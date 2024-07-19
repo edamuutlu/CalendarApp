@@ -69,7 +69,7 @@ export const CalendarContext: React.FC = () => {
     const dateCellRender = (value: Dayjs) => {
         const dayEvents = savedEvents.filter(event => dayjs(event.day).isSame(value, 'day'));
         return (
-            <ul>
+            <ul style={{ padding: '0px 4px' }}>
                 {dayEvents.map(event => (
                     <li className="cell-style" key={event.id}>{event.title}</li>
                 ))}

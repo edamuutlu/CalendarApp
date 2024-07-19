@@ -1,0 +1,10 @@
+.cell-style {
+    list-style: none;
+    padding: 2px 5px;
+    background: #cce7ff;
+    border-radius: 12px;
+    margin-bottom: 4px;
+    margin-top: 4px;
+    cursor: pointer;
+    padding: 5px;
+}

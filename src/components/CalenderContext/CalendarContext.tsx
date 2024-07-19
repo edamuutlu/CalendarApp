@@ -2,6 +2,7 @@ import React, { useEffect, useReducer, useState } from 'react';
 import { Calendar } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import EventModal from '../EventModal/EventModal';
+import "./CalendarContext.css"
 
 interface EventData {
     id: number;
@@ -53,7 +54,6 @@ export const CalendarContext: React.FC = () => {
 
     const handleSelect = (date: Dayjs) => {
         setSelectedDay(date);
-        setSelectedEvent(undefined);
         setShowEventModal(true);
     };
 
@@ -67,26 +67,29 @@ export const CalendarContext: React.FC = () => {
     };
 
     const dateCellRender = (value: Dayjs) => {
+        const dayEvents = savedEvents.filter(event => dayjs(event.day).isSame(value, 'day'));
         return (
-            <div>
-                {/* Burada her gün için etkinlikleri render edebilirsiniz */}
-            </div>
+            <ul>
+                {dayEvents.map(event => (
+                    <li className="cell-style" key={event.id}>{event.title}</li>
+                ))}
+            </ul>
         );
     };
 
-    const handlePanelChange = (date: Dayjs, mode: string) => {
+    /* const handlePanelChange = (date: Dayjs, mode: string) => {
         console.log('Selected Date:', date);
         console.log('Current Mode:', mode);
-    };
+    }; */
 
     return (
         <div>
             <Calendar
                 onSelect={handleSelect}
-                dateCellRender={dateCellRender}
-                onPanelChange={handlePanelChange}
+                cellRender={dateCellRender}
+                /* onPanelChange={handlePanelChange} */
             />
-            {selectedDay && (
+            {selectedDay &&  (
                 <EventModal 
                     visible={showEventModal}
                     onClose={() => setShowEventModal(false)}

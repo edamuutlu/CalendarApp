@@ -11,7 +11,6 @@ import GlobalContext from './context/GlobalContext';
 
 const App: React.FC = () => {
     const [date, setDate] = useState(dayjs());
-    const {showEventModal} = useContext(GlobalContext);
 
     return (
         <div>

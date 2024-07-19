@@ -1,0 +1,17 @@
+/* CreateEventButton.css */
+.create-event-button {
+    border: 1px solid #ccc; /* Kenarlık rengi ve kalınlığı */
+    padding: 0.5rem; /* 2 birim padding */
+    border-radius: 9999px; /* Tam yuvarlak köşe */
+    display: flex; /* Flexbox düzeni */
+    align-items: center; /* Dikeyde ortalama */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Orta düzey gölge */
+    transition: box-shadow 0.3s ease; /* Hover durumunda yumuşak geçiş */
+    background-color: #ffffff;
+    cursor: pointer;
+  }
+  
+  .create-event-button:hover {
+    box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1); /* Hover durumunda büyük gölge */
+  }
+  

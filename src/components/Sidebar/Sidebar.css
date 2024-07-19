@@ -1,0 +1,7 @@
+.sidebar { 
+  border: 1px solid #ccc;  
+  padding: 1.25rem; 
+  width: 16rem;   
+  background-color: #fff;  
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);  
+}

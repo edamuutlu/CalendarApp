@@ -1,0 +1,49 @@
+/* CalendarHeader.css */
+.calendar-header {
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #cacaca;
+}
+
+.calendar-header-operations {
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.calendar-logo {
+    margin-right: 8px;
+    width: 48px;
+    height: 48px;
+}
+
+.calendar-title {
+    margin-right: 20px;
+    font-size: 1.5rem;
+    color: rgb(107 114 128 / var(--tw-text-opacity));
+    font-weight: bold;
+}
+
+.calendar-button {
+    border: 1px solid #6f7275;
+    background-color: transparent;
+    color: #6f7275;
+    padding: 8px 16px;
+    border-radius: 6px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.calendar-button:hover {
+    color: #3490dc;
+    border-color: #3490dc; /* Kenar rengini de hover sırasında mavi yapmak için */
+}
+
+.calendar-month {
+    font-size: 1.5rem;
+    color: #555555;
+    font-weight: bold;
+}

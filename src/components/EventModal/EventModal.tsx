@@ -54,14 +54,14 @@ const EventModal: React.FC<EventModalProps> = ({ visible, onClose, onSave, selec
                 <Input
                     placeholder="Event Title"
                     name="title"
-                    value="" //{title}
+                    value={title} //{title}
                     onChange={handleInputChange}
                     style={{ marginBottom: '10px' }}
                 />
                 <Input.TextArea
                     placeholder="Event Description"
                     name="description"
-                    value="" //{description}
+                    value={description}
                     onChange={handleInputChange}
                 />
             </form>

@@ -1,0 +1,13 @@
+.login-container {
+    display: flex;
+    align-items: center;
+    height: 100vh;
+    background-color: #f8f9fa; /* Arka plan rengi */
+}
+
+.login-card {
+    width: 400px;
+    margin: auto; 
+    text-align: center;
+}
+

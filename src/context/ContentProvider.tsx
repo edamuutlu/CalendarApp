@@ -7,13 +7,6 @@ import {
   tumEtkinlikleriGetir,
 } from "../stores/CalendarStore";
 
-interface EventData {
-  id: number;
-  title: string;
-  desc: string;
-  day: Dayjs;
-}
-
 export interface ContentContextType {
   selectedDay: Dayjs;
   setSelectedDay: React.Dispatch<React.SetStateAction<Dayjs>>;
@@ -35,8 +28,8 @@ export interface ContentContextType {
   setEndTime: React.Dispatch<React.SetStateAction<Dayjs | null>>;
   eventType: number;
   setEventType: React.Dispatch<React.SetStateAction<number>>;
-  eventData: EventData[];
-  setEventData: React.Dispatch<React.SetStateAction<EventData[]>>;
+  eventData: EventAct[];
+  setEventData: React.Dispatch<React.SetStateAction<EventAct[]>>;
   modalDay: Dayjs | null;
   setModalDay: React.Dispatch<React.SetStateAction<Dayjs | null>>;
   handleSelect: (date: Dayjs) => void;
@@ -68,7 +61,7 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [endTime, setEndTime] = useState<Dayjs | null>(null);
   const [desc, setDesc] = useState("");
   const [eventType, setEventType] = useState<number>(0);
-  const [eventData, setEventData] = useState<EventData[]>([]);
+  const [eventData, setEventData] = useState<EventAct[]>([]);
   const [modalDay, setModalDay] = useState<Dayjs | null>(dayjs());
   const [isFirstOpen, setIsFirstOpen] = useState(false);
   const { username } = useParams<{ username: string }>();
@@ -84,6 +77,7 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     try {
       const savedEvents = await tumEtkinlikleriGetir();
       setEventData(savedEvents);
+      console.log('savedEvents :>> ', savedEvents);
     } catch (error) {
       console.error("Etkinlikler getirilirken hata oluştu:", error);
     }
@@ -126,13 +120,13 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   const dateCellRender = (value: Dayjs) => {
     const dayEvents = eventData.filter((event) =>
-      dayjs(event.day).isSame(value, "day")
+      dayjs(event.baslangicTarihi).isSame(value, "day")
     );
     return (
       <ul style={{ padding: "0px 4px" }}>
         {dayEvents.map((event) => (
           <li className="cell-style" key={event.id}>
-            {event.title}
+            {event.baslik}
           </li>
         ))}
       </ul>
@@ -141,13 +135,13 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   const openModal = () => {
     const dayEvents = eventData.filter((event) =>
-      dayjs(event.day).isSame(modalDay, "day")
+      dayjs(event.baslangicTarihi).isSame(modalDay, "day")
     );
 
     if (dayEvents.length > 0) {
       setIsSelectModal(false); /* update butonunun açılması için */
-      setTitle(dayEvents[0].title);
-      setDesc(dayEvents[0].desc);
+      setTitle(dayEvents[0].baslik);
+      setDesc(dayEvents[0].aciklama);
     } else {
       setTitle("");
       setDesc("");
@@ -164,8 +158,8 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const addEvent = async (event: EventAct) => {
     try {
       await addEventToStore(event);
-      /* const savedEvents = await tumEtkinlikleriGetir();
-      setEventData(savedEvents); */
+      const savedEvents = await tumEtkinlikleriGetir();
+      setEventData(savedEvents);
     } catch (error) {
       console.error("Etkinlik eklenirken hata oluştu:", error);
     }

@@ -9,10 +9,11 @@ import {
   Modal,
   Space,
   TimePicker,
+  Form,
 } from "antd";
 import "./CalendarContext.css";
 import { ContentContext } from "../../context/ContentProvider";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { DownOutlined } from "@ant-design/icons";
 import {
   MdOutlineModeEditOutline,
@@ -24,6 +25,7 @@ import {
 } from "react-icons/md";
 
 import type { MenuProps } from "antd";
+import { EventAct } from "../../stores/EventStore";
 
 const { RangePicker } = DatePicker;
 const dateFormat = "YYYY/MM/DD";
@@ -36,6 +38,7 @@ interface MenuItem {
 const CalendarContext: React.FC = () => {
   const context = useContext(ContentContext);
   const [selectType, setSelectType] = useState<string | null>(null);
+  const [form] = Form.useForm();
 
   const items: MenuItem[] = [
     {
@@ -81,6 +84,7 @@ const CalendarContext: React.FC = () => {
     selectedDay,
     showEventModal,
     isSelectModal,
+    setIsSelectModal,
     title,
     setTitle,
     desc,
@@ -107,16 +111,124 @@ const CalendarContext: React.FC = () => {
   const today = dayjs();
 
   useEffect(() => {
-    /* fetchEvents(); */
+    fetchEvents();
   }, []);
 
-  const newEvent = {
-    baslik: title,
-    aciklama: desc,
-    baslangicTarihi: startDate,
-    bitisTarihi: endDate,
-    tekrarDurumu: selectType,
+  const handleFormSubmit = (values: {
+    dateRange: [dayjs.Dayjs, dayjs.Dayjs];
+    timeRange: [dayjs.Dayjs, dayjs.Dayjs];
+    text: string;
+    title: string;
+  }) => {
+    console.log('values :>> ', values);
+    const baslangicSaatiDate = values.timeRange[0].toDate();
+    const bitisSaatiDate = values.timeRange[1].toDate();
+
+    console.log('baslangicSaatiDate :>> ', baslangicSaatiDate);
+    console.log('bitisSaatiDate :>> ', bitisSaatiDate);
+
+    const startDate = values.dateRange[0].toDate();
+    const endDate = values.dateRange[1].toDate();
+    const startDateTime = new Date(startDate);
+    console.log('startDate :>> ', startDate);
+    console.log('endDate :>> ', endDate);
+    console.log('startDateTime :>> ', startDateTime);
+    startDateTime.setHours(
+      baslangicSaatiDate.getHours(),
+      baslangicSaatiDate.getMinutes(),
+      baslangicSaatiDate.getSeconds()
+    );
+    const endDateTime = new Date(endDate);
+    endDateTime.setHours(
+      bitisSaatiDate.getHours(),
+      bitisSaatiDate.getMinutes(),
+      bitisSaatiDate.getSeconds()
+    );
+
+    const startDateTimeUTC = new Date(
+      startDateTime.getTime() - startDateTime.getTimezoneOffset() * 60000
+    );
+    const endDateTimeUTC = new Date(
+      endDateTime.getTime() - endDateTime.getTimezoneOffset() * 60000
+    );
+
+    const event: EventAct = {
+      baslik: values.title,
+      aciklama: values.text,
+      baslangicTarihi: startDateTimeUTC,
+      bitisTarihi: endDateTimeUTC,
+    };
+    addEvent(event);
+    closeModal();
+
+    form.resetFields();
   };
+
+  const handleFormUpdate = (values: {
+    dateRange: [dayjs.Dayjs, dayjs.Dayjs];
+    timeRange: [dayjs.Dayjs, dayjs.Dayjs];
+    text: string;
+    title: string;
+  }) => {
+    const baslangicSaatiDate = values.timeRange[0].toDate();
+    const bitisSaatiDate = values.timeRange[1].toDate();
+
+    const startDate = values.dateRange[0].toDate();
+    const endDate = values.dateRange[1].toDate();
+    const startDateTime = new Date(startDate);
+    startDateTime.setHours(
+      baslangicSaatiDate.getHours(),
+      baslangicSaatiDate.getMinutes(),
+      baslangicSaatiDate.getSeconds()
+    );
+    const endDateTime = new Date(endDate);
+    endDateTime.setHours(
+      bitisSaatiDate.getHours(),
+      bitisSaatiDate.getMinutes(),
+      bitisSaatiDate.getSeconds()
+    );
+
+    const startDateTimeUTC = new Date(
+      startDateTime.getTime() - startDateTime.getTimezoneOffset() * 60000
+    );
+    const endDateTimeUTC = new Date(
+      endDateTime.getTime() - endDateTime.getTimezoneOffset() * 60000
+    );
+    const event: EventAct = {
+      baslik: values.title,
+      aciklama: values.text,
+      baslangicTarihi: startDateTimeUTC,
+      bitisTarihi: endDateTimeUTC,
+    };
+    updateEvent(event);
+    closeModal();
+
+    form.resetFields();
+  };
+
+  /* const tarihleriAl = (baslangıcTarihi: any, bitisTarihi: any) => {
+    console.log('baslangıcTarihi :>> ', baslangıcTarihi);
+    const baslangicTarihDate = DayjsToDate(baslangıcTarihi);
+    const bitisTarihDate = DayjsToDate(bitisTarihi);
+
+    return {
+      baslangicTarihDate,
+      bitisTarihDate,
+    };
+  };
+  const saatleriAl = (baslangıcSaati: any, bitisSaati: any) => {
+    const baslangicSaatiDate = DayjsToDate(baslangıcSaati);
+    const bitisSaatiDate = DayjsToDate(bitisSaati);
+
+    return {
+      baslangicSaatiDate,
+      bitisSaatiDate,
+    };
+  };
+
+  const DayjsToDate = (dayjsObject: Dayjs): Date => {
+    return dayjsObject.toDate();
+  }; */
 
   return (
     <div>
@@ -135,7 +247,7 @@ const CalendarContext: React.FC = () => {
             key="submit"
             type="primary"
             style={{ backgroundColor: "green", borderColor: "green" }}
-            /* onClick={isSelectModal ? addEvent(newEvent) : updateEvent} */
+            onClick={() => form.submit()}
           >
             {isSelectModal ? "Add" : "Update"}
           </Button>,
@@ -144,74 +256,110 @@ const CalendarContext: React.FC = () => {
               key="delete"
               type="primary"
               style={{ backgroundColor: "red", borderColor: "red" }}
-              /* onClick={deleteEvent} */
+            /* onClick={deleteEvent()} */
             >
               Delete
             </Button>
           ),
         ].filter(Boolean)}
       >
-        <div className="event-input">
-          <MdOutlineModeEditOutline className="event-icon" />
-          <Input
-            placeholder="Event Title"
-            name="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            style={{ borderStartStartRadius: "0", borderEndStartRadius: "0" }}
-          />
-        </div>
-        <div className="event-input">
-          <MdDateRange className="event-icon" />
-          <RangePicker
-            defaultValue={isSelectModal ? [today, today] : [startDate, endDate]}
-            format={dateFormat}
-            className="range-picker"
-            style={{ borderStartStartRadius: "0", borderEndStartRadius: "0" }}
-          />
-        </div>
-        <div className="event-input">
-          <MdAccessTime className="event-icon" />
-          <TimePicker.RangePicker
-            defaultValue={[today, today]}
-            format="HH:mm"
-            className="time-picker"
-            style={{ borderStartStartRadius: "0", borderEndStartRadius: "0" }}
-          />
-        </div>
+        <Form form={form} onFinish={isSelectModal ? handleFormSubmit : handleFormUpdate}>
+          <div className="event-input">
+            <MdOutlineModeEditOutline className="event-icon" />
+            <Form.Item
+              name="title"
+              initialValue={title}
+              rules={[{ required: true, message: "Please input the title!" }]}
+            >
+              <Input
+                placeholder="Event Title"
+                style={{
+                  borderStartStartRadius: "0",
+                  borderEndStartRadius: "0",
+                }}
+              />
+            </Form.Item>
+          </div>
+          <div className="event-input">
+            <MdDateRange className="event-icon" />
+            <Form.Item
+              name="dateRange"
+              initialValue={isSelectModal ? [today, today] : [startDate, endDate]}
+              rules={[{ required: true, message: "Please select the date range!" }]}
+            >
+              <RangePicker
+                format={dateFormat}
+                /* onChange={(values) =>
+                  tarihleriAl(values?.[0], values?.[1])
+                } */
+                className="range-picker"
+                style={{
+                  borderStartStartRadius: "0",
+                  borderEndStartRadius: "0",
+                }}
+              />
+            </Form.Item>
+          </div>
+          <div className="event-input">
+            <MdAccessTime className="event-icon" />
+            <Form.Item
+              name="timeRange"
+              initialValue={[today, today]}
+              rules={[{ required: true, message: "Please select the time range!" }]}
+            >
+              <TimePicker.RangePicker
+                format="HH:mm"
+                /* onChange={(values) =>
+                  saatleriAl(values?.[0], values?.[1])
+                } */
+                className="time-picker"
+                style={{
+                  borderStartStartRadius: "0",
+                  borderEndStartRadius: "0",
+                }}
+              />
+            </Form.Item>
+          </div>
 
-        <div className="event-input">
-          <MdNotes className="desc-icon" />
-          <Input.TextArea
-            placeholder="Event Description"
-            name="description"
-            value={desc}
-            onChange={(e) => setDesc(e.target.value)}
-            style={{ borderStartStartRadius: "0", borderEndStartRadius: "0" }}
-          />
-        </div>
+          <div className="event-input">
+            <MdNotes className="desc-icon" />
+            <Form.Item
+              name="text"
+              initialValue={desc}
+              rules={[{ required: true, message: "Please input the description!" }]}
+            >
+              <Input.TextArea
+                placeholder="Event Description"
+                style={{
+                  borderStartStartRadius: "0",
+                  borderEndStartRadius: "0",
+                }}
+              />
+            </Form.Item>
+          </div>
 
-        <div className="event-input">
-          <MdOutlinePeopleAlt className="event-icon" />
-          <Input
-            placeholder="Add Guests"
-            name="guests"
-            defaultValue={title}
-            style={{ borderStartStartRadius: "0", borderEndStartRadius: "0" }}
-          />
-        </div>
+          <div className="event-input">
+            <MdOutlinePeopleAlt className="event-icon" />
+            <Input
+              placeholder="Add Guests"
+              name="guests"
+              defaultValue={title}
+              style={{ borderStartStartRadius: "0", borderEndStartRadius: "0" }}
+            />
+          </div>
 
-        <div className="event-input">
-          <MdEventRepeat className="event-icon" />
-          <Dropdown menu={menuProps} className="dropdown">
-            <Button>
-              <Space>
-                {selectType || "Select Repeat Type"}
-                <DownOutlined />
-              </Space>
-            </Button>
-          </Dropdown>
-        </div>
+          <div className="event-input">
+            <MdEventRepeat className="event-icon" />
+            <Dropdown menu={menuProps} className="dropdown">
+              <Button>
+                <Space>
+                  {selectType || "Select Repeat Type"}
+                  <DownOutlined />
+                </Space>
+              </Button>
+            </Dropdown>
+          </div>
+        </Form>
       </Modal>
     </div>
   );

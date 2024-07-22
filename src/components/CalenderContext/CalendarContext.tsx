@@ -120,19 +120,19 @@ const CalendarContext: React.FC = () => {
     text: string;
     title: string;
   }) => {
-    console.log('values :>> ', values);
+    console.log("values :>> ", values);
     const baslangicSaatiDate = values.timeRange[0].toDate();
     const bitisSaatiDate = values.timeRange[1].toDate();
 
-    console.log('baslangicSaatiDate :>> ', baslangicSaatiDate);
-    console.log('bitisSaatiDate :>> ', bitisSaatiDate);
+    console.log("baslangicSaatiDate :>> ", baslangicSaatiDate);
+    console.log("bitisSaatiDate :>> ", bitisSaatiDate);
 
-    const startDate = values.dateRange[0].toDate();
-    const endDate = values.dateRange[1].toDate();
+    const startDate = selectedDay.toDate();
+    const endDate = selectedDay.toDate();
     const startDateTime = new Date(startDate);
-    console.log('startDate :>> ', startDate);
-    console.log('endDate :>> ', endDate);
-    console.log('startDateTime :>> ', startDateTime);
+    console.log("startDate :>> ", startDate);
+    console.log("endDate :>> ", endDate);
+    console.log("startDateTime :>> ", startDateTime);
     startDateTime.setHours(
       baslangicSaatiDate.getHours(),
       baslangicSaatiDate.getMinutes(),
@@ -153,6 +153,7 @@ const CalendarContext: React.FC = () => {
     );
 
     const event: EventAct = {
+      date: selectedDay.toDate(),
       baslik: values.title,
       aciklama: values.text,
       baslangicTarihi: startDateTimeUTC,
@@ -173,8 +174,8 @@ const CalendarContext: React.FC = () => {
     const baslangicSaatiDate = values.timeRange[0].toDate();
     const bitisSaatiDate = values.timeRange[1].toDate();
 
-    const startDate = values.dateRange[0].toDate();
-    const endDate = values.dateRange[1].toDate();
+    const startDate = selectedDay.toDate();
+    const endDate = selectedDay.toDate();
     const startDateTime = new Date(startDate);
     startDateTime.setHours(
       baslangicSaatiDate.getHours(),
@@ -206,8 +207,9 @@ const CalendarContext: React.FC = () => {
     form.resetFields();
   };
 
-  /* const tarihleriAl = (baslangıcTarihi: any, bitisTarihi: any) => {
-    console.log('baslangıcTarihi :>> ', baslangıcTarihi);
+  const tarihleriAl = (baslangıcTarihi: any, bitisTarihi: any) => {
+    console.log("baslangıcTarihi :>> ", baslangıcTarihi);
+    console.log("baslangıcTarihi :>> ", bitisTarihi);
     const baslangicTarihDate = DayjsToDate(baslangıcTarihi);
     const bitisTarihDate = DayjsToDate(bitisTarihi);
 
@@ -217,6 +219,8 @@ const CalendarContext: React.FC = () => {
     };
   };
   const saatleriAl = (baslangıcSaati: any, bitisSaati: any) => {
+    console.log("baslangicSaati", baslangıcSaati);
+    console.log("bitisSaati", bitisSaati);
     const baslangicSaatiDate = DayjsToDate(baslangıcSaati);
     const bitisSaatiDate = DayjsToDate(bitisSaati);
 
@@ -228,7 +232,7 @@ const CalendarContext: React.FC = () => {
 
   const DayjsToDate = (dayjsObject: Dayjs): Date => {
     return dayjsObject.toDate();
-  }; */
+  };
 
   return (
     <div>
@@ -256,21 +260,24 @@ const CalendarContext: React.FC = () => {
               key="delete"
               type="primary"
               style={{ backgroundColor: "red", borderColor: "red" }}
-            /* onClick={deleteEvent()} */
+              /* onClick={() => deleteEvent()} */
             >
               Delete
             </Button>
           ),
         ].filter(Boolean)}
       >
-        <Form form={form} onFinish={isSelectModal ? handleFormSubmit : handleFormUpdate}>
-          <div className="event-input">
-            <MdOutlineModeEditOutline className="event-icon" />
-            <Form.Item
-              name="title"
-              initialValue={title}
-              rules={[{ required: true, message: "Please input the title!" }]}
-            >
+        <Form
+          form={form}
+          onFinish={isSelectModal ? handleFormSubmit : handleFormUpdate}
+        >
+          <Form.Item
+            name="title"
+            initialValue={title}
+            rules={[{ required: true, message: "Please input the title!" }]}
+          >
+            <div className="event-input">
+              <MdOutlineModeEditOutline className="event-icon" />
               <Input
                 placeholder="Event Title"
                 style={{
@@ -278,56 +285,61 @@ const CalendarContext: React.FC = () => {
                   borderEndStartRadius: "0",
                 }}
               />
-            </Form.Item>
-          </div>
-          <div className="event-input">
-            <MdDateRange className="event-icon" />
-            <Form.Item
-              name="dateRange"
-              initialValue={isSelectModal ? [today, today] : [startDate, endDate]}
-              rules={[{ required: true, message: "Please select the date range!" }]}
-            >
+            </div>
+          </Form.Item>
+
+          <Form.Item
+            name="dateRange"
+            initialValue={[selectedDay, selectedDay]}
+            rules={[
+              { required: true, message: "Please select the date range!" },
+            ]}
+          >
+            <div className="event-input">
+              <MdDateRange className="event-icon" />
               <RangePicker
                 format={dateFormat}
-                /* onChange={(values) =>
-                  tarihleriAl(values?.[0], values?.[1])
-                } */
+                onChange={(values) => tarihleriAl(values?.[0], values?.[1])}
                 className="range-picker"
                 style={{
                   borderStartStartRadius: "0",
                   borderEndStartRadius: "0",
                 }}
               />
-            </Form.Item>
-          </div>
-          <div className="event-input">
-            <MdAccessTime className="event-icon" />
-            <Form.Item
-              name="timeRange"
-              initialValue={[today, today]}
-              rules={[{ required: true, message: "Please select the time range!" }]}
-            >
+            </div>
+          </Form.Item>
+
+          <Form.Item
+            name="timeRange"
+            initialValue={[today, today]}
+            rules={[
+              { required: true, message: "Please select the time range!" },
+            ]}
+          >
+            <div className="event-input">
+              <MdAccessTime className="event-icon" />
               <TimePicker.RangePicker
                 format="HH:mm"
-                /* onChange={(values) =>
-                  saatleriAl(values?.[0], values?.[1])
-                } */
+                needConfirm={false}
+                onChange={(values) => saatleriAl(values?.[0], values?.[1])}
                 className="time-picker"
                 style={{
                   borderStartStartRadius: "0",
                   borderEndStartRadius: "0",
                 }}
               />
-            </Form.Item>
-          </div>
+            </div>
+          </Form.Item>
 
-          <div className="event-input">
-            <MdNotes className="desc-icon" />
-            <Form.Item
-              name="text"
-              initialValue={desc}
-              rules={[{ required: true, message: "Please input the description!" }]}
-            >
+          <Form.Item
+            name="text"
+            initialValue={desc}
+            rules={[
+              { required: true, message: "Please input the description!" },
+            ]}
+          >
+            <div className="event-input">
+              <MdNotes className="desc-icon" />
               <Input.TextArea
                 placeholder="Event Description"
                 style={{
@@ -335,8 +347,8 @@ const CalendarContext: React.FC = () => {
                   borderEndStartRadius: "0",
                 }}
               />
-            </Form.Item>
-          </div>
+            </div>
+          </Form.Item>
 
           <div className="event-input">
             <MdOutlinePeopleAlt className="event-icon" />

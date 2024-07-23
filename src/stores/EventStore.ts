@@ -26,6 +26,7 @@ export const useEventStore = () => {
       message.success("Etkinlik başarıyla eklendi.");
     } catch (error) {
       message.error("Aynı tarih ve saat aralığında etkinlik eklenemez.");
+      console.log("error", error);
     }
   };
 

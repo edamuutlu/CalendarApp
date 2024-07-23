@@ -11,7 +11,7 @@ import {
   TimePicker,
   Form,
 } from "antd";
-import "./CalendarContext.css";
+import "./MyCalendar.css";
 import { ContentContext } from "../../context/ContentProvider";
 import dayjs, { Dayjs } from "dayjs";
 import { DownOutlined } from "@ant-design/icons";
@@ -25,7 +25,7 @@ import {
 } from "react-icons/md";
 
 import type { MenuProps } from "antd";
-
+import { TekrarEnum, useEventStore } from "../../stores/EventStore";
 import { tümKullanicilariGetir } from "../../stores/UserStore";
 import UserAct from "../../types/UserAct";
 import EventAct from "../../types/EventAct";
@@ -35,50 +35,53 @@ const dateFormat = "YYYY/MM/DD";
 
 interface MenuItem {
   label: string;
-  key: string;
+  key: TekrarEnum;
 }
 
 const CalendarContext: React.FC = () => {
   const context = useContext(ContentContext);
-  const [selectType, setSelectType] = useState<string | null>(null);
+  const [selectType, setSelectType] = useState<TekrarEnum | undefined>(
+    undefined
+  );
   const [form] = Form.useForm();
   const [users, setUsers] = useState<UserAct[]>([]);
   const [selectedGuest, setSelectedGuest] = useState<string | null>(null);
-  const [baslangicSaati, setBaslangicSaati] = useState<Date | null>(null);
-  const [bitisSaati, setBitisSaati] = useState<Date | null>(null);
 
   const items: MenuItem[] = [
     {
       label: "Does not repeat",
-      key: "1",
+      key: TekrarEnum.hic,
     },
     {
       label: "Daily",
-      key: "2",
+      key: TekrarEnum.herGun,
     },
     {
       label: `Weekly on ${dayjs().format("dddd")}`,
-      key: "3",
+      key: TekrarEnum.herHafta,
     },
     {
       label: `Monthly on the ${dayjs().format("Do")}`,
-      key: "4",
+      key: TekrarEnum.herAy,
     },
     {
       label: `Annually on ${dayjs().format("MMM DD")}`,
-      key: "5",
+      key: TekrarEnum.herYil,
     },
   ];
 
   const handleMenuClick: MenuProps["onClick"] = (e) => {
-    const selectedItem = items.find((item) => item.key === e.key);
+    // Convert e.key to a number if it's a string
+    const keyAsNumber = Number(e.key);
+    const selectedItem = items.find((item) => item.key === keyAsNumber);
+
     if (selectedItem) {
       message.info(`Selected: ${selectedItem.label}`);
-      setSelectType(selectedItem.label);
+      setSelectType(keyAsNumber as TekrarEnum); // Type assertion
     }
   };
 
-  const handleGuestMenuClick = (e: { key: string; }) => {
+  const handleGuestMenuClick = (e: { key: string }) => {
     const selectedUser = users.find((user) => user.id === e.key);
     if (selectedUser) {
       message.info(`Selected: ${selectedUser.isim}`);
@@ -99,11 +102,57 @@ const CalendarContext: React.FC = () => {
     throw new Error("CalendarContext must be used within a ContentProvider");
   }
 
+  const { isSelectModal, eventData } = context;
+
+  const {
+    addEvent: addEventToStore,
+    updateEvent: updateEventInStore,
+    deleteEvent: deleteEventFromStore,
+  } = useEventStore();
+
+  const addEvent = async (event: EventAct) => {
+    try {
+      await addEventToStore(event);
+      await fetchEvents();
+    } catch (error) {
+      console.error("Etkinlik eklenirken hata oluştu:", error);
+    }
+
+    closeModal();
+    setTitle("");
+    setDesc("");
+  };
+
+  const updateEvent = async (event: EventAct) => {
+    try {
+      await updateEventInStore(event);
+      await fetchEvents();
+    } catch (error) {
+      console.error("Etkinlik güncellenirken hata oluştu:", error);
+    }
+
+    closeModal();
+    setTitle("");
+    setDesc("");
+  };
+
+  const deleteEvent = async (eventId: number) => {
+    try {
+      await deleteEventFromStore(eventId);
+      await fetchEvents();
+    } catch (error) {
+      console.error("Etkinlik silinirken hata oluştu:", error);
+    }
+
+    closeModal();
+    setTitle("");
+    setDesc("");
+  };
+
+
   const {
     selectedDay,
     showEventModal,
-    isSelectModal,
-    setIsSelectModal,
     title,
     setTitle,
     desc,
@@ -116,18 +165,10 @@ const CalendarContext: React.FC = () => {
     setStartTime,
     endTime,
     setEndTime,
-    eventType,
-    setEventType,
     handleSelect,
-    dateCellRender,
     closeModal,
     fetchEvents,
-    addEvent,
-    updateEvent,
-    deleteEvent,
   } = context;
-
-  const today = dayjs();
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -137,94 +178,92 @@ const CalendarContext: React.FC = () => {
 
     fetchUsers();
     fetchEvents();
-  }, []);
+  }, [selectedDay]);
 
-  const handleFormSubmit = (values: {
-    dateRange: [dayjs.Dayjs, dayjs.Dayjs];
-    timeRange: [dayjs.Dayjs, dayjs.Dayjs];
-    text: string;
-    title: string;
-  }) => {
-    console.log("values :>> ", values);
-    const baslangicSaatiDate = values.timeRange[0].toDate();
-    const bitisSaatiDate = values.timeRange[1].toDate();
+  const dateCellRender = (value: Dayjs) => {
+    if (!eventData) {
+      return <ul style={{ padding: "0px 4px" }}></ul>;
+    }
 
-    console.log("baslangicSaatiDate :>> ", baslangicSaatiDate);
-    console.log("bitisSaatiDate :>> ", bitisSaatiDate);
-
-    const startDate = selectedDay.toDate();
-    const endDate = selectedDay.toDate();
-    const startDateTime = new Date(startDate);
-    console.log("startDate :>> ", startDate);
-    console.log("endDate :>> ", endDate);
-    console.log("startDateTime :>> ", startDateTime);
-    startDateTime.setHours(
-      baslangicSaatiDate.getHours(),
-      baslangicSaatiDate.getMinutes(),
-      baslangicSaatiDate.getSeconds()
+    const dayEvents = eventData.filter((event) =>
+      dayjs(event.baslangicTarihi).isSame(value, "day")
     );
-    const endDateTime = new Date(endDate);
-    endDateTime.setHours(
-      bitisSaatiDate.getHours(),
-      bitisSaatiDate.getMinutes(),
-      bitisSaatiDate.getSeconds()
+    return (
+      <ul style={{ padding: "0px 4px" }}>
+        {dayEvents.map((event) => (
+          <li className="cell-style" key={event.id}>
+            {event.baslik}
+          </li>
+        ))}
+      </ul>
     );
+  };
 
-    const startDateTimeUTC = new Date(
-      startDateTime.getTime() - startDateTime.getTimezoneOffset() * 60000
-    );
-    const endDateTimeUTC = new Date(
-      endDateTime.getTime() - endDateTime.getTimezoneOffset() * 60000
+  const handleFormSubmit = () => {
+    const startDateFormat = DayjsToDate(startDate);
+    const endDateFormat = DayjsToDate(endDate);
+    const startTimeFormat = DayjsToDate(startTime);
+    const endTimeFormat = DayjsToDate(endTime);
+
+    startDateFormat.setHours(
+      startTimeFormat.getHours(),
+      startTimeFormat.getMinutes(),
+      startTimeFormat.getSeconds()
     );
 
+    endDateFormat.setHours(
+      endTimeFormat.getHours(),
+      endTimeFormat.getMinutes(),
+      endTimeFormat.getSeconds()
+    );
+
+    // Create event object
     const event: EventAct = {
       date: selectedDay.toDate(),
-      baslik: values.title,
-      aciklama: values.text,
-      baslangicTarihi: startDateTimeUTC,
-      bitisTarihi: endDateTimeUTC,
+      baslik: title,
+      aciklama: desc,
+      baslangicTarihi: startDateFormat,
+      bitisTarihi: endDateFormat,
+      tekrarDurumu: selectType ?? TekrarEnum.hic,
     };
+
+    // Call addEvent or any relevant function
     addEvent(event);
     closeModal();
 
+    // Reset the form
     form.resetFields();
   };
 
-  const handleFormUpdate = (values: {
-    dateRange: [dayjs.Dayjs, dayjs.Dayjs];
-    timeRange: [dayjs.Dayjs, dayjs.Dayjs];
-    text: string;
-    title: string;
-  }) => {
-    const baslangicSaatiDate = values.timeRange[0].toDate();
-    const bitisSaatiDate = values.timeRange[1].toDate();
-
-    const startDate = selectedDay.toDate();
-    const endDate = selectedDay.toDate();
-    const startDateTime = new Date(startDate);
-    startDateTime.setHours(
-      baslangicSaatiDate.getHours(),
-      baslangicSaatiDate.getMinutes(),
-      baslangicSaatiDate.getSeconds()
+  const handleFormUpdate = () => {
+    const dayEvents = eventData.filter((event) =>
+      dayjs(event.baslangicTarihi).isSame(selectedDay, "day")
     );
-    const endDateTime = new Date(endDate);
-    endDateTime.setHours(
-      bitisSaatiDate.getHours(),
-      bitisSaatiDate.getMinutes(),
-      bitisSaatiDate.getSeconds()
+    const startDateFormat = DayjsToDate(startDate);
+    const endDateFormat = DayjsToDate(endDate);
+    const startTimeFormat = DayjsToDate(startTime);
+    const endTimeFormat = DayjsToDate(endTime);
+
+    startDateFormat.setHours(
+      startTimeFormat.getHours(),
+      startTimeFormat.getMinutes(),
+      startTimeFormat.getSeconds()
     );
 
-    const startDateTimeUTC = new Date(
-      startDateTime.getTime() - startDateTime.getTimezoneOffset() * 60000
+    endDateFormat.setHours(
+      endTimeFormat.getHours(),
+      endTimeFormat.getMinutes(),
+      endTimeFormat.getSeconds()
     );
-    const endDateTimeUTC = new Date(
-      endDateTime.getTime() - endDateTime.getTimezoneOffset() * 60000
-    );
+
     const event: EventAct = {
-      baslik: values.title,
-      aciklama: values.text,
-      baslangicTarihi: startDateTimeUTC,
-      bitisTarihi: endDateTimeUTC,
+      id: dayEvents[0].id,
+      date: selectedDay.toDate(),
+      baslik: title,
+      aciklama: desc,
+      baslangicTarihi: startDateFormat,
+      bitisTarihi: endDateFormat,
+      tekrarDurumu: selectType ?? TekrarEnum.hic,
     };
     updateEvent(event);
     closeModal();
@@ -232,9 +271,27 @@ const CalendarContext: React.FC = () => {
     form.resetFields();
   };
 
+  const handleEventDelete = () => {
+    const dayEvents = eventData.filter((event) =>
+      dayjs(event.baslangicTarihi).isSame(selectedDay, "day")
+    );
+    deleteEvent(Number(dayEvents[0].id));
+    closeModal();
+
+    form.resetFields();
+  };
+
+  const DayjsToDate = (dayjsObject: Dayjs): Date => {
+    return dayjsObject.toDate();
+  };
+
   const tarihleriAl = (baslangıcTarihi: any, bitisTarihi: any) => {
     console.log("baslangıcTarihi :>> ", baslangıcTarihi);
     console.log("baslangıcTarihi :>> ", bitisTarihi);
+    setStartDate(baslangıcTarihi);
+    setEndDate(bitisTarihi);
+    console.log("startT", startDate);
+    console.log("endT", endDate);
     const baslangicTarihDate = DayjsToDate(baslangıcTarihi);
     const bitisTarihDate = DayjsToDate(bitisTarihi);
 
@@ -247,19 +304,17 @@ const CalendarContext: React.FC = () => {
   const saatleriAl = (baslangıcSaati: any, bitisSaati: any) => {
     console.log("baslangicSaati", baslangıcSaati);
     console.log("bitisSaati", bitisSaati);
+    setStartTime(baslangıcSaati);
+    setEndTime(bitisSaati);
+    console.log("startT", startTime);
+    console.log("endT", endTime);
     const baslangicSaatiDate = DayjsToDate(baslangıcSaati);
     const bitisSaatiDate = DayjsToDate(bitisSaati);
-    setBaslangicSaati(baslangicSaatiDate);
-    setBitisSaati(bitisSaatiDate);
 
     return {
       baslangicSaatiDate,
       bitisSaatiDate,
     };
-  };
-
-  const DayjsToDate = (dayjsObject: Dayjs): Date => {
-    return dayjsObject.toDate();
   };
 
   return (
@@ -288,7 +343,7 @@ const CalendarContext: React.FC = () => {
               key="delete"
               type="primary"
               style={{ backgroundColor: "red", borderColor: "red" }}
-            /* onClick={() => deleteEvent()} */
+              onClick={() => handleEventDelete()}
             >
               Delete
             </Button>
@@ -301,13 +356,14 @@ const CalendarContext: React.FC = () => {
         >
           <Form.Item
             name="title"
-            initialValue={isSelectModal ? "" : title}
             rules={[{ required: true, message: "Please input the title!" }]}
           >
             <div className="event-input">
               <MdOutlineModeEditOutline className="event-icon" />
               <Input
                 placeholder="Event Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
                 style={{
                   borderStartStartRadius: "0",
                   borderEndStartRadius: "0",
@@ -318,7 +374,9 @@ const CalendarContext: React.FC = () => {
 
           <Form.Item
             name="dateRange"
-            initialValue={[selectedDay, selectedDay]} /* isSelectModal ? [today,today] :  */
+            initialValue={
+              isSelectModal ? [selectedDay, dayjs()] : [startDate, endDate]
+            }
             rules={[
               { required: true, message: "Please select the date range!" },
             ]}
@@ -328,6 +386,9 @@ const CalendarContext: React.FC = () => {
               <RangePicker
                 format={dateFormat}
                 onChange={(values) => tarihleriAl(values?.[0], values?.[1])}
+                defaultValue={
+                  isSelectModal ? [selectedDay, dayjs()] : [startDate, endDate]
+                }
                 className="range-picker"
                 style={{
                   borderStartStartRadius: "0",
@@ -339,15 +400,22 @@ const CalendarContext: React.FC = () => {
 
           <Form.Item
             name="timeRange"
+            initialValue={
+              isSelectModal ? [dayjs(), dayjs()] : [startTime, endTime]
+            }
+            rules={[
+              { required: true, message: "Please select the time range!" },
+            ]}
           >
             <div className="event-input">
               <MdAccessTime className="event-icon" />
               <TimePicker.RangePicker
-                defaultValue={isSelectModal ? [today,today] : [today, today]}
-                format="HH:mm"
                 needConfirm={false}
                 onChange={(values) => saatleriAl(values?.[0], values?.[1])}
-                className="time-picker"
+                defaultValue={
+                  isSelectModal ? [dayjs(), dayjs()] : [startTime, endTime]
+                }
+                className="range-picker"
                 style={{
                   borderStartStartRadius: "0",
                   borderEndStartRadius: "0",
@@ -358,7 +426,6 @@ const CalendarContext: React.FC = () => {
 
           <Form.Item
             name="text"
-            initialValue={desc}
             rules={[
               { required: true, message: "Please input the description!" },
             ]}
@@ -367,6 +434,8 @@ const CalendarContext: React.FC = () => {
               <MdNotes className="desc-icon" />
               <Input.TextArea
                 placeholder="Event Description"
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
                 style={{
                   borderStartStartRadius: "0",
                   borderEndStartRadius: "0",
@@ -393,8 +462,9 @@ const CalendarContext: React.FC = () => {
             <Dropdown menu={menuProps} className="dropdown">
               <Button>
                 <Space>
-                  {/* {isSelectModal ? "Select Repeat Type" : selectType} */}
-                  {"Select Repeat Type"}
+                  {isSelectModal
+                    ? "Select Repeat Type"
+                    : TekrarEnum[selectType ?? TekrarEnum.hic]}
                   <DownOutlined />
                 </Space>
               </Button>

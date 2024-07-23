@@ -4,6 +4,7 @@ import "./CalendarHeader.css";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { ContentContext } from "../../context/ContentProvider";
 import { Button } from "antd";
+import dayjs from "dayjs";
 
 const CalendarHeader: React.FC = () => {
   const context = useContext(ContentContext);
@@ -12,7 +13,26 @@ const CalendarHeader: React.FC = () => {
     throw new Error("CalendarContext must be used within a ContentProvider");
   }
 
-  const { selectedDay, getToday, handleNextMonth, handlePrevMonth } = context;
+  const { selectedDay, setSelectedDay } = context;
+
+  const getToday = () => {
+    const now = dayjs();
+    setSelectedDay(now);
+  };
+
+  const handleNextMonth = () => {
+    if (selectedDay) {
+      const nextMonthDate = selectedDay.add(1, "month");
+      setSelectedDay(nextMonthDate);
+    }
+  };
+
+  const handlePrevMonth = () => {
+    if (selectedDay) {
+      const nextMonthDate = selectedDay.subtract(1, "month");
+      setSelectedDay(nextMonthDate);
+    }
+  };
 
   return (
     <header className="calendar-header">

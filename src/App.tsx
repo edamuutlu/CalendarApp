@@ -3,9 +3,9 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
 import Sidebar from "./components/Sidebar/Sidebar";
 import CalendarHeader from "./components/CalenderHeader/CalendarHeader";
-import CalendarContext from "./components/CalenderContext/CalendarContext";
 import Login from "./components/Login/Login";
 import Register from "./components/Register/Register";
+import MyCalendar from "./components/MyCalendar/MyCalendar"
 
 const App: React.FC = () => {
 
@@ -21,7 +21,7 @@ const App: React.FC = () => {
               <CalendarHeader/>
               <div className="hero">
                 <Sidebar />
-                <CalendarContext />
+                <MyCalendar />
               </div>
             </>
           }

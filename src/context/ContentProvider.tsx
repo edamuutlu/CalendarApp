@@ -1,6 +1,5 @@
 import React, { createContext, useEffect, useState, ReactNode } from "react";
 import dayjs, { Dayjs } from "dayjs";
-import { useEventStore } from "../stores/EventStore";
 import {
   aylikEtkinlikleriGetir,
   tumEtkinlikleriGetir,
@@ -18,30 +17,22 @@ export interface ContentContextType {
   setTitle: React.Dispatch<React.SetStateAction<string>>;
   desc: string;
   setDesc: React.Dispatch<React.SetStateAction<string>>;
-  startDate: Dayjs | null;
-  setStartDate: React.Dispatch<React.SetStateAction<Dayjs | null>>;
-  endDate: Dayjs | null;
-  setEndDate: React.Dispatch<React.SetStateAction<Dayjs | null>>;
-  startTime: Dayjs | null;
-  setStartTime: React.Dispatch<React.SetStateAction<Dayjs | null>>;
-  endTime: Dayjs | null;
-  setEndTime: React.Dispatch<React.SetStateAction<Dayjs | null>>;
+  startDate: Dayjs;
+  setStartDate: React.Dispatch<React.SetStateAction<Dayjs>>;
+  endDate: Dayjs;
+  setEndDate: React.Dispatch<React.SetStateAction<Dayjs>>;
+  startTime: Dayjs;
+  setStartTime: React.Dispatch<React.SetStateAction<Dayjs>>;
+  endTime: Dayjs;
+  setEndTime: React.Dispatch<React.SetStateAction<Dayjs>>;
   eventType: number;
   setEventType: React.Dispatch<React.SetStateAction<number>>;
   eventData: EventAct[];
   setEventData: React.Dispatch<React.SetStateAction<EventAct[]>>;
-  modalDay: Dayjs | null;
-  setModalDay: React.Dispatch<React.SetStateAction<Dayjs | null>>;
+  modalDay: Dayjs;
+  setModalDay: React.Dispatch<React.SetStateAction<Dayjs>>;
   handleSelect: (date: Dayjs) => void;
-  dateCellRender: (value: Dayjs) => JSX.Element;
-  openModal: () => void;
   closeModal: () => void;
-  addEvent: (event: EventAct) => Promise<void>;
-  updateEvent: (event: EventAct) => Promise<void>;
-  deleteEvent: (eventId: number) => Promise<void>;
-  getToday: () => void;
-  handleNextMonth: () => void;
-  handlePrevMonth: () => void;
   fetchEvents: () => void;
 }
 
@@ -54,21 +45,14 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [showEventModal, setShowEventModal] = useState(false);
   const [isSelectModal, setIsSelectModal] = useState(false);
   const [title, setTitle] = useState("");
-  const [startDate, setStartDate] = useState<Dayjs | null>(null);
-  const [endDate, setEndDate] = useState<Dayjs | null>(null);
-  const [startTime, setStartTime] = useState<Dayjs | null>(null);
-  const [endTime, setEndTime] = useState<Dayjs | null>(null);
+  const [startDate, setStartDate] = useState<Dayjs>(dayjs());
+  const [endDate, setEndDate] = useState<Dayjs>(dayjs());
+  const [startTime, setStartTime] = useState<Dayjs>(dayjs());
+  const [endTime, setEndTime] = useState<Dayjs>(dayjs());
   const [desc, setDesc] = useState("");
   const [eventType, setEventType] = useState<number>(0);
   const [eventData, setEventData] = useState<EventAct[]>([]);
-  const [modalDay, setModalDay] = useState<Dayjs | null>(dayjs());
-  const [isFirstOpen, setIsFirstOpen] = useState(false);
-
-  const {
-    addEvent: addEventToStore,
-    updateEvent: updateEventInStore,
-    deleteEvent: deleteEventFromStore,
-  } = useEventStore();
+  const [modalDay, setModalDay] = useState<Dayjs>(dayjs());
 
   // Load event data from API when the component mounts
   const fetchEvents = async () => {
@@ -76,48 +60,15 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       const savedEvents = await tumEtkinlikleriGetir();
       if (Array.isArray(savedEvents)) {
         setEventData(savedEvents);
-        console.log('savedEvents :>> ', savedEvents); 
+        console.log("savedEvents :>> ", savedEvents);
       } else {
         setEventData([]);
-        console.log('No events found for the user.');
+        console.log("No events found for the user.");
       }
     } catch (error) {
       console.error("Etkinlikler getirilirken hata oluştu:", error);
     }
   };
-
-  /* useEffect(() => {
-    fetchEvents();
-  }, [username]); */
-
-  useEffect(() => {
-    if (modalDay && isFirstOpen) {
-      openModal();
-    }
-    setIsFirstOpen(true);
-  }, [modalDay]);
-
-  /* Calendar Header Function Start */
-  const getToday = () => {
-    const now = dayjs();
-    setSelectedDay(now);
-  };
-
-  const handleNextMonth = () => {
-    if (selectedDay) {
-      const nextMonthDate = selectedDay.add(1, "month");
-      setSelectedDay(nextMonthDate);
-    }
-  };
-
-  const handlePrevMonth = () => {
-    if (selectedDay) {
-      const nextMonthDate = selectedDay.subtract(1, "month");
-      setSelectedDay(nextMonthDate);
-    }
-  };
-
-  /* Calendar Header Function End */
 
   /* Calendar Context Function Start */
   const handleSelect = (date: Dayjs) => {
@@ -125,86 +76,13 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     setModalDay(date);
   };
 
-  const dateCellRender = (value: Dayjs) => {
-    if (!eventData) {
-      return <ul style={{ padding: "0px 4px" }}></ul>;
-    }
-
-    const dayEvents = eventData.filter((event) =>
-      dayjs(event.baslangicTarihi).isSame(value, "day")
-    );
-    return (
-      <ul style={{ padding: "0px 4px" }}>
-        {dayEvents.map((event) => (
-          <li className="cell-style" key={event.id}>
-            {event.baslik}
-          </li>
-        ))}
-      </ul>
-    );
-  };
-
-  const openModal = () => {
-    const dayEvents = eventData.filter((event) =>
-      dayjs(event.baslangicTarihi).isSame(modalDay, "day")
-    );
-
-    if (dayEvents.length > 0) {
-      setIsSelectModal(false); /* update butonunun açılması için */
-      setTitle(dayEvents[0].baslik);
-      setDesc(dayEvents[0].aciklama);
-    } else {
-      setTitle("");
-      setDesc("");
-      setIsSelectModal(true);
-    }
-
-    setShowEventModal(true);
-  };
-
   const closeModal = () => {
+    setTitle("");
+    setDesc("");
+    setStartDate(dayjs());
+    setEndDate(dayjs());
     setShowEventModal(false);
   };
-
-  const addEvent = async (event: EventAct) => {
-    try {
-      await addEventToStore(event);
-      await fetchEvents();
-    } catch (error) {
-      console.error("Etkinlik eklenirken hata oluştu:", error);
-    }
-
-    closeModal();
-    setTitle("");
-    setDesc("");
-  };
-
-  const updateEvent = async (event: EventAct) => {
-    try {
-      await updateEventInStore(event);
-      await fetchEvents();
-    } catch (error) {
-      console.error("Etkinlik güncellenirken hata oluştu:", error);
-    }
-
-    closeModal();
-    setTitle("");
-    setDesc("");
-  };
-
-  const deleteEvent = async (eventId: number) => {
-    try {
-      await deleteEventFromStore(eventId);
-      await fetchEvents();
-    } catch (error) {
-      console.error("Etkinlik silinirken hata oluştu:", error);
-    }
-
-    closeModal();
-    setTitle("");
-    setDesc("");
-  };
-
   /* Calendar Context Function End */
 
   const contextValue = {
@@ -233,15 +111,7 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     modalDay,
     setModalDay,
     handleSelect,
-    dateCellRender,
-    openModal,
     closeModal,
-    addEvent,
-    updateEvent,
-    deleteEvent,
-    getToday,
-    handleNextMonth,
-    handlePrevMonth,
     fetchEvents,
   };
 

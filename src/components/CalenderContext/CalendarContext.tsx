@@ -25,9 +25,10 @@ import {
 } from "react-icons/md";
 
 import type { MenuProps } from "antd";
-import { EventAct } from "../../stores/EventStore";
+
 import { tümKullanicilariGetir } from "../../stores/UserStore";
 import UserAct from "../../types/UserAct";
+import EventAct from "../../types/EventAct";
 
 const { RangePicker } = DatePicker;
 const dateFormat = "YYYY/MM/DD";

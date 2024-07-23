@@ -1,5 +1,6 @@
 import { message } from "antd";
 import axios from "axios";
+import EventAct from "../types/EventAct";
 
 export enum TekrarEnum {
   hic = 0,
@@ -7,21 +8,6 @@ export enum TekrarEnum {
   herHafta = 7,
   herAy = 3,
   herYil = 4,
-}
-
-export interface EventAct {
-  id?: string | undefined;
-  date?: Date;
-
-  baslik: string;
-  aciklama: string;
-  baslangicTarihi: Date;
-  bitisTarihi: Date;
-  tekrarDurumu?: TekrarEnum;
-
-  ekleyenKullaniciId?: string;
-  ekleyenKullaniciAdi?: string;
-  isRecurring?: boolean;
 }
 
 export const useEventStore = () => {

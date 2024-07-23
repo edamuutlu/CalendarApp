@@ -12,7 +12,7 @@ const Login = () => {
   const handleSubmit = async () => {
     const token = await handleLogin(username, password);
     if(token){
-      navigate(`/home/${username}`);
+      navigate(`/home`);
     }else{
       alert("Username or password wrong.")
     } 

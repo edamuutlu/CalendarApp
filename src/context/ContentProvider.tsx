@@ -1,11 +1,11 @@
 import React, { createContext, useEffect, useState, ReactNode } from "react";
 import dayjs, { Dayjs } from "dayjs";
-import { useParams } from "react-router";
-import { EventAct, useEventStore } from "../stores/EventStore";
+import { useEventStore } from "../stores/EventStore";
 import {
   aylikEtkinlikleriGetir,
   tumEtkinlikleriGetir,
 } from "../stores/CalendarStore";
+import EventAct from "../types/EventAct";
 
 export interface ContentContextType {
   selectedDay: Dayjs;
@@ -43,7 +43,6 @@ export interface ContentContextType {
   handleNextMonth: () => void;
   handlePrevMonth: () => void;
   fetchEvents: () => void;
-  username: string | undefined;
 }
 
 export const ContentContext = createContext<ContentContextType | undefined>(
@@ -64,7 +63,6 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [eventData, setEventData] = useState<EventAct[]>([]);
   const [modalDay, setModalDay] = useState<Dayjs | null>(dayjs());
   const [isFirstOpen, setIsFirstOpen] = useState(false);
-  const { username } = useParams<{ username: string }>();
 
   const {
     addEvent: addEventToStore,
@@ -88,11 +86,9 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     }
   };
 
-  
-  
-  useEffect(() => {
+  /* useEffect(() => {
     fetchEvents();
-  }, [username]);
+  }, [username]); */
 
   useEffect(() => {
     if (modalDay && isFirstOpen) {
@@ -246,7 +242,6 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     getToday,
     handleNextMonth,
     handlePrevMonth,
-    username,
     fetchEvents,
   };
 

@@ -15,7 +15,7 @@ const App: React.FC = () => {
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route
-          path="/home/:username"
+          path="/home"
           element={
             <>
               <CalendarHeader/>

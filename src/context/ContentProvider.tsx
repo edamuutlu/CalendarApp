@@ -76,12 +76,21 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const fetchEvents = async () => {
     try {
       const savedEvents = await tumEtkinlikleriGetir();
-      setEventData(savedEvents);
-      console.log('savedEvents :>> ', savedEvents);
+      if (Array.isArray(savedEvents)) {
+        setEventData(savedEvents);
+        console.log('savedEvents :>> ', savedEvents); 
+      } else {
+        setEventData([]);
+        console.log('No events found for the user.');
+      }
     } catch (error) {
       console.error("Etkinlikler getirilirken hata oluştu:", error);
     }
   };
+  
+  useEffect(() => {
+    fetchEvents();
+  }, [username]);
 
   useEffect(() => {
     if (modalDay && isFirstOpen) {
@@ -119,6 +128,10 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   };
 
   const dateCellRender = (value: Dayjs) => {
+    if (!eventData) {
+      return <ul style={{ padding: "0px 4px" }}></ul>;
+    }
+
     const dayEvents = eventData.filter((event) =>
       dayjs(event.baslangicTarihi).isSame(value, "day")
     );
@@ -158,8 +171,7 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const addEvent = async (event: EventAct) => {
     try {
       await addEventToStore(event);
-      const savedEvents = await tumEtkinlikleriGetir();
-      setEventData(savedEvents);
+      await fetchEvents();
     } catch (error) {
       console.error("Etkinlik eklenirken hata oluştu:", error);
     }
@@ -172,8 +184,7 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const updateEvent = async (event: EventAct) => {
     try {
       await updateEventInStore(event);
-      /* const savedEvents = await tumEtkinlikleriGetir();
-      setEventData(savedEvents); */
+      await fetchEvents();
     } catch (error) {
       console.error("Etkinlik güncellenirken hata oluştu:", error);
     }
@@ -186,8 +197,7 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const deleteEvent = async (eventId: number) => {
     try {
       await deleteEventFromStore(eventId);
-      /* const savedEvents = await tumEtkinlikleriGetir();
-      setEventData(savedEvents); */
+      await fetchEvents();
     } catch (error) {
       console.error("Etkinlik silinirken hata oluştu:", error);
     }

@@ -1,0 +1,136 @@
+import axios from "axios";
+import { message } from "antd";
+
+const apiUrletkinligeKullaniciEkle =
+  "http://localhost:5011/api/Etkinlik/EtkinligeKullaniciEkle";
+const apiUrletkinliktenKullaniciSil =
+  "http://localhost:5011/api/Etkinlik/EtkinliktenDavetliKullanicilariSil";
+const apiUrlEklendigimEtkinlikler =
+  "http://localhost:5011/api/Etkinlik/EklenenEtkinlikleriGetir";
+const apiUrlEtkinligeDavetliKullanicilariGetir =
+  "http://localhost:5011/api/Etkinlik/EtkinligeDavetliKullanicilariGetir";
+
+const apiUrlMevcutKullaniciGetir =
+  "http://localhost:5011/api/Kullanici/MevcutKullaniciGetir";
+const apiUrlTümKullanicilariGetir =
+  "http://localhost:5011/api/Kullanici/TumKullanicilariGetir";
+
+interface EtkinligeKullaniciEkleRequest {
+  etkinlikId: number;
+  kullaniciIds: string[];
+}
+
+interface EtkinliktenDavetliKullanicilariSilRequest {
+  etkinlikId: number;
+  kullaniciIds: string[];
+}
+
+export const etkinligeKullaniciEkle = async (
+  request: EtkinligeKullaniciEkleRequest
+): Promise<void> => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("Token bulunamadı. Lütfen tekrar giriş yapın.");
+    }
+
+    const response = await axios.post(apiUrletkinligeKullaniciEkle, request, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.data.success) {
+      message.success("Kullanıcı ekleme işlemi başarıyla tamamlandı.");
+    } else {
+    }
+  } catch (error) {
+    console.error("Kullanıcı ekleme işlemi sırasında bir hata oluştu:", error);
+  }
+};
+
+export const etkinliktenKullaniciSil = async (
+  request: EtkinliktenDavetliKullanicilariSilRequest
+): Promise<void> => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("Token bulunamadı. Lütfen tekrar giriş yapın.");
+    }
+
+    await axios.delete(apiUrletkinliktenKullaniciSil, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      data: request,
+    });
+
+    message.success("Kullanıcı silme işlemi başarıyla tamamlandı.");
+  } catch (error) {
+    console.error("Kullanıcı silme işlemi sırasında bir hata oluştu:", error);
+  }
+};
+export const eklendigimEtkinlikleriGetir = async () => {
+  try {
+    const response = await axios.get(apiUrlEklendigimEtkinlikler, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    return [];
+  }
+};
+
+export const etkinligeDavetliKullanicilariGetir = async (id: Number) => {
+  try {
+    const response = await axios.get(
+      `http://localhost:5011/api/Etkinlik/EtkinligeDavetliKullanicilariGetir?etkinlikId=${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      "Etkinlikleri alma işlemi sırasında bir hata oluştu: " + error
+    );
+  }
+};
+
+export const tümKullanicilariGetir = async () => {
+  try {
+    const response = await axios.get(`${apiUrlTümKullanicilariGetir}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+   
+  }
+};
+
+export const MevcutKullaniciGetir = async () => {
+  try {
+    const response = await axios.get(apiUrlMevcutKullaniciGetir, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      "Etkinlikleri alma işlemi sırasında bir hata oluştu: " + error
+    );
+  }
+};

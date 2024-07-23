@@ -26,6 +26,8 @@ import {
 
 import type { MenuProps } from "antd";
 import { EventAct } from "../../stores/EventStore";
+import { tümKullanicilariGetir } from "../../stores/UserStore";
+import UserAct from "../../types/UserAct";
 
 const { RangePicker } = DatePicker;
 const dateFormat = "YYYY/MM/DD";
@@ -39,6 +41,10 @@ const CalendarContext: React.FC = () => {
   const context = useContext(ContentContext);
   const [selectType, setSelectType] = useState<string | null>(null);
   const [form] = Form.useForm();
+  const [users, setUsers] = useState<UserAct[]>([]);
+  const [selectedGuest, setSelectedGuest] = useState<string | null>(null);
+  const [baslangicSaati, setBaslangicSaati] = useState<Date | null>(null);
+  const [bitisSaati, setBitisSaati] = useState<Date | null>(null);
 
   const items: MenuItem[] = [
     {
@@ -71,11 +77,23 @@ const CalendarContext: React.FC = () => {
     }
   };
 
+  const handleGuestMenuClick = (e: { key: string; }) => {
+    const selectedUser = users.find((user) => user.id === e.key);
+    if (selectedUser) {
+      message.info(`Selected: ${selectedUser.isim}`);
+      setSelectedGuest(selectedUser.isim);
+    }
+  };
+
   const menuProps = {
     items: items.map((item) => ({ key: item.key, label: item.label })),
     onClick: handleMenuClick,
   };
 
+  const guestMenuProps = {
+    items: users.map((user) => ({ key: user.id, label: user.isim })),
+    onClick: handleGuestMenuClick,
+  };
   if (!context) {
     throw new Error("CalendarContext must be used within a ContentProvider");
   }
@@ -111,6 +129,12 @@ const CalendarContext: React.FC = () => {
   const today = dayjs();
 
   useEffect(() => {
+    const fetchUsers = async () => {
+      const allUsers = await tümKullanicilariGetir();
+      setUsers(allUsers);
+    };
+
+    fetchUsers();
     fetchEvents();
   }, []);
 
@@ -218,11 +242,14 @@ const CalendarContext: React.FC = () => {
       bitisTarihDate,
     };
   };
+
   const saatleriAl = (baslangıcSaati: any, bitisSaati: any) => {
     console.log("baslangicSaati", baslangıcSaati);
     console.log("bitisSaati", bitisSaati);
     const baslangicSaatiDate = DayjsToDate(baslangıcSaati);
     const bitisSaatiDate = DayjsToDate(bitisSaati);
+    setBaslangicSaati(baslangicSaatiDate);
+    setBitisSaati(bitisSaatiDate);
 
     return {
       baslangicSaatiDate,
@@ -260,7 +287,7 @@ const CalendarContext: React.FC = () => {
               key="delete"
               type="primary"
               style={{ backgroundColor: "red", borderColor: "red" }}
-              /* onClick={() => deleteEvent()} */
+            /* onClick={() => deleteEvent()} */
             >
               Delete
             </Button>
@@ -273,7 +300,7 @@ const CalendarContext: React.FC = () => {
         >
           <Form.Item
             name="title"
-            initialValue={title}
+            initialValue={isSelectModal ? "" : title}
             rules={[{ required: true, message: "Please input the title!" }]}
           >
             <div className="event-input">
@@ -290,7 +317,7 @@ const CalendarContext: React.FC = () => {
 
           <Form.Item
             name="dateRange"
-            initialValue={[selectedDay, selectedDay]}
+            initialValue={[selectedDay, selectedDay]} /* isSelectModal ? [today,today] :  */
             rules={[
               { required: true, message: "Please select the date range!" },
             ]}
@@ -311,14 +338,11 @@ const CalendarContext: React.FC = () => {
 
           <Form.Item
             name="timeRange"
-            initialValue={[today, today]}
-            rules={[
-              { required: true, message: "Please select the time range!" },
-            ]}
           >
             <div className="event-input">
               <MdAccessTime className="event-icon" />
               <TimePicker.RangePicker
+                defaultValue={isSelectModal ? [today,today] : [today, today]}
                 format="HH:mm"
                 needConfirm={false}
                 onChange={(values) => saatleriAl(values?.[0], values?.[1])}
@@ -351,13 +375,16 @@ const CalendarContext: React.FC = () => {
           </Form.Item>
 
           <div className="event-input">
-            <MdOutlinePeopleAlt className="event-icon" />
-            <Input
-              placeholder="Add Guests"
-              name="guests"
-              defaultValue={title}
-              style={{ borderStartStartRadius: "0", borderEndStartRadius: "0" }}
-            />
+            <MdEventRepeat className="event-icon" />
+            <Dropdown menu={guestMenuProps} className="dropdown">
+              <Button>
+                <Space>
+                  {/* {isSelectModal ? "Add Guests" : selectedGuest } */}
+                  {"Add Guests"}
+                  <DownOutlined />
+                </Space>
+              </Button>
+            </Dropdown>
           </div>
 
           <div className="event-input">
@@ -365,7 +392,8 @@ const CalendarContext: React.FC = () => {
             <Dropdown menu={menuProps} className="dropdown">
               <Button>
                 <Space>
-                  {selectType || "Select Repeat Type"}
+                  {/* {isSelectModal ? "Select Repeat Type" : selectType} */}
+                  {"Select Repeat Type"}
                   <DownOutlined />
                 </Space>
               </Button>

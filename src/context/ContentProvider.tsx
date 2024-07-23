@@ -87,6 +87,8 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       console.error("Etkinlikler getirilirken hata oluştu:", error);
     }
   };
+
+  
   
   useEffect(() => {
     fetchEvents();

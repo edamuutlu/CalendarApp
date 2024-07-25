@@ -24,10 +24,10 @@ import {
 } from "react-icons/md";
 
 import type { MenuProps } from "antd";
-import { TekrarEnum, useEventStore } from "../../stores/EventStore";
+import { etkinlikEkle, etkinlikGuncelle, etkinlikSil, TekrarEnum } from "../../stores/EventStore";
 import { tümKullanicilariGetir } from "../../stores/UserStore";
-import UserAct from "../../types/UserAct";
-import EventAct from "../../types/EventAct";
+import Kullanici from "../../types/Kullanici";
+import Etkinlik from "../../types/Etkinlik";
 
 const { RangePicker } = DatePicker;
 const dateFormat = "YYYY/MM/DD";
@@ -38,24 +38,24 @@ interface MenuItem {
 }
 
 const TekrarEnumToString = {
-  [TekrarEnum.hic]: "Does not repeat",
-  [TekrarEnum.herGun]: "Daily",
-  [TekrarEnum.herHafta]: "Every Week",
-  [TekrarEnum.herAy]: "Every month",
-  [TekrarEnum.herYil]: "Every year",
+  [TekrarEnum.hic]: "Tekrarlama",
+  [TekrarEnum.herGun]: "Her gün",
+  [TekrarEnum.herHafta]: "Her hafta",
+  [TekrarEnum.herAy]: "Her ay",
+  [TekrarEnum.herYil]: "Her yıl",
 };
 
 const CalendarContext: React.FC = () => {
   const context = useContext(ContentContext);
   
-  const [startTime, setStartTime] = useState<Dayjs>(dayjs());
-  const [endTime, setEndTime] = useState<Dayjs>(dayjs());
+  const [baslangicSaati, setBaslangicSaati] = useState<Dayjs>(dayjs());
+  const [bitisSaati, setBitisSaati] = useState<Dayjs>(dayjs());
   const [selectType, setSelectType] = useState<TekrarEnum | undefined>(
     undefined
   );
   const [form] = Form.useForm();
-  const [users, setUsers] = useState<UserAct[]>([]);
-  const [selectedGuest, setSelectedGuest] = useState<string | null>(null);
+  const [kullanicilar, setKullanicilar] = useState<Kullanici[]>([]);
+  const [davetliKullanici, setDavetliKullanici] = useState<string | null>(null);
 
   const items: MenuItem[] = [
     {
@@ -91,10 +91,10 @@ const CalendarContext: React.FC = () => {
   };
 
   const handleGuestMenuClick = (e: { key: string; }) => {
-    const selectedUser = users.find((user) => user.id === e.key);
+    const selectedUser = kullanicilar.find((user) => user.id === e.key);
     if (selectedUser) {
       message.info(`Selected: ${selectedUser.isim}`);
-      setSelectedGuest(selectedUser.isim);
+      setDavetliKullanici(selectedUser.isim);
     }
   };
 
@@ -104,7 +104,7 @@ const CalendarContext: React.FC = () => {
   };
 
   const guestMenuProps = {
-    items: users.map((user) => ({ key: user.id, label: user.isim })),
+    items: kullanicilar.map((user) => ({ key: user.id, label: user.isim })),
     onClick: handleGuestMenuClick,
   };
 
@@ -116,9 +116,7 @@ const CalendarContext: React.FC = () => {
 
   const {
     seciliGun,
-    setSeciliGun,
     etkinlikPenceresiniGoster,
-    setEtkinlikPenceresiniGoster,
     baslik,
     setBaslik,
     aciklama,
@@ -132,58 +130,13 @@ const CalendarContext: React.FC = () => {
     etkinlikleriCek,
   } = context;
 
-  const {
-    etkinlikEkle: addEventToStore,
-    etkinlikGuncelle: updateEventInStore,
-    etkinlikSil: deleteEventFromStore,
-  } = useEventStore();
-
-  const etkinlikEkle = async (event: EventAct) => {
-    try {
-      await addEventToStore(event);
-      await etkinlikleriCek();
-    } catch (error) {
-      console.error("Etkinlik eklenirken hata oluştu:", error);
-    }
-
-    etkinlikPencereKapat();
-    setBaslik("");
-    setAciklama("");
-  };
-
-  const etkinlikGuncelle = async (event: EventAct) => {
-    try {
-      await updateEventInStore(event);
-      await etkinlikleriCek();
-    } catch (error) {
-      console.error("Etkinlik güncellenirken hata oluştu:", error);
-    }
-
-    etkinlikPencereKapat();
-    setBaslik("");
-    setAciklama("");
-  };
-
-  const etkinlikSil = async (eventId: number) => {
-    try {
-      await deleteEventFromStore(eventId);
-      await etkinlikleriCek();
-    } catch (error) {
-      console.error("Etkinlik silinirken hata oluştu:", error);
-    }
-
-    etkinlikPencereKapat();
-    setBaslik("");
-    setAciklama("");
-  };
-
   useEffect(() => {
-    const fetchUsers = async () => {
-      const allUsers = await tümKullanicilariGetir();
-      setUsers(allUsers);
+    const kullanicilariCek = async () => {
+      const tumKullanicilar = await tümKullanicilariGetir();
+      setKullanicilar(tumKullanicilar);
     };
 
-    fetchUsers();
+    kullanicilariCek();
     etkinlikleriCek();
   }, [seciliGun]);
 
@@ -192,25 +145,25 @@ const CalendarContext: React.FC = () => {
       return <ul style={{ padding: "0px 4px" }}></ul>;
     }
 
-    const dayEvents = etkinlikData.filter((event) =>
-      dayjs(event.baslangicTarihi).isSame(value, "day")
+    const gununEtkinlikleri = etkinlikData.filter((etkinlik) =>
+      dayjs(etkinlik.baslangicTarihi).isSame(value, "day")
     );
     return (
       <ul style={{ padding: "0px 4px" }}>
-        {dayEvents.map((event) => (
-          <li className="cell-style" key={event.id}>
-            {event.baslik}
+        {gununEtkinlikleri.map((etkinlik) => (
+          <li className="cell-style" key={etkinlik.id}>
+            {etkinlik.baslik}
           </li>
         ))}
       </ul>
     );
   };
 
-  const handleFormSubmit = () => {
+  const etkinlikEkleyeBas = async () => {
     const startDateFormat = DayjsToDate(baslangicTarihi);
     const endDateFormat = DayjsToDate(bitisTarihi);
-    const startTimeFormat = DayjsToDate(startTime);
-    const endTimeFormat = DayjsToDate(endTime);
+    const startTimeFormat = DayjsToDate(baslangicSaati);
+    const endTimeFormat = DayjsToDate(bitisSaati);
 
     startDateFormat.setHours(
       startTimeFormat.getHours(),
@@ -225,7 +178,7 @@ const CalendarContext: React.FC = () => {
     );
 
     // Create event object
-    const event: EventAct = {
+    const event: Etkinlik = {
       date: seciliGun.toDate(),
       baslik: baslik,
       aciklama: aciklama,
@@ -235,21 +188,30 @@ const CalendarContext: React.FC = () => {
     };
 
     // Call addEvent or any relevant function
-    etkinlikEkle(event);
+    try {
+      await etkinlikEkle(event);
+      await etkinlikleriCek();
+    } catch (error) {
+      console.error("Etkinlik eklenirken hata oluştu:", error);
+    }
+
+    etkinlikPencereKapat();
+    setBaslik("");
+    setAciklama("");
     etkinlikPencereKapat();
 
     // Reset the form
     form.resetFields();
   };
 
-  const handleFormUpdate = () => {
+  const etkinlikGuncelleyeBas = async () => {
     const dayEvents = etkinlikData.filter((event) =>
       dayjs(event.baslangicTarihi).isSame(seciliGun, "day")
     );
     const startDateFormat = DayjsToDate(baslangicTarihi);
     const endDateFormat = DayjsToDate(bitisTarihi);
-    const startTimeFormat = DayjsToDate(startTime);
-    const endTimeFormat = DayjsToDate(endTime);
+    const startTimeFormat = DayjsToDate(baslangicSaati);
+    const endTimeFormat = DayjsToDate(bitisSaati);
 
     startDateFormat.setHours(
       startTimeFormat.getHours(),
@@ -263,7 +225,7 @@ const CalendarContext: React.FC = () => {
       endTimeFormat.getSeconds()
     );
 
-    const event: EventAct = {
+    const event: Etkinlik = {
       id: dayEvents[0].id,
       date: seciliGun.toDate(),
       baslik: baslik,
@@ -272,17 +234,36 @@ const CalendarContext: React.FC = () => {
       bitisTarihi: endDateFormat,
       tekrarDurumu: selectType ?? TekrarEnum.hic,
     };
-    etkinlikGuncelle(event);
+    try {
+      await etkinlikGuncelle(event);
+      await etkinlikleriCek();
+    } catch (error) {
+      console.error("Etkinlik güncellenirken hata oluştu:", error);
+    }
+
+    etkinlikPencereKapat();
+    setBaslik("");
+    setAciklama("");
     etkinlikPencereKapat();
 
     form.resetFields();
   };
 
-  const handleEventDelete = () => {
+  const etkinlikSileBas = async () => {
     const dayEvents = etkinlikData.filter((event) =>
       dayjs(event.baslangicTarihi).isSame(seciliGun, "day")
     );
-    etkinlikSil(Number(dayEvents[0].id));
+    
+    try {
+      await etkinlikSil(Number(dayEvents[0].id));
+      await etkinlikleriCek();
+    } catch (error) {
+      console.error("Etkinlik silinirken hata oluştu:", error);
+    }
+
+    etkinlikPencereKapat();
+    setBaslik("");
+    setAciklama("");
     etkinlikPencereKapat();
 
     form.resetFields();
@@ -311,10 +292,10 @@ const CalendarContext: React.FC = () => {
   const saatleriAl = (baslangıcSaati: any, bitisSaati: any) => {
     console.log("baslangicSaati", baslangıcSaati);
     console.log("bitisSaati", bitisSaati);
-    setStartTime(baslangıcSaati);
-    setEndTime(bitisSaati);
-    console.log("startT", startTime);
-    console.log("endT", endTime);
+    setBaslangicSaati(baslangıcSaati);
+    setBitisSaati(bitisSaati);
+    console.log("startT", baslangicSaati);
+    console.log("endT", bitisSaati);
     const baslangicSaatiDate = DayjsToDate(baslangıcSaati);
     const bitisSaatiDate = DayjsToDate(bitisSaati);
 
@@ -332,7 +313,7 @@ const CalendarContext: React.FC = () => {
         value={seciliGun}
       />
       <Modal
-        title={dahaOncePencereSecilmediMi ? "Add Event" : "Update Event"}
+        title={dahaOncePencereSecilmediMi ? " Etkinlik Ekle" : "Etkinlik Güncelle"}
         open={etkinlikPenceresiniGoster}
         onCancel={etkinlikPencereKapat}
         className="modal"
@@ -343,32 +324,32 @@ const CalendarContext: React.FC = () => {
             style={{ backgroundColor: "green", borderColor: "green" }}
             onClick={() => form.submit()}
           >
-            {dahaOncePencereSecilmediMi ? "Add" : "Update"}
+            {dahaOncePencereSecilmediMi ? "Ekle" : "Güncelle"}
           </Button>,
           !dahaOncePencereSecilmediMi && (
             <Button
               key="delete"
               type="primary"
               style={{ backgroundColor: "red", borderColor: "red" }}
-              onClick={() => handleEventDelete()}
+              onClick={() => etkinlikSileBas()}
             >
-              Delete
+              Sil
             </Button>
           ),
         ].filter(Boolean)}
       >
         <Form
           form={form}
-          onFinish={dahaOncePencereSecilmediMi ? handleFormSubmit : handleFormUpdate}
+          onFinish={dahaOncePencereSecilmediMi ? etkinlikEkleyeBas : etkinlikGuncelleyeBas}
         >
           <Form.Item
             name="title"
-            rules={[{ required: true, message: "Please input the title!" }]}
+            rules={[{ required: true, message: "Lütfen etkinlik başlığını giriniz!" }]}
           >
             <div className="event-input">
               <MdOutlineModeEditOutline className="event-icon" />
               <Input
-                placeholder="Event Title"
+                placeholder="Etkinlik Başlığı"
                 value={baslik}
                 onChange={(e) => setBaslik(e.target.value)}
                 style={{
@@ -385,7 +366,7 @@ const CalendarContext: React.FC = () => {
               dahaOncePencereSecilmediMi ? [seciliGun, dayjs()] : [baslangicTarihi, bitisTarihi]
             }
             rules={[
-              { required: true, message: "Please select the date range!" },
+              { required: true, message: "Lütfen tarih aralığını giriniz!" },
             ]}
           >
             <div className="event-input">
@@ -408,10 +389,10 @@ const CalendarContext: React.FC = () => {
           <Form.Item
             name="timeRange"
             initialValue={
-              dahaOncePencereSecilmediMi ? [dayjs(), dayjs()] : [startTime, endTime]
+              dahaOncePencereSecilmediMi ? [dayjs(), dayjs()] : [baslangicSaati, bitisSaati]
             }
             rules={[
-              { required: true, message: "Please select the time range!" },
+              { required: true, message: "Lütfen saat aralığını giriniz!" },
             ]}
           >
             <div className="event-input">
@@ -420,7 +401,7 @@ const CalendarContext: React.FC = () => {
                 needConfirm={false}
                 onChange={(values) => saatleriAl(values?.[0], values?.[1])}
                 defaultValue={
-                  dahaOncePencereSecilmediMi ? [dayjs(), dayjs()] : [startTime, endTime]
+                  dahaOncePencereSecilmediMi ? [dayjs(), dayjs()] : [baslangicSaati, bitisSaati]
                 }
                 className="range-picker"
                 style={{
@@ -434,13 +415,13 @@ const CalendarContext: React.FC = () => {
           <Form.Item
             name="text"
             rules={[
-              { required: true, message: "Please input the description!" },
+              { required: true, message: "Lütfen etkinlik açıklamasını giriniz!" },
             ]}
           >
             <div className="event-input">
               <MdNotes className="desc-icon" />
               <Input.TextArea
-                placeholder="Event Description"
+                placeholder="Etkinlik Açıklaması"
                 value={aciklama}
                 onChange={(e) => setAciklama(e.target.value)}
                 style={{
@@ -456,7 +437,7 @@ const CalendarContext: React.FC = () => {
             <Dropdown menu={guestMenuProps} className="dropdown">
               <Button>
                 <Space>
-                  {dahaOncePencereSecilmediMi ? "Add Guests" : selectedGuest }
+                  {dahaOncePencereSecilmediMi ? "Kullanıcı Davet Et" : davetliKullanici }
                   <DownOutlined />
                 </Space>
               </Button>
@@ -469,7 +450,7 @@ const CalendarContext: React.FC = () => {
               <Button>
                 <Space>
                   {dahaOncePencereSecilmediMi
-                    ? "Select Repeat Type"
+                    ? "Tekrarlama Tipi"
                     : TekrarEnumToString[selectType ?? TekrarEnum.hic]}
                   <DownOutlined />
                 </Space>

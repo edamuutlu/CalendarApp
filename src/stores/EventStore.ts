@@ -1,6 +1,6 @@
 import { message } from "antd";
 import axios from "axios";
-import EventAct from "../types/EventAct";
+import Etkinlik from "../types/Etkinlik";
 
 export enum TekrarEnum {
   hic = 0,
@@ -10,8 +10,7 @@ export enum TekrarEnum {
   herYil = 4,
 }
 
-export const useEventStore = () => {
-  const etkinlikEkle = async (event: EventAct) => {
+export const etkinlikEkle = async (event: Etkinlik) => {
     try {
       await axios.post(
         "http://localhost:5011/api/Etkinlik/EtkinlikOlustur",
@@ -30,7 +29,7 @@ export const useEventStore = () => {
     }
   };
 
-  const etkinlikGuncelle = async (event: EventAct) => {
+export const etkinlikGuncelle = async (event: Etkinlik) => {
     try {
       await axios.put(
         "http://localhost:5011/api/Etkinlik/EtkinlikGuncelle",
@@ -49,7 +48,7 @@ export const useEventStore = () => {
     }
   };
 
-  const etkinlikSil = async (eventId: number) => {
+export const etkinlikSil = async (eventId: number) => {
     try {
       await axios.delete(
         `http://localhost:5011/api/Etkinlik/EtkinlikSil?EtkinlikId=${eventId}`,
@@ -66,5 +65,3 @@ export const useEventStore = () => {
     }
   };
 
-  return { etkinlikEkle, etkinlikGuncelle, etkinlikSil };
-};

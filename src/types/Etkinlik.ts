@@ -1,7 +1,7 @@
 import { TekrarEnum } from "../stores/EventStore";
 
 
-interface EventAct {
+interface Etkinlik {
   id?: string | undefined;
   date?: Date;
 
@@ -15,4 +15,4 @@ interface EventAct {
   ekleyenKullaniciAdi?: string;
   isRecurring?: boolean;
 }
-export default EventAct;
+export default Etkinlik;

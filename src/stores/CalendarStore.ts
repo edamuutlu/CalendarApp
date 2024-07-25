@@ -1,6 +1,6 @@
 import axios from "axios";
 import dayjs from "dayjs";
-import EventAct from "../types/EventAct";
+import Etkinlik from "../types/Etkinlik";
 
 export const aylikEtkinlikleriGetir = async (seciliGun: dayjs.Dayjs) => {
   const response = await axios.get(
@@ -12,7 +12,7 @@ export const aylikEtkinlikleriGetir = async (seciliGun: dayjs.Dayjs) => {
       },
     }
   );
-  return response.data as EventAct[];
+  return response.data as Etkinlik[];
 };
 
 export const tumEtkinlikleriGetir = async () => {
@@ -25,5 +25,5 @@ export const tumEtkinlikleriGetir = async () => {
       },
     }
   );
-  return response.data as EventAct[];
+  return response.data as Etkinlik[];
 };

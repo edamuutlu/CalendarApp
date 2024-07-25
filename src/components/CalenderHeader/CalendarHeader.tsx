@@ -15,19 +15,19 @@ const CalendarHeader: React.FC = () => {
 
   const { seciliGun, setSeciliGun } = context;
 
-  const getToday = () => {
+  const bugunuGetir = () => {
     const now = dayjs();
     setSeciliGun(now);
   };
 
-  const handleNextMonth = () => {
+  const sonrakiAyaGec = () => {
     if (seciliGun) {
       const nextMonthDate = seciliGun.add(1, "month");
       setSeciliGun(nextMonthDate);
     }
   };
 
-  const handlePrevMonth = () => {
+  const oncekiAyaGec = () => {
     if (seciliGun) {
       const nextMonthDate = seciliGun.subtract(1, "month");
       setSeciliGun(nextMonthDate);
@@ -38,24 +38,24 @@ const CalendarHeader: React.FC = () => {
     <header className="calendar-header">
       <div className="calendar-header-operations">
         <img src={logo} alt="calendar" className="calendar-logo" />
-        <h1 className="calendar-title">Baykar Calendar</h1>
-        <button onClick={handlePrevMonth} className="calendar-button">
+        <h1 className="calendar-title">Baykar Takvim</h1>
+        <button onClick={oncekiAyaGec} className="calendar-button">
           <LeftOutlined />
         </button>
-        <button onClick={getToday} className="calendar-button">
-          Today
+        <button onClick={bugunuGetir} className="calendar-button">
+          Bugün
         </button>
-        <button onClick={handleNextMonth} className="calendar-button">
+        <button onClick={sonrakiAyaGec} className="calendar-button">
           <RightOutlined />
         </button>
         <h2 className="calendar-month">{seciliGun.format("MMM YYYY")}</h2>
       </div>
       <div className="right-buttons">
         <Button href="/" className="calendar-button">
-          Login
+          Giriş Yap
         </Button>
         <Button href="/register" className="calendar-button">
-          Register
+          Kayıt Ol
         </Button>
       </div>
     </header>

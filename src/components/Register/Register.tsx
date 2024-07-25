@@ -5,25 +5,25 @@ import "./Register.css";
 import { handleRegister } from "../../stores/AuthStore";
 
 const Register = () => {
-  const [username, setUsername] = useState<string>("");
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [kullaniciAdi, setKullaniciAdi] = useState<string>("");
+  const [isim, setIsim] = useState<string>("");
+  const [soyisim, setSoyisim] = useState<string>("");
+  const [sifre, setSifre] = useState<string>("");
+  const [sifreTekrar, setSifreTekrar] = useState<string>("");
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
-    if (password !== confirmPassword) {
+    if (sifre !== sifreTekrar) {
       message.error("Passwords do not match");
       return;
     }
 
     const newUserData = {
-      KullaniciAdi: username,
-      Isim: firstName,
-      Soyisim: lastName,
-      KullaniciSifresi: password,
-      KullaniciSifresiTekrar: confirmPassword
+      KullaniciAdi: kullaniciAdi,
+      Isim: isim,
+      Soyisim: soyisim,
+      KullaniciSifresi: sifre,
+      KullaniciSifresiTekrar: sifreTekrar
     };
 
     await handleRegister(newUserData);
@@ -34,45 +34,45 @@ const Register = () => {
 
   return (
     <div className="login-container">
-      <Card title="REGISTER" bordered={true} className="login-card">
+      <Card title="Kayıt Ol" bordered={true} className="login-card">
         <Form layout="vertical">
-          <Form.Item label="Username:" name="username">
+          <Form.Item label="Kullanıcı Adı:" name="kullaniciAdi">
             <Input
-              placeholder="Username"
+              placeholder="Kullanıcı Adı"
               required
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => setKullaniciAdi(e.target.value)}
             />
           </Form.Item>
 
-          <Form.Item label="First Name" name="firstname">
+          <Form.Item label="İsim" name="isim">
             <Input
-              placeholder="First Name"
+              placeholder="İsim"
               required
-              onChange={(e) => setFirstName(e.target.value)}
+              onChange={(e) => setIsim(e.target.value)}
             />
           </Form.Item>
 
-          <Form.Item label="Last Name:" name="lastname">
+          <Form.Item label="Soyisim:" name="soyisim">
             <Input
-              placeholder="Last Name"
+              placeholder="Soyisim"
               required
-              onChange={(e) => setLastName(e.target.value)}
+              onChange={(e) => setSoyisim(e.target.value)}
             />
           </Form.Item>
 
-          <Form.Item label="Password" name="password">
+          <Form.Item label="Şifre:" name="sifre">
             <Input.Password
-              placeholder="Password"
+              placeholder="Şifre"
               required
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => setSifre(e.target.value)}
             />
           </Form.Item>
 
-          <Form.Item label="Confirm Password" name="confirmPassword">
+          <Form.Item label="Şifre Tekrar:" name="sifreTekrar">
             <Input.Password
-              placeholder="Confirm Password"
+              placeholder="Şifre Tekrar"
               required
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e) => setSifreTekrar(e.target.value)}
             />
           </Form.Item>
 

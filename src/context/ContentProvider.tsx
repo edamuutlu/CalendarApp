@@ -4,7 +4,7 @@ import {
   aylikEtkinlikleriGetir,
   tumEtkinlikleriGetir,
 } from "../stores/CalendarStore";
-import EventAct from "../types/EventAct";
+import Etkinlik from "../types/Etkinlik";
 
 export interface ContentContextType {
   seciliGun: Dayjs;
@@ -23,10 +23,10 @@ export interface ContentContextType {
   setBitisTarihi: React.Dispatch<React.SetStateAction<Dayjs>>;
   tekrarTipi: number;
   setTekrarTipi: React.Dispatch<React.SetStateAction<number>>;
-  etkinlikData: EventAct[];
+  etkinlikData: Etkinlik[];
   acilanEtkinlikPencereTarihi: Dayjs;
   setAcilanEtkinlikPencereTarihi: React.Dispatch<React.SetStateAction<Dayjs>>;
-  setEtkinlikData: React.Dispatch<React.SetStateAction<EventAct[]>>;
+  setEtkinlikData: React.Dispatch<React.SetStateAction<Etkinlik[]>>;
   tarihSec: (date: Dayjs) => void;
   etkinlikPencereKapat: () => void;
   etkinlikleriCek: () => void;
@@ -45,7 +45,7 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [bitisTarihi, setBitisTarihi] = useState<Dayjs>(dayjs());
   const [aciklama, setAciklama] = useState(""); 
   const [tekrarTipi, setTekrarTipi] = useState<number>(0);
-  const [etkinlikData, setEtkinlikData] = useState<EventAct[]>([]);
+  const [etkinlikData, setEtkinlikData] = useState<Etkinlik[]>([]);
   const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] = useState<Dayjs>(dayjs());
 
   // Load event data from API when the component mounts

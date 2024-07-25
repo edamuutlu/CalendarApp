@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import plusImg from "../../assets/plus.svg";
 import "./CreateEventButton.css";
 import { ContentContext } from "../../context/ContentProvider";
@@ -12,26 +12,26 @@ export default function CreateEventButton() {
     throw new Error("CalendarContext must be used within a ContentProvider");
   }
 
-  const { seciliGun, etkinlikData, acilanEtkinlikPencereTarihi, setBaslik, setAciklama, setBaslangicTarihi, setBitisTarihi, setEtkinlikPenceresiniGoster, dahaOncePencereSecilmediMi, setDahaOncePencereSecilmediMi} = context;
+  const { seciliGun, etkinlikData, acilanEtkinlikPencereTarihi, setBaslik, setAciklama, setBaslangicTarihi, setBitisTarihi, setEtkinlikPenceresiniGoster, setDahaOncePencereSecilmediMi} = context;
 
   useEffect(() => {
     if (acilanEtkinlikPencereTarihi && ilkAcilisMi) {
-      openModal();
+      etkinlikPenceresiniAc();
     }
     setIlkAcilisMi(true);
   }, [acilanEtkinlikPencereTarihi]);
 
-  const openModal = () => {
-    const dayEvents = etkinlikData.filter((event) =>
+  const etkinlikPenceresiniAc = () => {
+    const gununEtkinlikleri = etkinlikData.filter((event) =>
       dayjs(event.baslangicTarihi).isSame(acilanEtkinlikPencereTarihi, "day")
     );
 
-    if (dayEvents.length > 0) {
+    if (gununEtkinlikleri.length > 0) {
       setDahaOncePencereSecilmediMi(false); /* update butonunun açılması için */
-      setBaslik(dayEvents[0].baslik);
-      setAciklama(dayEvents[0].aciklama);
-      setBaslangicTarihi(DayjsCevir(dayEvents[0].baslangicTarihi));
-      setBitisTarihi(DayjsCevir(dayEvents[0].bitisTarihi));
+      setBaslik(gununEtkinlikleri[0].baslik);
+      setAciklama(gununEtkinlikleri[0].aciklama);
+      setBaslangicTarihi(DayjsCevir(gununEtkinlikleri[0].baslangicTarihi));
+      setBitisTarihi(DayjsCevir(gununEtkinlikleri[0].bitisTarihi));
     } else {
       setBaslik("");
       setAciklama("");
@@ -48,9 +48,9 @@ export default function CreateEventButton() {
 
 
   return (
-    <button onClick={() => openModal()} className="create-event-button">
+    <button onClick={() => etkinlikPenceresiniAc()} className="create-event-button">
       <img src={plusImg} alt="create_event" className="button-img" />
-      <span className="button-text">Create Event</span>
+      <span className="button-text">Etkinlik Oluştur</span>
     </button>
   );
 }

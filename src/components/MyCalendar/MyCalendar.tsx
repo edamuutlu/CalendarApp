@@ -50,7 +50,7 @@ const CalendarContext: React.FC = () => {
   
   const [baslangicSaati, setBaslangicSaati] = useState<Dayjs>(dayjs());
   const [bitisSaati, setBitisSaati] = useState<Dayjs>(dayjs());
-  const [selectType, setSelectType] = useState<TekrarEnum | undefined>(
+  const [tekrarTipi, setTekrarTipi] = useState<TekrarEnum | undefined>(
     undefined
   );
   const [form] = Form.useForm();
@@ -59,23 +59,23 @@ const CalendarContext: React.FC = () => {
 
   const items: MenuItem[] = [
     {
-      label: "Does not repeat",
+      label: "Tekrarlama",
       key: TekrarEnum.hic,
     },
     {
-      label: "Daily",
+      label: "Her Gün",
       key: TekrarEnum.herGun,
     },
     {
-      label: `Weekly on ${dayjs().format("dddd")}`,
+      label: `Her Hafta ${dayjs().format("dddd")}`,
       key: TekrarEnum.herHafta,
     },
     {
-      label: `Monthly on the ${dayjs().format("Do")}`,
+      label: `Her Ay ${dayjs().format("Do")}`,
       key: TekrarEnum.herAy,
     },
     {
-      label: `Annually on ${dayjs().format("MMM DD")}`,
+      label: `Her Yıl ${dayjs().format("MMM DD")}`,
       key: TekrarEnum.herYil,
     },
   ];
@@ -86,7 +86,7 @@ const CalendarContext: React.FC = () => {
 
     if (selectedItem) {
       message.info(`Selected: ${selectedItem.label}`);
-      setSelectType(keyAsNumber as TekrarEnum); // Type assertion
+      setTekrarTipi(keyAsNumber as TekrarEnum); // Type assertion
     }
   };
 
@@ -184,7 +184,7 @@ const CalendarContext: React.FC = () => {
       aciklama: aciklama,
       baslangicTarihi: startDateFormat,
       bitisTarihi: endDateFormat,
-      tekrarDurumu: selectType ?? TekrarEnum.hic,
+      tekrarDurumu: tekrarTipi ?? TekrarEnum.hic,
     };
 
     // Call addEvent or any relevant function
@@ -232,7 +232,7 @@ const CalendarContext: React.FC = () => {
       aciklama: aciklama,
       baslangicTarihi: startDateFormat,
       bitisTarihi: endDateFormat,
-      tekrarDurumu: selectType ?? TekrarEnum.hic,
+      tekrarDurumu: tekrarTipi ?? TekrarEnum.hic,
     };
     try {
       await etkinlikGuncelle(event);
@@ -451,7 +451,7 @@ const CalendarContext: React.FC = () => {
                 <Space>
                   {dahaOncePencereSecilmediMi
                     ? "Tekrarlama Tipi"
-                    : TekrarEnumToString[selectType ?? TekrarEnum.hic]}
+                    : TekrarEnumToString[tekrarTipi ?? TekrarEnum.hic]}
                   <DownOutlined />
                 </Space>
               </Button>

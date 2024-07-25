@@ -27,7 +27,7 @@ export interface ContentContextType {
   acilanEtkinlikPencereTarihi: Dayjs;
   setAcilanEtkinlikPencereTarihi: React.Dispatch<React.SetStateAction<Dayjs>>;
   setEtkinlikData: React.Dispatch<React.SetStateAction<Etkinlik[]>>;
-  etkinlikleriCek: () => void;
+  etkinlikleriCek: () => Promise<Etkinlik[]>;
 }
 
 export const ContentContext = createContext<ContentContextType | undefined>(
@@ -36,23 +36,28 @@ export const ContentContext = createContext<ContentContextType | undefined>(
 
 const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [seciliGun, setSeciliGun] = useState(dayjs());
-  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] = useState(false);
-  const [dahaOncePencereSecilmediMi, setDahaOncePencereSecilmediMi] = useState(false);
+  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] =
+    useState(false);
+  const [dahaOncePencereSecilmediMi, setDahaOncePencereSecilmediMi] =
+    useState(false);
   const [baslik, setBaslik] = useState("");
   const [baslangicTarihi, setBaslangicTarihi] = useState<Dayjs>(dayjs());
   const [bitisTarihi, setBitisTarihi] = useState<Dayjs>(dayjs());
-  const [aciklama, setAciklama] = useState(""); 
+  const [aciklama, setAciklama] = useState("");
   const [tekrarTipi, setTekrarTipi] = useState<number>(0);
   const [etkinlikData, setEtkinlikData] = useState<Etkinlik[]>([]);
-  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] = useState<Dayjs>(dayjs());
+  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] =
+    useState<Dayjs>(dayjs());
 
-  const etkinlikleriCek = async () => {
+  const etkinlikleriCek = async (): Promise<Etkinlik[]> => {
     try {
-      const kayitliEtkinlikler = await tumEtkinlikleriGetir();
+      const kayitliEtkinlikler: Etkinlik[] = await tumEtkinlikleriGetir();
       setEtkinlikData(kayitliEtkinlikler);
+      return kayitliEtkinlikler;
     } catch (error) {
       setEtkinlikData([]);
       console.error("Etkinlikler getirilirken hata oluştu:", error);
+      return [];
     }
   };
 

@@ -18,7 +18,7 @@ const apiUrlMevcutKullaniciGetir =
 const apiUrlTümKullanicilariGetir =
   "http://localhost:5011/api/Kullanici/TumKullanicilariGetir";
 
-interface EtkinligeKullaniciEkleRequest {
+export interface EtkinligeKullaniciEkleRequest {
   etkinlikId: number;
   kullaniciIds: string[];
 }

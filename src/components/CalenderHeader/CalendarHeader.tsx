@@ -4,7 +4,10 @@ import "./CalendarHeader.css";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { ContentContext } from "../../context/ContentProvider";
 import { Button } from "antd";
+import "dayjs/locale/tr"; // Import the Turkish locale
 import dayjs from "dayjs";
+
+dayjs.locale("tr"); // Set the global locale to Turkish
 
 const CalendarHeader: React.FC = () => {
   const context = useContext(ContentContext);

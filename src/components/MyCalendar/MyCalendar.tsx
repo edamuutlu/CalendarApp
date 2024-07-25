@@ -24,8 +24,18 @@ import {
 } from "react-icons/md";
 
 import type { MenuProps } from "antd";
-import { etkinlikEkle, etkinlikGuncelle, etkinlikSil, TekrarEnum } from "../../stores/EventStore";
-import { kullaniciEtkinligiGetir, tümKullanicilariGetir } from "../../stores/UserStore";
+import {
+  etkinlikEkle,
+  etkinlikGuncelle,
+  etkinlikSil,
+  TekrarEnum,
+} from "../../stores/EventStore";
+import {
+  etkinligeKullaniciEkle,
+  EtkinligeKullaniciEkleRequest,
+  kullaniciEtkinligiGetir,
+  tümKullanicilariGetir,
+} from "../../stores/UserStore";
 import Kullanici from "../../types/Kullanici";
 import Etkinlik from "../../types/Etkinlik";
 
@@ -55,7 +65,7 @@ const CalendarContext: React.FC = () => {
   );
   const [form] = Form.useForm();
   const [kullanicilar, setKullanicilar] = useState<Kullanici[]>([]);
-  const [davetliKullanici, setDavetliKullanici] = useState<string | null>(null);
+  const [davetliKullanici, setDavetliKullanici] = useState<Kullanici>();
 
   const items: MenuItem[] = [
     {
@@ -86,7 +96,7 @@ const CalendarContext: React.FC = () => {
 
     if (selectedItem) {
       message.info(`Selected: ${selectedItem.label}`);
-      setTekrarTipi(keyAsNumber as TekrarEnum); // Type assertion
+      setTekrarTipi(keyAsNumber as TekrarEnum);
     }
   };
 
@@ -95,11 +105,11 @@ const CalendarContext: React.FC = () => {
     onClick: handleMenuClick,
   };
 
-  const handleGuestMenuClick = (e: { key: string; }) => {
+  const handleGuestMenuClick = (e: { key: string }) => {
     const selectedUser = kullanicilar.find((user) => user.id === e.key);
     if (selectedUser) {
       message.info(`Selected: ${selectedUser.isim}`);
-      setDavetliKullanici(selectedUser.isim);
+      setDavetliKullanici(selectedUser);
     }
   };
 
@@ -178,7 +188,7 @@ const CalendarContext: React.FC = () => {
       endTimeFormat.getSeconds()
     );
 
-    // Create event object
+    // Etkinlik nesnesini oluştur
     const event: Etkinlik = {
       date: seciliGun.toDate(),
       baslik: baslik,
@@ -188,26 +198,38 @@ const CalendarContext: React.FC = () => {
       tekrarDurumu: tekrarTipi ?? TekrarEnum.hic,
     };
 
-    // Call addEvent or any relevant function
     try {
       await etkinlikEkle(event);
-      await etkinlikleriCek();
+      const data: Etkinlik[] = await etkinlikleriCek();
+      const dayEvents = data.filter((event: Etkinlik) =>
+        dayjs(event.baslangicTarihi).isSame(seciliGun, "day")
+      );
+      console.log("dayEvents", dayEvents);
+
+      // İd'yi number'a çevirme veya uygun tipi kullanma
+      const etkinlikId = Number(dayEvents[0].id);
+
+      // davetliKullanici'nın null olmadığından emin olma
+      if (davetliKullanici) {
+        const request: EtkinligeKullaniciEkleRequest = {
+          etkinlikId: etkinlikId,
+          kullaniciIds: [davetliKullanici.id as string], // `davetliKullanici`'yı `string` olarak belirtme
+        };
+
+        await etkinligeKullaniciEkle(request);
+      } else {
+        console.error("Davetli kullanıcı null veya undefined.");
+      }
     } catch (error) {
       console.error("Etkinlik eklenirken hata oluştu:", error);
     }
 
-    /* try {
-      const etkinlik = await etkinligeKullaniciEkle(Number(event.id)); 
-    } catch (error) {
-      console.error("Etkinlik getirilirken hata oluştu:", error);
-    } */
-    
+    // Etkinlik penceresini kapat ve formu sıfırla
     etkinlikPencereKapat();
     setBaslik("");
     setAciklama("");
     etkinlikPencereKapat();
 
-    // Reset the form
     form.resetFields();
   };
 
@@ -449,7 +471,9 @@ const CalendarContext: React.FC = () => {
             <Dropdown menu={guestMenuProps} className="dropdown">
               <Button>
                 <Space>
-                  {davetliKullanici ? davetliKullanici : "Kullanıcı Davet Et" }
+                  {davetliKullanici?.isim
+                    ? davetliKullanici?.isim
+                    : "Kullanıcı Davet Et"}
                   <DownOutlined />
                 </Space>
               </Button>

@@ -12,7 +12,7 @@ export default function CreateEventButton() {
     throw new Error("CalendarContext must be used within a ContentProvider");
   }
 
-  const { selectedDay, eventData, modalDay, setTitle, setDesc, setStartDate, setEndDate, setShowEventModal, isSelectModal, setIsSelectModal} = context;
+  const { seciliGun, etkinlikData, modalDay, setBaslik, setAciklama, setBaslangicTarihi, setBitisTarihi, setEtkinlikPenceresiniGoster, dahaOncePencereSecilmediMi, setDahaOncePencereSecilmediMi} = context;
 
   useEffect(() => {
     if (modalDay && isFirstOpen) {
@@ -22,24 +22,24 @@ export default function CreateEventButton() {
   }, [modalDay]);
 
   const openModal = () => {
-    const dayEvents = eventData.filter((event) =>
+    const dayEvents = etkinlikData.filter((event) =>
       dayjs(event.baslangicTarihi).isSame(modalDay, "day")
     );
 
     if (dayEvents.length > 0) {
-      setIsSelectModal(false); /* update butonunun açılması için */
-      setTitle(dayEvents[0].baslik);
-      setDesc(dayEvents[0].aciklama);
-      setStartDate(convertToDayjs(dayEvents[0].baslangicTarihi));
-      setEndDate(convertToDayjs(dayEvents[0].bitisTarihi));
+      setDahaOncePencereSecilmediMi(false); /* update butonunun açılması için */
+      setBaslik(dayEvents[0].baslik);
+      setAciklama(dayEvents[0].aciklama);
+      setBaslangicTarihi(convertToDayjs(dayEvents[0].baslangicTarihi));
+      setBitisTarihi(convertToDayjs(dayEvents[0].bitisTarihi));
     } else {
-      setTitle("");
-      setDesc("");
-      setStartDate(selectedDay);
-      setIsSelectModal(true);
+      setBaslik("");
+      setAciklama("");
+      setBaslangicTarihi(seciliGun);
+      setDahaOncePencereSecilmediMi(true);
     }
 
-    setShowEventModal(true);
+    setEtkinlikPenceresiniGoster(true); 
   };
 
   const convertToDayjs = (date: Date): dayjs.Dayjs => {

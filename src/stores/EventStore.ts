@@ -5,13 +5,13 @@ import EventAct from "../types/EventAct";
 export enum TekrarEnum {
   hic = 0,
   herGun = 1,
-  herHafta = 7,
+  herHafta = 2,
   herAy = 3,
   herYil = 4,
 }
 
 export const useEventStore = () => {
-  const addEvent = async (event: EventAct) => {
+  const etkinlikEkle = async (event: EventAct) => {
     try {
       await axios.post(
         "http://localhost:5011/api/Etkinlik/EtkinlikOlustur",
@@ -30,7 +30,7 @@ export const useEventStore = () => {
     }
   };
 
-  const updateEvent = async (event: EventAct) => {
+  const etkinlikGuncelle = async (event: EventAct) => {
     try {
       await axios.put(
         "http://localhost:5011/api/Etkinlik/EtkinlikGuncelle",
@@ -49,7 +49,7 @@ export const useEventStore = () => {
     }
   };
 
-  const deleteEvent = async (eventId: number) => {
+  const etkinlikSil = async (eventId: number) => {
     try {
       await axios.delete(
         `http://localhost:5011/api/Etkinlik/EtkinlikSil?EtkinlikId=${eventId}`,
@@ -66,5 +66,5 @@ export const useEventStore = () => {
     }
   };
 
-  return { addEvent, updateEvent, deleteEvent };
+  return { etkinlikEkle, etkinlikGuncelle, etkinlikSil };
 };

@@ -13,24 +13,24 @@ const CalendarHeader: React.FC = () => {
     throw new Error("CalendarContext must be used within a ContentProvider");
   }
 
-  const { selectedDay, setSelectedDay } = context;
+  const { seciliGun, setSeciliGun } = context;
 
   const getToday = () => {
     const now = dayjs();
-    setSelectedDay(now);
+    setSeciliGun(now);
   };
 
   const handleNextMonth = () => {
-    if (selectedDay) {
-      const nextMonthDate = selectedDay.add(1, "month");
-      setSelectedDay(nextMonthDate);
+    if (seciliGun) {
+      const nextMonthDate = seciliGun.add(1, "month");
+      setSeciliGun(nextMonthDate);
     }
   };
 
   const handlePrevMonth = () => {
-    if (selectedDay) {
-      const nextMonthDate = selectedDay.subtract(1, "month");
-      setSelectedDay(nextMonthDate);
+    if (seciliGun) {
+      const nextMonthDate = seciliGun.subtract(1, "month");
+      setSeciliGun(nextMonthDate);
     }
   };
 
@@ -48,7 +48,7 @@ const CalendarHeader: React.FC = () => {
         <button onClick={handleNextMonth} className="calendar-button">
           <RightOutlined />
         </button>
-        <h2 className="calendar-month">{selectedDay.format("MMM YYYY")}</h2>
+        <h2 className="calendar-month">{seciliGun.format("MMM YYYY")}</h2>
       </div>
       <div className="right-buttons">
         <Button href="/" className="calendar-button">

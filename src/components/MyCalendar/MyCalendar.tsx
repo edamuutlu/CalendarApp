@@ -25,7 +25,7 @@ import {
 
 import type { MenuProps } from "antd";
 import { etkinlikEkle, etkinlikGuncelle, etkinlikSil, TekrarEnum } from "../../stores/EventStore";
-import { tümKullanicilariGetir } from "../../stores/UserStore";
+import { kullaniciEtkinligiGetir, tümKullanicilariGetir } from "../../stores/UserStore";
 import Kullanici from "../../types/Kullanici";
 import Etkinlik from "../../types/Etkinlik";
 
@@ -90,17 +90,17 @@ const CalendarContext: React.FC = () => {
     }
   };
 
+  const menuProps = {
+    items: items.map((item) => ({ key: item.key, label: item.label })),
+    onClick: handleMenuClick,
+  };
+
   const handleGuestMenuClick = (e: { key: string; }) => {
     const selectedUser = kullanicilar.find((user) => user.id === e.key);
     if (selectedUser) {
       message.info(`Selected: ${selectedUser.isim}`);
       setDavetliKullanici(selectedUser.isim);
     }
-  };
-
-  const menuProps = {
-    items: items.map((item) => ({ key: item.key, label: item.label })),
-    onClick: handleMenuClick,
   };
 
   const guestMenuProps = {
@@ -196,6 +196,12 @@ const CalendarContext: React.FC = () => {
       console.error("Etkinlik eklenirken hata oluştu:", error);
     }
 
+    /* try {
+      const etkinlik = await etkinligeKullaniciEkle(Number(event.id)); 
+    } catch (error) {
+      console.error("Etkinlik getirilirken hata oluştu:", error);
+    } */
+    
     etkinlikPencereKapat();
     setBaslik("");
     setAciklama("");
@@ -275,12 +281,8 @@ const CalendarContext: React.FC = () => {
   };
 
   const tarihleriAl = (baslangıcTarihi: any, bitisTarihi: any) => {
-    console.log("baslangıcTarihi :>> ", baslangıcTarihi);
-    console.log("bitisTarihi :>> ", bitisTarihi);
     setBaslangicTarihi(baslangıcTarihi);
     setBitisTarihi(bitisTarihi);
-    console.log("startT", baslangicTarihi);
-    console.log("endT", bitisTarihi);
     const baslangicTarihDate = DayjsToDate(baslangıcTarihi);
     const bitisTarihDate = DayjsToDate(bitisTarihi);
 
@@ -291,12 +293,8 @@ const CalendarContext: React.FC = () => {
   };
 
   const saatleriAl = (baslangıcSaati: any, bitisSaati: any) => {
-    console.log("baslangicSaati", baslangıcSaati);
-    console.log("bitisSaati", bitisSaati);
     setBaslangicSaati(baslangıcSaati);
     setBitisSaati(bitisSaati);
-    console.log("startT", baslangicSaati);
-    console.log("endT", bitisSaati);
     const baslangicSaatiDate = DayjsToDate(baslangıcSaati);
     const bitisSaatiDate = DayjsToDate(bitisSaati);
 
@@ -451,7 +449,7 @@ const CalendarContext: React.FC = () => {
             <Dropdown menu={guestMenuProps} className="dropdown">
               <Button>
                 <Space>
-                  {dahaOncePencereSecilmediMi ? "Kullanıcı Davet Et" : davetliKullanici }
+                  {davetliKullanici ? davetliKullanici : "Kullanıcı Davet Et" }
                   <DownOutlined />
                 </Space>
               </Button>

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { message } from "antd";
+import Etkinlik from "../types/Etkinlik";
 
 const apiUrletkinligeKullaniciEkle =
   "http://localhost:5011/api/Etkinlik/EtkinligeKullaniciEkle";
@@ -9,6 +10,8 @@ const apiUrlEklendigimEtkinlikler =
   "http://localhost:5011/api/Etkinlik/EklenenEtkinlikleriGetir";
 const apiUrlEtkinligeDavetliKullanicilariGetir =
   "http://localhost:5011/api/Etkinlik/EtkinligeDavetliKullanicilariGetir";
+const apiUrlKullaniciEtkinligiGetir =
+  "http://localhost:5011/api/Etkinlik/KullaniciEtkinligiGetir";
 
 const apiUrlMevcutKullaniciGetir =
   "http://localhost:5011/api/Kullanici/MevcutKullaniciGetir";
@@ -115,7 +118,7 @@ export const tümKullanicilariGetir = async () => {
     });
     return response.data;
   } catch (error) {
-   
+
   }
 };
 
@@ -134,3 +137,13 @@ export const MevcutKullaniciGetir = async () => {
     );
   }
 };
+
+export const kullaniciEtkinligiGetir = async (id: Number) => {
+  const response = await axios.get(`${apiUrlKullaniciEtkinligiGetir}?etkinlikId=${id}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      "Content-Type": "application/json",
+    },
+  });
+  return response.data as Etkinlik;
+}

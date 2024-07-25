@@ -27,8 +27,6 @@ export interface ContentContextType {
   acilanEtkinlikPencereTarihi: Dayjs;
   setAcilanEtkinlikPencereTarihi: React.Dispatch<React.SetStateAction<Dayjs>>;
   setEtkinlikData: React.Dispatch<React.SetStateAction<Etkinlik[]>>;
-  tarihSec: (date: Dayjs) => void;
-  etkinlikPencereKapat: () => void;
   etkinlikleriCek: () => void;
 }
 
@@ -48,7 +46,6 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [etkinlikData, setEtkinlikData] = useState<Etkinlik[]>([]);
   const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] = useState<Dayjs>(dayjs());
 
-  // Load event data from API when the component mounts
   const etkinlikleriCek = async () => {
     try {
       const kayitliEtkinlikler = await tumEtkinlikleriGetir();
@@ -58,20 +55,6 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       console.error("Etkinlikler getirilirken hata oluştu:", error);
     }
   };
-
-  const tarihSec = (date: Dayjs) => {
-    setSeciliGun(date);
-    setAcilanEtkinlikPencereTarihi(date);
-  };
-
-  const etkinlikPencereKapat = () => {
-    setBaslik("");
-    setAciklama("");
-    setBaslangicTarihi(dayjs());
-    setBitisTarihi(dayjs());
-    setEtkinlikPenceresiniGoster(false);
-  };
-
 
   const contextValue = {
     seciliGun,
@@ -94,8 +77,6 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     setEtkinlikData,
     acilanEtkinlikPencereTarihi,
     setAcilanEtkinlikPencereTarihi,
-    tarihSec,
-    etkinlikPencereKapat,
     etkinlikleriCek,
   };
 

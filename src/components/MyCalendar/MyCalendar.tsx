@@ -116,7 +116,10 @@ const CalendarContext: React.FC = () => {
 
   const {
     seciliGun,
+    setSeciliGun,
     etkinlikPenceresiniGoster,
+    setEtkinlikPenceresiniGoster,
+    setAcilanEtkinlikPencereTarihi,
     baslik,
     setBaslik,
     aciklama,
@@ -125,8 +128,6 @@ const CalendarContext: React.FC = () => {
     setBaslangicTarihi,
     bitisTarihi,
     setBitisTarihi,
-    tarihSec,
-    etkinlikPencereKapat,
     etkinlikleriCek,
   } = context;
 
@@ -303,6 +304,19 @@ const CalendarContext: React.FC = () => {
       baslangicSaatiDate,
       bitisSaatiDate,
     };
+  };
+
+  const tarihSec = (date: Dayjs) => {
+    setSeciliGun(date);
+    setAcilanEtkinlikPencereTarihi(date);
+  };
+
+  const etkinlikPencereKapat = () => {
+    setBaslik("");
+    setAciklama("");
+    setBaslangicTarihi(dayjs());
+    setBitisTarihi(dayjs());
+    setEtkinlikPenceresiniGoster(false);
   };
 
   return (

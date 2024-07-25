@@ -24,12 +24,12 @@ export interface ContentContextType {
   tekrarTipi: number;
   setTekrarTipi: React.Dispatch<React.SetStateAction<number>>;
   etkinlikData: EventAct[];
-  modalDay: Dayjs;
-  setModalDay: React.Dispatch<React.SetStateAction<Dayjs>>;
+  acilanEtkinlikPencereTarihi: Dayjs;
+  setAcilanEtkinlikPencereTarihi: React.Dispatch<React.SetStateAction<Dayjs>>;
   setEtkinlikData: React.Dispatch<React.SetStateAction<EventAct[]>>;
-  handleSelect: (date: Dayjs) => void;
+  tarihSec: (date: Dayjs) => void;
   etkinlikPencereKapat: () => void;
-  fetchEvents: () => void;
+  etkinlikleriCek: () => void;
 }
 
 export const ContentContext = createContext<ContentContextType | undefined>(
@@ -46,22 +46,22 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [aciklama, setAciklama] = useState(""); 
   const [tekrarTipi, setTekrarTipi] = useState<number>(0);
   const [etkinlikData, setEtkinlikData] = useState<EventAct[]>([]);
-  const [modalDay, setModalDay] = useState<Dayjs>(dayjs());
+  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] = useState<Dayjs>(dayjs());
 
   // Load event data from API when the component mounts
-  const fetchEvents = async () => {
+  const etkinlikleriCek = async () => {
     try {
-      const savedEvents = await tumEtkinlikleriGetir();
-      setEtkinlikData(savedEvents);
+      const kayitliEtkinlikler = await tumEtkinlikleriGetir();
+      setEtkinlikData(kayitliEtkinlikler);
     } catch (error) {
       setEtkinlikData([]);
       console.error("Etkinlikler getirilirken hata oluştu:", error);
     }
   };
 
-  const handleSelect = (date: Dayjs) => {
+  const tarihSec = (date: Dayjs) => {
     setSeciliGun(date);
-    setModalDay(date);
+    setAcilanEtkinlikPencereTarihi(date);
   };
 
   const etkinlikPencereKapat = () => {
@@ -92,11 +92,11 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     setTekrarTipi,
     etkinlikData,
     setEtkinlikData,
-    modalDay,
-    setModalDay,
-    handleSelect,
+    acilanEtkinlikPencereTarihi,
+    setAcilanEtkinlikPencereTarihi,
+    tarihSec,
     etkinlikPencereKapat,
-    fetchEvents,
+    etkinlikleriCek,
   };
 
   return (

@@ -43,7 +43,7 @@ export default function Sidebar() {
   const [items, setItems] = useState<MenuItem[]>(initialItems);
 
   useEffect(() => {
-    const fetchEvents = async () => {
+    const etkinlikleriCek = async () => {
       try {
         const fetchedEvents = await tumEtkinlikleriGetir();
         setEvents(fetchedEvents);
@@ -63,7 +63,7 @@ export default function Sidebar() {
       }
     };
 
-    fetchEvents();
+    etkinlikleriCek();
     fetchUsers();
   }, []);
 

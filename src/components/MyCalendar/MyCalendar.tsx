@@ -127,9 +127,9 @@ const CalendarContext: React.FC = () => {
     setBaslangicTarihi,
     bitisTarihi,
     setBitisTarihi,
-    handleSelect,
+    tarihSec,
     etkinlikPencereKapat,
-    fetchEvents,
+    etkinlikleriCek,
   } = context;
 
   const {
@@ -141,7 +141,7 @@ const CalendarContext: React.FC = () => {
   const etkinlikEkle = async (event: EventAct) => {
     try {
       await addEventToStore(event);
-      await fetchEvents();
+      await etkinlikleriCek();
     } catch (error) {
       console.error("Etkinlik eklenirken hata oluştu:", error);
     }
@@ -154,7 +154,7 @@ const CalendarContext: React.FC = () => {
   const etkinlikGuncelle = async (event: EventAct) => {
     try {
       await updateEventInStore(event);
-      await fetchEvents();
+      await etkinlikleriCek();
     } catch (error) {
       console.error("Etkinlik güncellenirken hata oluştu:", error);
     }
@@ -167,7 +167,7 @@ const CalendarContext: React.FC = () => {
   const etkinlikSil = async (eventId: number) => {
     try {
       await deleteEventFromStore(eventId);
-      await fetchEvents();
+      await etkinlikleriCek();
     } catch (error) {
       console.error("Etkinlik silinirken hata oluştu:", error);
     }
@@ -184,7 +184,7 @@ const CalendarContext: React.FC = () => {
     };
 
     fetchUsers();
-    fetchEvents();
+    etkinlikleriCek();
   }, [seciliGun]);
 
   const dateCellRender = (value: Dayjs) => {
@@ -327,7 +327,7 @@ const CalendarContext: React.FC = () => {
   return (
     <div>
       <Calendar
-        onSelect={handleSelect}
+        onSelect={tarihSec}
         cellRender={dateCellRender}
         value={seciliGun}
       />

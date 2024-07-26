@@ -12,30 +12,30 @@ export default function CreateEventButton() {
     throw new Error("CalendarContext must be used within a ContentProvider");
   }
 
-  const { etkinlikData, acilanEtkinlikPencereTarihi, setEtkinlikPenceresiniGoster, setDahaOncePencereSecilmediMi} = context;
+  const {
+    etkinlikData,
+    acilanEtkinlikPencereTarihi,
+    setEtkinlikPenceresiniGoster,
+    setDahaOncePencereSecilmediMi,
+  } = context;
 
-  useEffect(() => {
+  /*  useEffect(() => {
     if (acilanEtkinlikPencereTarihi && ilkAcilisMi) {
       etkinlikPenceresiniAc();
     }
     setIlkAcilisMi(true);
-  }, [acilanEtkinlikPencereTarihi]);
+  }, [acilanEtkinlikPencereTarihi]); */
 
   const etkinlikPenceresiniAc = () => {
-    const gununEtkinlikleri = etkinlikData.filter((event) =>
-      dayjs(event.baslangicTarihi).isSame(acilanEtkinlikPencereTarihi, "day")
-    );
-
-    if (gununEtkinlikleri.length > 0) {
-      setDahaOncePencereSecilmediMi(false); /* update butonunun açılması için */
-    } else {
-      setDahaOncePencereSecilmediMi(true);
-    }
-    setEtkinlikPenceresiniGoster(true); 
+    setDahaOncePencereSecilmediMi(true);
+    setEtkinlikPenceresiniGoster(true);
   };
 
   return (
-    <button onClick={() => etkinlikPenceresiniAc()} className="create-event-button">
+    <button
+      onClick={() => etkinlikPenceresiniAc()}
+      className="create-event-button"
+    >
       <img src={plusImg} alt="create_event" className="button-img" />
       <span className="button-text">Etkinlik Oluştur</span>
     </button>

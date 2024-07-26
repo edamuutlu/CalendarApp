@@ -15,7 +15,7 @@ const apiUrlKullaniciEtkinligiGetir =
 
 const apiUrlMevcutKullaniciGetir =
   "http://localhost:5011/api/Kullanici/MevcutKullaniciGetir";
-const apiUrlTümKullanicilariGetir =
+const apiUrlTumKullanicilariGetir =
   "http://localhost:5011/api/Kullanici/TumKullanicilariGetir";
 
 export interface EtkinligeKullaniciEkleRequest {
@@ -109,9 +109,9 @@ export const etkinligeDavetliKullanicilariGetir = async (id: Number) => {
   }
 };
 
-export const tümKullanicilariGetir = async () => {
+export const tumKullanicilariGetir = async () => {
   try {
-    const response = await axios.get(`${apiUrlTümKullanicilariGetir}`, {
+    const response = await axios.get(`${apiUrlTumKullanicilariGetir}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
         "Content-Type": "application/json",

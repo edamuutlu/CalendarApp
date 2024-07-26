@@ -5,7 +5,7 @@ import "./Sidebar.css";
 import { AppstoreOutlined } from "@ant-design/icons";
 import Etkinlik from "../../types/Etkinlik";
 import { tumEtkinlikleriGetir } from "../../stores/CalendarStore";
-import { tümKullanicilariGetir } from "../../stores/UserStore";
+import { tumKullanicilariGetir } from "../../stores/UserStore";
 import Kullanici from "../../types/Kullanici";
 import { ContentContext } from "../../context/ContentProvider";
 
@@ -55,7 +55,7 @@ export default function Sidebar() {
 
     const kullanicilariCek = async () => {
       try {
-        const fetchedUsers = await tümKullanicilariGetir();
+        const fetchedUsers = await tumKullanicilariGetir();
         setKullanicilar(fetchedUsers);
         setUsersMenuItems(fetchedUsers);
       } catch (error) {

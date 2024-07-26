@@ -34,7 +34,7 @@ import {
   etkinligeKullaniciEkle,
   EtkinligeKullaniciEkleRequest,
   kullaniciEtkinligiGetir,
-  tümKullanicilariGetir,
+  tumKullanicilariGetir,
 } from "../../stores/UserStore";
 import Kullanici from "../../types/Kullanici";
 import Etkinlik from "../../types/Etkinlik";
@@ -143,7 +143,7 @@ const CalendarContext: React.FC = () => {
 
   useEffect(() => {
     const kullanicilariCek = async () => {
-      const tumKullanicilar = await tümKullanicilariGetir();
+      const tumKullanicilar = await tumKullanicilariGetir();
       setKullanicilar(tumKullanicilar);
     };
 

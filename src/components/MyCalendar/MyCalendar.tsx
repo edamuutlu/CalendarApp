@@ -418,6 +418,7 @@ const CalendarContext: React.FC = () => {
               <RangePicker
                 format={dateFormat}
                 onChange={(values) => tarihleriAl(values?.[0], values?.[1])}
+                minDate={dahaOncePencereSecilmediMi ? dayjs(seciliGun, dateFormat) : dayjs(baslangicTarihi, dateFormat)}
                 defaultValue={
                   dahaOncePencereSecilmediMi ? [seciliGun, dayjs()] : [baslangicTarihi, bitisTarihi]
                 }
@@ -495,8 +496,8 @@ const CalendarContext: React.FC = () => {
             <Dropdown menu={menuProps} className="dropdown">
               <Button>
                 <Space>
-                  {dahaOncePencereSecilmediMi
-                    ? "Tekrarlama Tipi"
+                  {tekrarTipi
+                    ? TekrarEnumToString[tekrarTipi ?? TekrarEnum.hic]
                     : TekrarEnumToString[tekrarTipi ?? TekrarEnum.hic]}
                   <DownOutlined />
                 </Space>

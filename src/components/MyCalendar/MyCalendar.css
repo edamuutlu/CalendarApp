@@ -9,6 +9,17 @@
   padding: 5px;
 }
 
+.guest-cell-style {
+  list-style: none;
+  padding: 2px 5px;
+  background: #a692ff;
+  border-radius: 12px;
+  margin-bottom: 4px;
+  margin-top: 4px;
+  cursor: pointer;
+  padding: 5px;
+}
+
 .modal {
   width: 700px !important;
   height: 700px !important;

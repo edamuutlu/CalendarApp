@@ -5,6 +5,7 @@ import {
   tumEtkinlikleriGetir,
 } from "../stores/CalendarStore";
 import Etkinlik from "../types/Etkinlik";
+import { eklendigimEtkinlikleriGetir } from "../stores/UserStore";
 
 export interface ContentContextType {
   seciliGun: Dayjs;
@@ -23,10 +24,11 @@ export interface ContentContextType {
   setBitisTarihi: React.Dispatch<React.SetStateAction<Dayjs>>;
   tekrarTipi: number;
   setTekrarTipi: React.Dispatch<React.SetStateAction<number>>;
-  etkinlikData: Etkinlik[];
   acilanEtkinlikPencereTarihi: Dayjs;
   setAcilanEtkinlikPencereTarihi: React.Dispatch<React.SetStateAction<Dayjs>>;
+  etkinlikData: Etkinlik[];
   setEtkinlikData: React.Dispatch<React.SetStateAction<Etkinlik[]>>;
+  eklendigimEtkinlikler: Etkinlik[];
   etkinlikleriCek: () => Promise<Etkinlik[]>;
 }
 
@@ -46,12 +48,17 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [aciklama, setAciklama] = useState("");
   const [tekrarTipi, setTekrarTipi] = useState<number>(0);
   const [etkinlikData, setEtkinlikData] = useState<Etkinlik[]>([]);
+  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<Etkinlik[]>([]);
   const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] =
     useState<Dayjs>(dayjs());
 
   const etkinlikleriCek = async (): Promise<Etkinlik[]> => {
     try {
       const kayitliEtkinlikler: Etkinlik[] = await tumEtkinlikleriGetir();
+      const eklendigimEtkinlikler: Etkinlik[] = await eklendigimEtkinlikleriGetir();
+      setEklendigimEtkinlikler(eklendigimEtkinlikler);
+      console.log('eklendigimEtkinlikler :>> ', eklendigimEtkinlikler);
+
       setEtkinlikData(kayitliEtkinlikler);
       return kayitliEtkinlikler;
     } catch (error) {
@@ -79,6 +86,7 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     tekrarTipi,
     setTekrarTipi,
     etkinlikData,
+    eklendigimEtkinlikler,
     setEtkinlikData,
     acilanEtkinlikPencereTarihi,
     setAcilanEtkinlikPencereTarihi,

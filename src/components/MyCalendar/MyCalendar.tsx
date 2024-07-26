@@ -122,7 +122,7 @@ const CalendarContext: React.FC = () => {
     throw new Error("CalendarContext must be used within a ContentProvider");
   }
 
-  const { dahaOncePencereSecilmediMi, etkinlikData } = context;
+  const { dahaOncePencereSecilmediMi, etkinlikData, eklendigimEtkinlikler } = context;
 
   const {
     seciliGun,
@@ -152,13 +152,18 @@ const CalendarContext: React.FC = () => {
   }, [seciliGun]);
 
   const dateCellRender = (value: Dayjs) => {
-    if (!etkinlikData) {
+    if (!etkinlikData || !eklendigimEtkinlikler) {
       return <ul style={{ padding: "0px 4px" }}></ul>;
     }
-
+  
     const gununEtkinlikleri = etkinlikData.filter((etkinlik) =>
       dayjs(etkinlik.baslangicTarihi).isSame(value, "day")
     );
+  
+    const eklenenEtkinlikler = eklendigimEtkinlikler.filter((etkinlik) =>
+      dayjs(etkinlik.baslangicTarihi).isSame(value, "day")
+    );
+  
     return (
       <ul style={{ padding: "0px 4px" }}>
         {gununEtkinlikleri.map((etkinlik) => (
@@ -166,10 +171,15 @@ const CalendarContext: React.FC = () => {
             {etkinlik.baslik}
           </li>
         ))}
+        {eklenenEtkinlikler.map((etkinlik) => (
+          <li className="guest-cell-style" key={etkinlik.id}>
+            {etkinlik.baslik}
+          </li>
+        ))}
       </ul>
     );
   };
-
+  
   const etkinlikEkleyeBas = async () => {
     const startDateFormat = DayjsToDate(baslangicTarihi);
     const endDateFormat = DayjsToDate(bitisTarihi);

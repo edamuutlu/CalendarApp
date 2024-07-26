@@ -7,7 +7,7 @@ const apiUrletkinligeKullaniciEkle =
 const apiUrletkinliktenKullaniciSil =
   "http://localhost:5011/api/Etkinlik/EtkinliktenDavetliKullanicilariSil";
 const apiUrlEklendigimEtkinlikler =
-  "http://localhost:5011/api/Etkinlik/EklenenEtkinlikleriGetir";
+  "http://localhost:5011/api/Etkinlik/EklenilenEtkinlikleriGetir";
 const apiUrlEtkinligeDavetliKullanicilariGetir =
   "http://localhost:5011/api/Etkinlik/EtkinligeDavetliKullanicilariGetir";
 const apiUrlKullaniciEtkinligiGetir =
@@ -75,6 +75,7 @@ export const etkinliktenKullaniciSil = async (
     console.error("Kullanıcı silme işlemi sırasında bir hata oluştu:", error);
   }
 };
+
 export const eklendigimEtkinlikleriGetir = async () => {
   try {
     const response = await axios.get(apiUrlEklendigimEtkinlikler, {

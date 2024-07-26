@@ -6,6 +6,7 @@ import {
 } from "../stores/CalendarStore";
 import Etkinlik from "../types/Etkinlik";
 import { eklendigimEtkinlikleriGetir } from "../stores/UserStore";
+import Kullanici from "../types/Kullanici";
 
 export interface ContentContextType {
   seciliGun: Dayjs;
@@ -14,22 +15,14 @@ export interface ContentContextType {
   setEtkinlikPenceresiniGoster: React.Dispatch<React.SetStateAction<boolean>>;
   dahaOncePencereSecilmediMi: boolean;
   setDahaOncePencereSecilmediMi: React.Dispatch<React.SetStateAction<boolean>>;
-  baslik: string;
-  setBaslik: React.Dispatch<React.SetStateAction<string>>;
-  aciklama: string;
-  setAciklama: React.Dispatch<React.SetStateAction<string>>;
-  baslangicTarihi: Dayjs;
-  setBaslangicTarihi: React.Dispatch<React.SetStateAction<Dayjs>>;
-  bitisTarihi: Dayjs;
-  setBitisTarihi: React.Dispatch<React.SetStateAction<Dayjs>>;
-  tekrarTipi: number;
-  setTekrarTipi: React.Dispatch<React.SetStateAction<number>>;
   acilanEtkinlikPencereTarihi: Dayjs;
   setAcilanEtkinlikPencereTarihi: React.Dispatch<React.SetStateAction<Dayjs>>;
   etkinlikData: Etkinlik[];
   setEtkinlikData: React.Dispatch<React.SetStateAction<Etkinlik[]>>;
   eklendigimEtkinlikler: Etkinlik[];
   etkinlikleriCek: () => Promise<Etkinlik[]>;
+  tumKullanicilar: Kullanici[];
+  setTumKullanicilar: React.Dispatch<React.SetStateAction<Kullanici[]>>;
 }
 
 export const ContentContext = createContext<ContentContextType | undefined>(
@@ -38,27 +31,18 @@ export const ContentContext = createContext<ContentContextType | undefined>(
 
 const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [seciliGun, setSeciliGun] = useState(dayjs());
-  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] =
-    useState(false);
-  const [dahaOncePencereSecilmediMi, setDahaOncePencereSecilmediMi] =
-    useState(false);
-  const [baslik, setBaslik] = useState("");
-  const [baslangicTarihi, setBaslangicTarihi] = useState<Dayjs>(dayjs());
-  const [bitisTarihi, setBitisTarihi] = useState<Dayjs>(dayjs());
-  const [aciklama, setAciklama] = useState("");
-  const [tekrarTipi, setTekrarTipi] = useState<number>(0);
+  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] = useState(false);
+  const [dahaOncePencereSecilmediMi, setDahaOncePencereSecilmediMi] = useState(false);
   const [etkinlikData, setEtkinlikData] = useState<Etkinlik[]>([]);
   const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<Etkinlik[]>([]);
-  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] =
-    useState<Dayjs>(dayjs());
+  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] = useState<Dayjs>(dayjs());
+  const [tumKullanicilar, setTumKullanicilar] = useState<Kullanici[]>([]);
 
   const etkinlikleriCek = async (): Promise<Etkinlik[]> => {
     try {
       const kayitliEtkinlikler: Etkinlik[] = await tumEtkinlikleriGetir();
       const eklendigimEtkinlikler: Etkinlik[] = await eklendigimEtkinlikleriGetir();
       setEklendigimEtkinlikler(eklendigimEtkinlikler);
-      console.log('eklendigimEtkinlikler :>> ', eklendigimEtkinlikler);
-
       setEtkinlikData(kayitliEtkinlikler);
       return kayitliEtkinlikler;
     } catch (error) {
@@ -75,22 +59,14 @@ const ContentProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     setEtkinlikPenceresiniGoster,
     dahaOncePencereSecilmediMi,
     setDahaOncePencereSecilmediMi,
-    baslik,
-    setBaslik,
-    aciklama,
-    setAciklama,
-    baslangicTarihi,
-    setBaslangicTarihi,
-    bitisTarihi,
-    setBitisTarihi,
-    tekrarTipi,
-    setTekrarTipi,
     etkinlikData,
     eklendigimEtkinlikler,
     setEtkinlikData,
     acilanEtkinlikPencereTarihi,
     setAcilanEtkinlikPencereTarihi,
     etkinlikleriCek,
+    tumKullanicilar,
+    setTumKullanicilar,
   };
 
   return (

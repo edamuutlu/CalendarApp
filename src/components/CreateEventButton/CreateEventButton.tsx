@@ -12,7 +12,7 @@ export default function CreateEventButton() {
     throw new Error("CalendarContext must be used within a ContentProvider");
   }
 
-  const { seciliGun, etkinlikData, acilanEtkinlikPencereTarihi, setBaslik, setAciklama, setBaslangicTarihi, setBitisTarihi, setEtkinlikPenceresiniGoster, setDahaOncePencereSecilmediMi} = context;
+  const { etkinlikData, acilanEtkinlikPencereTarihi, setEtkinlikPenceresiniGoster, setDahaOncePencereSecilmediMi} = context;
 
   useEffect(() => {
     if (acilanEtkinlikPencereTarihi && ilkAcilisMi) {
@@ -28,24 +28,11 @@ export default function CreateEventButton() {
 
     if (gununEtkinlikleri.length > 0) {
       setDahaOncePencereSecilmediMi(false); /* update butonunun açılması için */
-      setBaslik(gununEtkinlikleri[0].baslik);
-      setAciklama(gununEtkinlikleri[0].aciklama);
-      setBaslangicTarihi(DayjsCevir(gununEtkinlikleri[0].baslangicTarihi));
-      setBitisTarihi(DayjsCevir(gununEtkinlikleri[0].bitisTarihi));
     } else {
-      setBaslik("");
-      setAciklama("");
-      setBaslangicTarihi(seciliGun);
       setDahaOncePencereSecilmediMi(true);
     }
-
     setEtkinlikPenceresiniGoster(true); 
   };
-
-  const DayjsCevir = (date: Date): dayjs.Dayjs => {
-    return date ? dayjs(date) : dayjs();
-  };
-
 
   return (
     <button onClick={() => etkinlikPenceresiniAc()} className="create-event-button">

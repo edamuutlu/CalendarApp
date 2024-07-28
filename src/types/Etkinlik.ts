@@ -1,4 +1,4 @@
-import { TekrarEnum } from "../stores/EventStore";
+import { TekrarEnum } from "../yonetimler/EtkinlikYonetimi";
 
 
 interface Etkinlik {

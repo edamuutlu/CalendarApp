@@ -8,10 +8,11 @@ import {
   Space,
   TimePicker,
   Form,
+  Select,
   message,
 } from "antd";
 import dayjs, { Dayjs } from "dayjs";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   MdAccessTime,
   MdDateRange,
@@ -24,15 +25,23 @@ import {
   etkinlikGuncelle,
   etkinlikSil,
   TekrarEnum,
-} from "../../stores/EventStore";
+} from "../../yonetimler/EtkinlikYonetimi";
 import Kullanici from "../../types/Kullanici";
-import { ContentContext } from "../../context/ContentProvider";
 import { MenuProps } from "antd/lib";
 import Etkinlik from "../../types/Etkinlik";
 import {
+  etkinligeDavetliKullanicilariGetir,
   etkinligeKullaniciEkle,
   EtkinligeKullaniciEkleRequest,
-} from "../../stores/UserStore";
+  EtkinliktenDavetliKullanicilariSilRequest,
+  etkinliktenKullaniciSil,
+} from "../../yonetimler/KullaniciYonetimi";
+import type { SelectProps } from "antd";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import isBetween from "dayjs/plugin/isBetween";
+
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isBetween);
 
 const { RangePicker } = DatePicker;
 const dateFormat = "YYYY/MM/DD";
@@ -50,9 +59,29 @@ const TekrarEnumToString = {
   [TekrarEnum.herYil]: "Her yıl",
 };
 
-export default function ModalForm() {
-  const context = useContext(ContentContext);
+interface EtkinlikPenceresiProps {
+  seciliGun: Dayjs;
+  etkinlikPenceresiniGoster: boolean;
+  setEtkinlikPenceresiniGoster: React.Dispatch<React.SetStateAction<boolean>>;
+  etkinlikleriCek: () => Promise<Etkinlik[]>;
+  dahaOncePencereSecilmediMi: boolean;
+  etkinlikData: Etkinlik[];
+  acilanEtkinlikPencereTarihi: Dayjs;
+  setDahaOncePencereSecilmediMi: React.Dispatch<React.SetStateAction<boolean>>;
+  tumKullanicilar: Kullanici[];
+}
 
+const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
+  seciliGun,
+  etkinlikPenceresiniGoster,
+  setEtkinlikPenceresiniGoster,
+  etkinlikleriCek,
+  dahaOncePencereSecilmediMi,
+  etkinlikData,
+  acilanEtkinlikPencereTarihi,
+  setDahaOncePencereSecilmediMi,
+  tumKullanicilar,
+}) => {
   const [baslangicSaati, setBaslangicSaati] = useState<Dayjs>(dayjs());
   const [bitisSaati, setBitisSaati] = useState<Dayjs>(dayjs());
   const [tekrarTipi, setTekrarTipi] = useState<TekrarEnum | undefined>(
@@ -61,13 +90,19 @@ export default function ModalForm() {
   const [form] = Form.useForm();
   const [ilkAcilisMi, setIlkAcilisMi] = useState(false);
   const [kullanicilar, setKullanicilar] = useState<Kullanici[]>([]);
-  const [davetliKullanici, setDavetliKullanici] = useState<Kullanici>();
+  const [secilenKullanicilar, setSecilenKullanicilar] = useState<Kullanici[]>(
+    []
+  );
+  const [secilenKullaniciIsimleri, setSecilenKullaniciIsimleri] = useState<
+    string[]
+  >([]);
 
   const [baslik, setBaslik] = useState("");
   const [baslangicTarihi, setBaslangicTarihi] = useState<Dayjs>(dayjs());
   const [bitisTarihi, setBitisTarihi] = useState<Dayjs>(dayjs());
   const [aciklama, setAciklama] = useState("");
 
+  // Tekrar Durumu Ayarları Başlangıç
   const items: MenuItem[] = [
     {
       label: "Tekrarlama",
@@ -78,15 +113,15 @@ export default function ModalForm() {
       key: TekrarEnum.herGun,
     },
     {
-      label: `Her Hafta ${dayjs().format("dddd")}`,
+      label: `Her Hafta`,
       key: TekrarEnum.herHafta,
     },
     {
-      label: `Her Ay ${dayjs().format("Do")}`,
+      label: `Her Ay`,
       key: TekrarEnum.herAy,
     },
     {
-      label: `Her Yıl ${dayjs().format("MMM DD")}`,
+      label: `Her Yıl`,
       key: TekrarEnum.herYil,
     },
   ];
@@ -106,57 +141,84 @@ export default function ModalForm() {
     onClick: handleMenuClick,
   };
 
-  const handleGuestMenuClick = (e: { key: string }) => {
-    const selectedUser = kullanicilar.find((user) => user.id === e.key);
-    if (selectedUser) {
-      message.info(`Selected: ${selectedUser.isim}`);
-      setDavetliKullanici(selectedUser);
-    }
+  // Tekrar Durumu Ayarları Bitiş
+
+  // Davenli Kullanıcı Durumu Ayarları Başlangıç
+  const options: SelectProps["options"] = [];
+
+  kullanicilar.map((kullanici) => {
+    options.push({
+      label: kullanici.isim,
+      value: kullanici.isim,
+    });
+  });
+
+  const handleChange = (value: string[]) => {
+    const selectedUsers = value
+      .map((user) => kullanicilar.find((item) => item.isim === user))
+      .filter((user): user is Kullanici => user !== undefined);
+    setSecilenKullanicilar(selectedUsers);
+    const secilenKullaniciIsimleri = selectedUsers.map((user) => user.isim);
+    setSecilenKullaniciIsimleri(secilenKullaniciIsimleri);
   };
+  // Davenli Kullanıcı Durumu Ayarları Bitiş
 
-  const guestMenuProps = {
-    items: kullanicilar.map((user) => ({ key: user.id, label: user.isim })),
-    onClick: handleGuestMenuClick,
+  const gununEtkinlikleri = (): Etkinlik[] => {
+    return etkinlikData.filter((event) => {
+      const startDate = dayjs(event.baslangicTarihi);
+      const endDate = dayjs(event.bitisTarihi);
+      const currentDate = dayjs(acilanEtkinlikPencereTarihi);
+  
+      return currentDate.isSame(startDate, "day") ||
+             currentDate.isSame(endDate, "day") ||
+             currentDate.isBetween(startDate, endDate, "day", "[]");
+    });
   };
-
-  if (!context) {
-    throw new Error("CalendarContext must be used within a ContentProvider");
-  }
-
-  const {
-    seciliGun,
-    etkinlikPenceresiniGoster,
-    setEtkinlikPenceresiniGoster,
-    etkinlikleriCek,
-    dahaOncePencereSecilmediMi,
-    etkinlikData,
-    acilanEtkinlikPencereTarihi,
-    setDahaOncePencereSecilmediMi,
-    tumKullanicilar,
-  } = context;
-
-  const etkinlikPenceresiniAc = () => {
-    const gununEtkinlikleri = etkinlikData.filter((event) =>
-      dayjs(event.baslangicTarihi).isSame(acilanEtkinlikPencereTarihi, "day")
-    );
-
-    if (gununEtkinlikleri.length > 0) {
-      setBaslik(gununEtkinlikleri[0].baslik);
-      setBaslangicTarihi(dayjs(gununEtkinlikleri[0].baslangicTarihi));
-      setBitisTarihi(dayjs(gununEtkinlikleri[0].bitisTarihi));
-      setBaslangicSaati(dayjs(gununEtkinlikleri[0].baslangicTarihi));
-      setBitisSaati(dayjs(gununEtkinlikleri[0].bitisTarihi));
-      setAciklama(gununEtkinlikleri[0].aciklama);
-      setTekrarTipi(gununEtkinlikleri[0].tekrarDurumu);
-      //setDavetliKullanici()
-      console.log("deneme", gununEtkinlikleri);
-      setDahaOncePencereSecilmediMi(false); /* update butonunun açılması için */
+  
+  const etkinlikPenceresiniAc = async () => {
+    const etkinlikler = gununEtkinlikleri();
+    
+    if (etkinlikler.length > 0) {
+      for (const etkinlik of etkinlikler) {
+  
+        const startDate = dayjs(etkinlik.baslangicTarihi);
+        const endDate = dayjs(etkinlik.bitisTarihi);
+  
+        // Tarih karşılaştırma işlemi
+        const isInBetween = acilanEtkinlikPencereTarihi.isSame(startDate, 'day') ||
+          acilanEtkinlikPencereTarihi.isSame(endDate, 'day') ||
+          (acilanEtkinlikPencereTarihi.isAfter(startDate, 'day') && acilanEtkinlikPencereTarihi.isBefore(endDate, 'day'));
+  
+        if (isInBetween) {
+          const davetliKullanicilar: Kullanici[] =
+            await etkinligeDavetliKullanicilariGetir(Number(etkinlik.id));
+          const secilenKullaniciIsimleri = davetliKullanicilar.map(
+            (user) => user.isim
+          );
+          setSecilenKullaniciIsimleri(secilenKullaniciIsimleri);
+          console.log("davetliKullanicilar", davetliKullanicilar);
+          setBaslik(etkinlik.baslik);
+          setBaslangicTarihi(dayjs(etkinlik.baslangicTarihi));
+          setBitisTarihi(dayjs(etkinlik.bitisTarihi));
+          setBaslangicSaati(dayjs(etkinlik.baslangicTarihi));
+          setBitisSaati(dayjs(etkinlik.bitisTarihi));
+          setAciklama(etkinlik.aciklama);
+          setTekrarTipi(etkinlik.tekrarDurumu);
+          setDahaOncePencereSecilmediMi(
+            false
+          ); /* update butonunun açılması için */
+        } else {
+          setBaslangicTarihi(dayjs(seciliGun));
+          setDahaOncePencereSecilmediMi(true);
+        }
+      }
     } else {
+      setBaslangicTarihi(dayjs(seciliGun));
       setDahaOncePencereSecilmediMi(true);
     }
     setEtkinlikPenceresiniGoster(true);
   };
-
+  
   useEffect(() => {
     setKullanicilar(tumKullanicilar);
     if (acilanEtkinlikPencereTarihi && ilkAcilisMi) {
@@ -196,19 +258,17 @@ export default function ModalForm() {
     try {
       await etkinlikEkle(event);
       const data: Etkinlik[] = await etkinlikleriCek();
-      const dayEvents = data.filter((event: Etkinlik) =>
-        dayjs(event.baslangicTarihi).isSame(seciliGun, "day")
-      );
-      console.log("dayEvents", dayEvents);
+      const etkinlikler = gununEtkinlikleri();
 
       // İd'yi number'a çevirme veya uygun tipi kullanma
-      const etkinlikId = Number(dayEvents[0].id);
+      const etkinlikId = Number(etkinlikler[0].id);
 
       // davetliKullanici'nın null olmadığından emin olma
-      if (davetliKullanici) {
+      if (secilenKullanicilar) {
+        const selectedUserIds = secilenKullanicilar.map((user) => user.id);
         const request: EtkinligeKullaniciEkleRequest = {
           etkinlikId: etkinlikId,
-          kullaniciIds: [davetliKullanici.id as string], // `davetliKullanici`'yı `string` olarak belirtme
+          kullaniciIds: selectedUserIds,
         };
 
         await etkinligeKullaniciEkle(request);
@@ -221,17 +281,10 @@ export default function ModalForm() {
 
     // Etkinlik penceresini kapat ve formu sıfırla
     etkinlikPencereKapat();
-    setBaslik("");
-    setAciklama("");
-    etkinlikPencereKapat();
-
-    form.resetFields();
   };
 
   const etkinlikGuncelleyeBas = async () => {
-    const dayEvents = etkinlikData.filter((event) =>
-      dayjs(event.baslangicTarihi).isSame(seciliGun, "day")
-    );
+    const etkinlikler = gununEtkinlikleri();
     const startDateFormat = DayjsToDate(baslangicTarihi);
     const endDateFormat = DayjsToDate(bitisTarihi);
     const startTimeFormat = DayjsToDate(baslangicSaati);
@@ -250,7 +303,7 @@ export default function ModalForm() {
     );
 
     const event: Etkinlik = {
-      id: dayEvents[0].id,
+      id: etkinlikler[0].id,
       date: seciliGun.toDate(),
       baslik: baslik,
       aciklama: aciklama,
@@ -259,62 +312,68 @@ export default function ModalForm() {
       tekrarDurumu: tekrarTipi ?? TekrarEnum.hic,
     };
     try {
-      await etkinlikGuncelle(event);
-      await etkinlikleriCek();
+      const data: Etkinlik[] = await etkinlikleriCek();
+      const etkinlikler = gununEtkinlikleri();
+
+      // İd'yi number'a çevirme veya uygun tipi kullanma
+      const etkinlikId = Number(etkinlikler[0].id);
+
+      // davetliKullanici'nın null olmadığından emin olma
+      if (secilenKullanicilar) {
+        const selectedUserIds = secilenKullanicilar.map((user) => user.id);
+        const request: EtkinliktenDavetliKullanicilariSilRequest = {
+          etkinlikId: etkinlikId,
+          kullaniciIds: selectedUserIds, // `davetliKullanici`'yı `string` olarak belirtme
+        };
+        await etkinliktenKullaniciSil(request);
+        await etkinlikGuncelle(event);
+        await etkinligeKullaniciEkle(request);
+        await etkinlikleriCek();
+      } else {
+        console.error("Davetli kullanıcı null veya undefined.");
+      }
     } catch (error) {
-      console.error("Etkinlik güncellenirken hata oluştu:", error);
+      console.error("Etkinlik eklenirken hata oluştu:", error);
     }
 
     etkinlikPencereKapat();
-    setBaslik("");
-    setAciklama("");
-    etkinlikPencereKapat();
-
-    form.resetFields();
   };
 
   const etkinlikSileBas = async () => {
-    const dayEvents = etkinlikData.filter((event) =>
-      dayjs(event.baslangicTarihi).isSame(seciliGun, "day")
-    );
-
     try {
-      await etkinlikSil(Number(dayEvents[0].id));
-      await etkinlikleriCek();
+      const data: Etkinlik[] = await etkinlikleriCek();
+      const etkinlikler = gununEtkinlikleri();
+      // İd'yi number'a çevirme veya uygun tipi kullanma
+      const etkinlikId = Number(etkinlikler[0].id);
+
+      // davetliKullanici'nın null olmadığından emin olma
+      if (secilenKullanicilar) {
+        const selectedUserIds = secilenKullanicilar.map((user) => user.id);
+        const request: EtkinliktenDavetliKullanicilariSilRequest = {
+          etkinlikId: etkinlikId,
+          kullaniciIds: selectedUserIds, // `davetliKullanici`'yı `string` olarak belirtme
+        };
+        await etkinliktenKullaniciSil(request);
+        await etkinlikSil(Number(etkinlikler[0].id));
+        await etkinlikleriCek();
+      } else {
+        console.error("Davetli kullanıcı null veya undefined.");
+      }
     } catch (error) {
-      console.error("Etkinlik silinirken hata oluştu:", error);
+      console.error("Etkinlik eklenirken hata oluştu:", error);
     }
 
     etkinlikPencereKapat();
-    setBaslik("");
-    setAciklama("");
-    etkinlikPencereKapat();
-
-    form.resetFields();
   };
 
   const tarihleriAl = (baslangıcTarihi: any, bitisTarihi: any) => {
     setBaslangicTarihi(baslangıcTarihi);
     setBitisTarihi(bitisTarihi);
-    const baslangicTarihDate = DayjsToDate(baslangıcTarihi);
-    const bitisTarihDate = DayjsToDate(bitisTarihi);
-
-    return {
-      baslangicTarihDate,
-      bitisTarihDate,
-    };
   };
 
   const saatleriAl = (baslangıcSaati: any, bitisSaati: any) => {
     setBaslangicSaati(baslangıcSaati);
     setBitisSaati(bitisSaati);
-    const baslangicSaatiDate = DayjsToDate(baslangıcSaati);
-    const bitisSaatiDate = DayjsToDate(bitisSaati);
-
-    return {
-      baslangicSaatiDate,
-      bitisSaatiDate,
-    };
   };
 
   const DayjsToDate = (dayjsObject: Dayjs): Date => {
@@ -326,6 +385,8 @@ export default function ModalForm() {
     setAciklama("");
     setBaslangicTarihi(dayjs());
     setBitisTarihi(dayjs());
+    setSecilenKullaniciIsimleri([]);
+    setTekrarTipi(0);
     setEtkinlikPenceresiniGoster(false);
   };
 
@@ -364,12 +425,7 @@ export default function ModalForm() {
           dahaOncePencereSecilmediMi ? etkinlikEkleyeBas : etkinlikGuncelleyeBas
         }
       >
-        <Form.Item
-          name="title"
-          rules={[
-            { required: true, message: "Lütfen etkinlik başlığını giriniz!" },
-          ]}
-        >
+        <Form.Item name="title">
           <div className="event-input">
             <MdOutlineModeEditOutline className="event-icon" />
             <Input
@@ -388,7 +444,7 @@ export default function ModalForm() {
           name="dateRange"
           initialValue={
             dahaOncePencereSecilmediMi
-              ? [seciliGun, dayjs()]
+              ? [seciliGun, seciliGun]
               : [baslangicTarihi, bitisTarihi]
           }
           rules={[
@@ -405,11 +461,17 @@ export default function ModalForm() {
                   ? dayjs(seciliGun, dateFormat)
                   : dayjs(baslangicTarihi, dateFormat)
               }
-              value={
-                dahaOncePencereSecilmediMi
-                  ? [seciliGun, dayjs()]
-                  : [baslangicTarihi, bitisTarihi]
+              maxDate={
+                tekrarTipi === 2
+                  ? dayjs(seciliGun).add(6, "day")
+                  : tekrarTipi === 3
+                  ? dayjs(seciliGun).add(29, "day")
+                  : tekrarTipi === 4
+                  ? dayjs(seciliGun).add(364, "day")
+                  : dayjs(baslangicTarihi, dateFormat)
               }
+              value={[baslangicTarihi, bitisTarihi]}
+              disabled={tekrarTipi === 1}
               className="range-picker"
               style={{
                 borderStartStartRadius: "0",
@@ -419,27 +481,14 @@ export default function ModalForm() {
           </div>
         </Form.Item>
 
-        <Form.Item
-          name="timeRange"
-          initialValue={
-            dahaOncePencereSecilmediMi
-              ? [dayjs(), dayjs()]
-              : [baslangicSaati, bitisSaati]
-          }
-          rules={[
-            { required: true, message: "Lütfen saat aralığını giriniz!" },
-          ]}
-        >
+        <Form.Item name="timeRange" initialValue={[baslangicSaati, bitisSaati]}>
           <div className="event-input">
             <MdAccessTime className="event-icon" />
             <TimePicker.RangePicker
               needConfirm={false}
+              format={"HH:mm"}
               onChange={(values) => saatleriAl(values?.[0], values?.[1])}
-              value={
-                dahaOncePencereSecilmediMi
-                  ? [dayjs(), dayjs()]
-                  : [baslangicSaati, bitisSaati]
-              }
+              value={[baslangicSaati, bitisSaati]}
               className="range-picker"
               style={{
                 borderStartStartRadius: "0",
@@ -449,15 +498,7 @@ export default function ModalForm() {
           </div>
         </Form.Item>
 
-        <Form.Item
-          name="text"
-          rules={[
-            {
-              required: true,
-              message: "Lütfen etkinlik açıklamasını giriniz!",
-            },
-          ]}
-        >
+        <Form.Item name="text">
           <div className="event-input">
             <MdNotes className="desc-icon" />
             <Input.TextArea
@@ -474,16 +515,16 @@ export default function ModalForm() {
 
         <div className="event-input">
           <UserOutlined className="event-icon" />
-          <Dropdown menu={guestMenuProps} className="dropdown">
-            <Button>
-              <Space>
-                {davetliKullanici?.isim
-                  ? davetliKullanici?.isim
-                  : "Kullanıcı Davet Et"}
-                <DownOutlined />
-              </Space>
-            </Button>
-          </Dropdown>
+          <Space style={{ width: "100%" }} direction="vertical">
+            <Select
+              mode="multiple"
+              style={{ width: "100%" }}
+              placeholder="Please select"
+              value={secilenKullaniciIsimleri}
+              onChange={handleChange}
+              options={options}
+            />
+          </Space>
         </div>
 
         <div className="event-input">
@@ -491,9 +532,7 @@ export default function ModalForm() {
           <Dropdown menu={menuProps} className="dropdown">
             <Button>
               <Space>
-                {tekrarTipi
-                  ? TekrarEnumToString[tekrarTipi ?? TekrarEnum.hic]
-                  : TekrarEnumToString[tekrarTipi ?? TekrarEnum.hic]}
+                {TekrarEnumToString[tekrarTipi ?? TekrarEnum.hic]}
                 <DownOutlined />
               </Space>
             </Button>
@@ -502,4 +541,6 @@ export default function ModalForm() {
       </Form>
     </Modal>
   );
-}
+};
+
+export default EtkinlikPenceresi;

@@ -1,46 +1,50 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu, MenuProps } from "antd";
-import CreateEventButton from "../CreateEventButton/CreateEventButton";
-import "./Sidebar.css";
+import "../../assets/css/YanMenu.css";
 import { AppstoreOutlined } from "@ant-design/icons";
 import Etkinlik from "../../types/Etkinlik";
-import { tumEtkinlikleriGetir } from "../../stores/CalendarStore";
-import { tumKullanicilariGetir } from "../../stores/UserStore";
+import { tumEtkinlikleriGetir } from "../../yonetimler/TakvimYonetimi";
+import { tumKullanicilariGetir } from "../../yonetimler/KullaniciYonetimi";
 import Kullanici from "../../types/Kullanici";
-import { ContentContext } from "../../context/ContentProvider";
+import EtkinlikOlusturButonu from "./EtkinlikOlusturButonu";
+import { Dayjs } from "dayjs";
 
-type MenuItem = Required<MenuProps>['items'][number];
+type MenuItem = Required<MenuProps>["items"][number];
 
 const initialItems: MenuItem[] = [
   {
-    key: 'sub2',
-    label: 'Etkinliklerim',
+    key: "sub2",
+    label: "Etkinliklerim",
     icon: <AppstoreOutlined />,
     children: [], // Etkinlikler burada listelenecek
   },
   {
-    type: 'divider',
+    type: "divider",
   },
   {
-    key: 'grp',
-    label: 'Tüm Kullanıcılar',
-    type: 'group',
+    key: "grp",
+    label: "Tüm Kullanıcılar",
+    type: "group",
     children: [], // Kullanıcılar burada listelenecek
   },
 ];
 
-export default function Sidebar() {
+interface YanMenuProps {
+  etkinlikData: Etkinlik[],
+  acilanEtkinlikPencereTarihi: Dayjs;
+  setEtkinlikPenceresiniGoster: React.Dispatch<React.SetStateAction<boolean>>;
+  setDahaOncePencereSecilmediMi: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const YanMenu: React.FC<YanMenuProps> = ({
+  etkinlikData,
+  acilanEtkinlikPencereTarihi,
+  setEtkinlikPenceresiniGoster,
+  setDahaOncePencereSecilmediMi,
+}) => {
   const [etkinlikler, setEtkinlikler] = useState<Etkinlik[]>([]);
   const [kullanicilar, setKullanicilar] = useState<Kullanici[]>([]);
   const [items, setItems] = useState<MenuItem[]>(initialItems);
-
-  const context = useContext(ContentContext);
-
-  if (!context) {
-    throw new Error("CalendarContext must be used within a ContentProvider");
-  }
-
-  const { etkinlikPenceresiniGoster } = context;
 
   useEffect(() => {
     const etkinlikleriCek = async () => {
@@ -65,13 +69,13 @@ export default function Sidebar() {
 
     etkinlikleriCek();
     kullanicilariCek();
-  }, [etkinlikPenceresiniGoster]);
+  }, [etkinlikler]);
 
   const setMyEventsMenuItems = (events: Etkinlik[]) => {
     setItems((prevItems) => {
       const newItems = [...prevItems];
-      const myEventsItem = newItems.find(item => item?.key === 'sub2');
-      if (myEventsItem && 'children' in myEventsItem) {
+      const myEventsItem = newItems.find((item) => item?.key === "sub2");
+      if (myEventsItem && "children" in myEventsItem) {
         myEventsItem.children = events.map((event) => {
           const key = event.id ? event.id.toString() : "";
           return {
@@ -87,8 +91,8 @@ export default function Sidebar() {
   const setUsersMenuItems = (users: Kullanici[]) => {
     setItems((prevItems) => {
       const newItems = [...prevItems];
-      const usersItem = newItems.find(item => item?.key === 'grp');
-      if (usersItem && 'children' in usersItem) {
+      const usersItem = newItems.find((item) => item?.key === "grp");
+      if (usersItem && "children" in usersItem) {
         usersItem.children = users.map((user) => {
           const key = user.id ? user.id.toString() : "";
           return {
@@ -103,7 +107,12 @@ export default function Sidebar() {
 
   return (
     <aside className="sidebar">
-      <CreateEventButton />
+      <EtkinlikOlusturButonu
+        etkinlikData={etkinlikData}
+        acilanEtkinlikPencereTarihi={acilanEtkinlikPencereTarihi}
+        setEtkinlikPenceresiniGoster={setEtkinlikPenceresiniGoster}
+        setDahaOncePencereSecilmediMi={setDahaOncePencereSecilmediMi}
+      />
       <Menu
         style={{ width: 256 }}
         defaultSelectedKeys={["1"]}
@@ -113,4 +122,6 @@ export default function Sidebar() {
       />
     </aside>
   );
-}
+};
+
+export default YanMenu;

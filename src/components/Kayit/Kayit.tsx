@@ -1,10 +1,10 @@
 import { Card, Form, Input, Button, message } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import "./Register.css";
-import { handleRegister } from "../../stores/AuthStore";
+import "../../assets/css/KayitOl.css";
+import { kayitOl } from "../../yonetimler/KimlikYonetimi";
 
-const Register = () => {
+const Kayit = () => {
   const [kullaniciAdi, setKullaniciAdi] = useState<string>("");
   const [isim, setIsim] = useState<string>("");
   const [soyisim, setSoyisim] = useState<string>("");
@@ -26,7 +26,7 @@ const Register = () => {
       KullaniciSifresiTekrar: sifreTekrar
     };
 
-    await handleRegister(newUserData);
+    await kayitOl(newUserData);
 
     // Redirect to login page
     navigate("/");
@@ -103,4 +103,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Kayit;

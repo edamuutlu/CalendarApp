@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, Form, Input, Button } from "antd";
-import "./Login.css";
-import { handleLogin } from "../../stores/AuthStore";
+import "../../assets/css/Giris.css";
+import { girisYap } from "../../yonetimler/KimlikYonetimi";
 
-const Login = () => {
+const Giris = () => {
   const [kullaniciAdi, setKullaniciAdi] = useState<string>("");
   const [sifre, setSifre] = useState<string>("");
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
-    const token = await handleLogin(kullaniciAdi, sifre);
+    const token = await girisYap(kullaniciAdi, sifre);
     if(token){
-      navigate(`/home`);
+      navigate(`/anasayfa`);
     }else{
       alert("Kullanıcı adı veya şifre hatalı.")
     } 
@@ -54,7 +54,7 @@ const Login = () => {
             <Button
               block
               type="default"
-              onClick={() => navigate("/register")}
+              onClick={() => navigate("/kayit")}
               htmlType="button"
             >
               Kayıt Ol
@@ -66,4 +66,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Giris;

@@ -24,8 +24,8 @@ export const etkinlikEkle = async (event: Etkinlik) => {
       );
       message.success("Etkinlik başarıyla eklendi.");
     } catch (error) {
-      message.error("Aynı tarih ve saat aralığında etkinlik eklenemez.");
-      console.log("error", error);
+      /* message.error("Aynı tarih ve saat aralığında etkinlik eklenemez.");
+      console.log("error", error); */
     }
   };
 
@@ -43,8 +43,8 @@ export const etkinlikGuncelle = async (event: Etkinlik) => {
       );
       message.success("Etkinlik başarıyla güncellendi.");
     } catch (error) {
-      message.error("Güncelleme işlemi sırasında bir hata oluştu:");
-      console.error("Güncelleme sırasında bir hata oluştu:", error);
+      /* message.error("Güncelleme işlemi sırasında bir hata oluştu:");
+      console.error("Güncelleme sırasında bir hata oluştu:", error); */
     }
   };
 
@@ -60,8 +60,8 @@ export const etkinlikSil = async (eventId: number) => {
       );
       message.success("Etkinlik başarıyla silindi.");
     } catch (error) {
-      message.error("Silme işlemi sırasında bir hata oluştu:");
-      console.error("Silme işlemi sırasında bir hata oluştu:", error);
+     /*  message.error("Silme işlemi sırasında bir hata oluştu:");
+      console.error("Silme işlemi sırasında bir hata oluştu:", error); */
     }
   };
 

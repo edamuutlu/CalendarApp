@@ -1,23 +1,25 @@
+.etkinlik-listesi{
+  padding: 0;
+  font-size: 12px;
+}
 .cell-style {
   list-style: none;
-  padding: 2px 5px;
+  padding: 3px 10px;
+  font-weight: 500;
   background: #cce7ff;
-  border-radius: 12px;
-  margin-bottom: 4px;
-  margin-top: 4px;
+  border-radius: 16px;
+  margin-bottom: 2px;
   cursor: pointer;
-  padding: 5px;
 }
 
 .guest-cell-style {
   list-style: none;
-  padding: 2px 5px;
+  padding: 3px 10px;
+  font-weight: 500;
   background: #a692ff;
-  border-radius: 12px;
-  margin-bottom: 4px;
-  margin-top: 4px;
+  border-radius: 16px;
+  margin-bottom: 2px;
   cursor: pointer;
-  padding: 5px;
 }
 
 .modal {
@@ -64,3 +66,4 @@
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
+

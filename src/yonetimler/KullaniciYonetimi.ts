@@ -1,6 +1,7 @@
 import axios from "axios";
 import { message } from "antd";
 import Etkinlik from "../types/Etkinlik";
+import Kullanici from "../types/Kullanici";
 
 const apiUrletkinligeKullaniciEkle =
   "http://localhost:5011/api/Etkinlik/EtkinligeKullaniciEkle";
@@ -23,7 +24,7 @@ export interface EtkinligeKullaniciEkleRequest {
   kullaniciIds: string[];
 }
 
-interface EtkinliktenDavetliKullanicilariSilRequest {
+export interface EtkinliktenDavetliKullanicilariSilRequest {
   etkinlikId: number;
   kullaniciIds: string[];
 }
@@ -49,7 +50,7 @@ export const etkinligeKullaniciEkle = async (
     } else {
     }
   } catch (error) {
-    console.error("Kullanıcı ekleme işlemi sırasında bir hata oluştu:", error);
+    /* console.error("Kullanıcı ekleme işlemi sırasında bir hata oluştu:", error); */
   }
 };
 
@@ -72,7 +73,7 @@ export const etkinliktenKullaniciSil = async (
 
     message.success("Kullanıcı silme işlemi başarıyla tamamlandı.");
   } catch (error) {
-    console.error("Kullanıcı silme işlemi sırasında bir hata oluştu:", error);
+    /* console.error("Kullanıcı silme işlemi sırasında bir hata oluştu:", error); */
   }
 };
 
@@ -90,7 +91,7 @@ export const eklendigimEtkinlikleriGetir = async () => {
   }
 };
 
-export const etkinligeDavetliKullanicilariGetir = async (id: Number) => {
+export const etkinligeDavetliKullanicilariGetir = async (id: Number): Promise<Kullanici[]> => {
   try {
     const response = await axios.get(
       `http://localhost:5011/api/Etkinlik/EtkinligeDavetliKullanicilariGetir?etkinlikId=${id}`,
@@ -133,9 +134,9 @@ export const MevcutKullaniciGetir = async () => {
     });
     return response.data;
   } catch (error) {
-    throw new Error(
+    /* throw new Error(
       "Etkinlikleri alma işlemi sırasında bir hata oluştu: " + error
-    );
+    ); */
   }
 };
 

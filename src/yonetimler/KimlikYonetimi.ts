@@ -8,7 +8,7 @@ export interface User {
   KullaniciSifresiTekrar: string;
 }
 
-export const handleLogin = async (username: string, password: string) => {
+export const girisYap = async (username: string, password: string) => {
 
   try {
     const response = await axios.post(
@@ -24,7 +24,7 @@ export const handleLogin = async (username: string, password: string) => {
   }
 };
 
-export const handleRegister  = async (FormData: User) => {
+export const kayitOl  = async (FormData: User) => {
   try {
     const response = await axios.post(
       "http://localhost:5011/api/OturumYonetimi/KayitOl",

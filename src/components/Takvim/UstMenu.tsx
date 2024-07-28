@@ -1,22 +1,19 @@
 import React, { useContext } from "react";
-import logo from "../../assets/logo.jpg";
-import "./CalendarHeader.css";
+import logo from "../../assets/images/logo.jpg";
+import "../../assets/css/UstMenu.css";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
-import { ContentContext } from "../../context/ContentProvider";
 import { Button } from "antd";
 import "dayjs/locale/tr"; // Import the Turkish locale
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 
 dayjs.locale("tr"); // Set the global locale to Turkish
 
-const CalendarHeader: React.FC = () => {
-  const context = useContext(ContentContext);
+interface UstMenuProps {
+  seciliGun: Dayjs;
+  setSeciliGun: React.Dispatch<React.SetStateAction<Dayjs>>;
+}
 
-  if (!context) {
-    throw new Error("CalendarContext must be used within a ContentProvider");
-  }
-
-  const { seciliGun, setSeciliGun } = context;
+const UstMenu: React.FC<UstMenuProps> = ({seciliGun, setSeciliGun}) => {
 
   const bugunuGetir = () => {
     const now = dayjs();
@@ -57,7 +54,7 @@ const CalendarHeader: React.FC = () => {
         <Button href="/" className="calendar-button">
           Giriş Yap
         </Button>
-        <Button href="/register" className="calendar-button">
+        <Button href="/kayit" className="calendar-button">
           Kayıt Ol
         </Button>
       </div>
@@ -65,4 +62,4 @@ const CalendarHeader: React.FC = () => {
   );
 };
 
-export default CalendarHeader;
+export default UstMenu;

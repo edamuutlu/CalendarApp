@@ -8,8 +8,8 @@ import {
 } from "../../yonetimler/KullaniciYonetimi";
 import UstMenu from "./UstMenu";
 import YanMenu from "./YanMenu";
-import Etkinlik from "../../types/Etkinlik";
-import Kullanici from "../../types/Kullanici";
+import Etkinlik from "../../tipler/Etkinlik";
+import Kullanici from "../../tipler/Kullanici";
 import { tumEtkinlikleriGetir } from "../../yonetimler/TakvimYonetimi";
 import EtkinlikPenceresi from "./EtkinlikPenceresi";
 import isBetween from "dayjs/plugin/isBetween";

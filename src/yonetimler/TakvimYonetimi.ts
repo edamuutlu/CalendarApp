@@ -1,6 +1,6 @@
 import axios from "axios";
 import dayjs from "dayjs";
-import Etkinlik from "../types/Etkinlik";
+import Etkinlik from "../tipler/Etkinlik";
 
 export const aylikEtkinlikleriGetir = async (seciliGun: dayjs.Dayjs) => {
   const response = await axios.get(

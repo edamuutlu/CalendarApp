@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Etkinlik from "../../types/Etkinlik";
+import Etkinlik from "../../tipler/Etkinlik";
 import {
   Input,
   Modal,
@@ -17,7 +17,7 @@ import {
   MdOutlineModeEditOutline,
 } from "react-icons/md";
 import { UserOutlined } from "@ant-design/icons";
-import Kullanici from "../../types/Kullanici";
+import Kullanici from "../../tipler/Kullanici";
 import { etkinligeDavetliKullanicilariGetir } from "../../yonetimler/KullaniciYonetimi";
 import dayjs from "dayjs";
 

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { message } from "antd";
-import Etkinlik from "../types/Etkinlik";
-import Kullanici from "../types/Kullanici";
+import Etkinlik from "../tipler/Etkinlik";
+import Kullanici from "../tipler/Kullanici";
 
 const apiUrletkinligeKullaniciEkle =
   "http://localhost:5011/api/Etkinlik/EtkinligeKullaniciEkle";

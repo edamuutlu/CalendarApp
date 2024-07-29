@@ -26,9 +26,9 @@ import {
   etkinlikSil,
   TekrarEnum,
 } from "../../yonetimler/EtkinlikYonetimi";
-import Kullanici from "../../types/Kullanici";
+import Kullanici from "../../tipler/Kullanici";
 import { MenuProps } from "antd/lib";
-import Etkinlik from "../../types/Etkinlik";
+import Etkinlik from "../../tipler/Etkinlik";
 import {
   etkinligeDavetliKullanicilariGetir,
   etkinligeKullaniciEkle,
@@ -39,6 +39,7 @@ import {
 import type { SelectProps } from "antd";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import isBetween from "dayjs/plugin/isBetween";
+import "../../assets/css/Takvim.css";
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isBetween);
@@ -440,6 +441,18 @@ const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
           </div>
         </Form.Item>
 
+        <div className="event-input">
+          <MdEventRepeat className="event-icon" />
+          <Dropdown menu={menuProps} className="dropdown">
+            <Button>
+              <Space>
+                {TekrarEnumToString[tekrarTipi ?? TekrarEnum.hic]}
+                <DownOutlined />
+              </Space>
+            </Button>
+          </Dropdown>
+        </div>
+
         <Form.Item
           name="dateRange"
           initialValue={
@@ -527,17 +540,6 @@ const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
           </Space>
         </div>
 
-        <div className="event-input">
-          <MdEventRepeat className="event-icon" />
-          <Dropdown menu={menuProps} className="dropdown">
-            <Button>
-              <Space>
-                {TekrarEnumToString[tekrarTipi ?? TekrarEnum.hic]}
-                <DownOutlined />
-              </Space>
-            </Button>
-          </Dropdown>
-        </div>
       </Form>
     </Modal>
   );

@@ -1,6 +1,6 @@
 import { message } from "antd";
 import axios from "axios";
-import Etkinlik from "../types/Etkinlik";
+import Etkinlik from "../tipler/Etkinlik";
 
 export enum TekrarEnum {
   hic = 0,

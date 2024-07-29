@@ -1,7 +1,7 @@
 import { useState } from "react";
 import plusImg from "../../assets/images/plus.svg";
 import "../../assets/css/EtkinlikOlusturButonu.css";
-import Etkinlik from "../../types/Etkinlik";
+import Etkinlik from "../../tipler/Etkinlik";
 import { Dayjs } from "dayjs";
 
 interface EtkinlikOlusturButonuProps {

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Menu, MenuProps } from "antd";
 import "../../assets/css/YanMenu.css";
-import { AppstoreOutlined } from "@ant-design/icons";
-import Etkinlik from "../../types/Etkinlik";
+import { AppstoreAddOutlined } from "@ant-design/icons";
+import Etkinlik from "../../tipler/Etkinlik";
 import { tumEtkinlikleriGetir } from "../../yonetimler/TakvimYonetimi";
 import { tumKullanicilariGetir } from "../../yonetimler/KullaniciYonetimi";
-import Kullanici from "../../types/Kullanici";
+import Kullanici from "../../tipler/Kullanici";
 import EtkinlikOlusturButonu from "./EtkinlikOlusturButonu";
 import { Dayjs } from "dayjs";
 
@@ -15,7 +15,7 @@ const initialItems: MenuItem[] = [
   {
     key: "sub2",
     label: "Etkinliklerim",
-    icon: <AppstoreOutlined />,
+    icon: <AppstoreAddOutlined />,
     children: [], // Etkinlikler burada listelenecek
   },
   {

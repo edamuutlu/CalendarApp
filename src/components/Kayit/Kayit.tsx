@@ -14,10 +14,10 @@ const Kayit = () => {
 
   const handleSubmit = async () => {
     if (sifre !== sifreTekrar) {
-      message.error("Passwords do not match");
+      message.error("Şifreler uyuşmuyor.");
       return;
     }
-
+  
     const newUserData = {
       KullaniciAdi: kullaniciAdi,
       Isim: isim,
@@ -25,11 +25,22 @@ const Kayit = () => {
       KullaniciSifresi: sifre,
       KullaniciSifresiTekrar: sifreTekrar
     };
-
-    await kayitOl(newUserData);
-
-    // Redirect to login page
-    navigate("/");
+  
+    try {
+      await kayitOl(newUserData);
+      message.success("Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.");
+  
+      // Redirect to login page
+      navigate("/");
+    } catch (error: any) {
+      if (error.response && error.response.data && error.response.data.message) {
+        // Server provided a detailed error message
+        message.error(`Hata: ${error.response.data.message}`);
+      } else {
+        // Generic error message
+        message.error("Kayıt sırasında bir hata oluştu. Lütfen daha sonra tekrar deneyin.");
+      }
+    }
   };
 
   return (

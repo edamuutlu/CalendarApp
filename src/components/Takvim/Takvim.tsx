@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Calendar, Typography } from "antd";
+import { Button, Calendar } from "antd";
 import "../../assets/css/Takvim.css";
 import dayjs, { Dayjs } from "dayjs";
 import {
@@ -35,7 +35,8 @@ const Takvim: React.FC = () => {
   const etkinlikleriAl = async (): Promise<Etkinlik[]> => {
     try {
       const kayitliEtkinlikler: Etkinlik[] = await tumEtkinlikleriGetir();
-      const eklendigimEtkinlikler: Etkinlik[] = await eklendigimEtkinlikleriGetir();
+      const eklendigimEtkinlikler: Etkinlik[] =
+        await eklendigimEtkinlikleriGetir();
       setEklendigimEtkinlikler(eklendigimEtkinlikler);
       setEtkinlikData(kayitliEtkinlikler);
       return kayitliEtkinlikler;
@@ -154,51 +155,37 @@ const Takvim: React.FC = () => {
     }
   };
 
-
-  const üstMenuRender = () => {
-    return (
-      <div>
-        <button onClick={oncekiAyaGec} className="calendar-button">
-          <LeftOutlined />
-        </button>
-        <button onClick={bugunuGetir} className="calendar-button">
-          Bugün
-        </button>
-        <button onClick={sonrakiAyaGec} className="calendar-button">
-          <RightOutlined />
-        </button>
-        <h2 className="calendar-month">{varsayilanGun.format("MMM YYYY")}</h2>
-      </div>
-    );
-  };
-
   return (
     <div>
-      <UstMenu varsayilanGun={varsayilanGun} setVarsayilanGun={setVarsayilanGun} />
+      <UstMenu/>
       <div className="hero">
         <YanMenu
           setEtkinlikPenceresiniGoster={setEtkinlikPenceresiniGoster}
           setDahaOncePencereSecildiMi={setDahaOncePencereSecildiMi}
         />
-         <div className="takvim-baslik">
-          <Button onClick={oncekiAyaGec} className="calendar-button">
-            <LeftOutlined />
-          </Button>
-          <Button onClick={bugunuGetir} className="calendar-button">
-            Bugün
-          </Button>
-          <Button onClick={sonrakiAyaGec} className="calendar-button">
-            <RightOutlined />
-          </Button>
-          <Typography.Title level={4} className="calendar-month">
-            {varsayilanGun.format("MMM YYYY")}
-          </Typography.Title>
+        <div className="main">
+          <div className="takvim-baslik-container">
+            <div className="takvim-baslik">
+              <Button onClick={oncekiAyaGec} className="calendar-button">
+                <LeftOutlined />
+              </Button>
+              <Button onClick={bugunuGetir} className="calendar-button">
+                Bugün
+              </Button>
+              <Button onClick={sonrakiAyaGec} className="calendar-button">
+                <RightOutlined />
+              </Button>
+              <h2 className="calendar-month">
+                {varsayilanGun.format("MMM YYYY")}
+              </h2>
+            </div>
+          </div>
+          <Calendar
+            onSelect={tarihSec}
+            cellRender={(date, info) => renderDateCell(date, info)}
+            value={varsayilanGun}
+          />
         </div>
-        <Calendar
-          onSelect={tarihSec}
-          cellRender={(date, info) => renderDateCell(date, info)}
-          value={varsayilanGun}
-        />
         <EtkinlikPenceresi
           varsayilanGun={varsayilanGun}
           etkinlikPenceresiniGoster={etkinlikPenceresiniGoster}

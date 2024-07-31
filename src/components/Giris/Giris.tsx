@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, Form, Input, Button } from "antd";
+import { Card, Form, Input, Button, message } from "antd";
 import "../../assets/css/Giris.css";
 import { girisYap } from "../../yonetimler/KimlikYonetimi";
 
@@ -10,13 +10,24 @@ const Giris = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
-    const token = await girisYap(kullaniciAdi, sifre);
-    if(token){
-      navigate(`/anasayfa`);
-    }else{
-      alert("Kullanıcı adı veya şifre hatalı.")
-    } 
+    try {
+      const token = await girisYap(kullaniciAdi, sifre);
+      if (token) {
+        navigate(`/anasayfa`);
+      } else {
+        message.error("Kullanıcı adı veya şifre hatalı.");
+      }
+    } catch (error: any) {
+      if (error.response && error.response.status === 500) {
+        message.error("Sunucuda bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.");
+      } else if (error.message.includes("Network Error")) {
+        message.error("Ağ hatası. İnternet bağlantınızı kontrol ediniz.");
+      } else {
+        message.error("Beklenmeyen bir hata oluştu. Lütfen tekrar deneyiniz.");
+      }
+    }
   };
+
 
   return (
     <div className="login-container">

@@ -1,20 +1,19 @@
-import { useState } from "react";
-import plusImg from "../../assets/images/plus.svg";
+import { FaRegCalendarPlus } from "react-icons/fa";
 import "../../assets/css/EtkinlikOlusturButonu.css";
-import Etkinlik from "../../tipler/Etkinlik";
-import { Dayjs } from "dayjs";
 
 interface EtkinlikOlusturButonuProps {
-  etkinlikData: Etkinlik[];
-  acilanEtkinlikPencereTarihi: Dayjs;
   setEtkinlikPenceresiniGoster: React.Dispatch<React.SetStateAction<boolean>>;
-  setDahaOncePencereSecilmediMi: React.Dispatch<React.SetStateAction<boolean>>;
+  setDahaOncePencereSecildiMi: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const EtkinlikOlusturButonu: React.FC<EtkinlikOlusturButonuProps> = ({etkinlikData, acilanEtkinlikPencereTarihi, setEtkinlikPenceresiniGoster, setDahaOncePencereSecilmediMi}) => {
+const EtkinlikOlusturButonu = (props: EtkinlikOlusturButonuProps) => {
+  const {
+    setEtkinlikPenceresiniGoster,
+    setDahaOncePencereSecildiMi
+  } = props;
 
   const etkinlikPenceresiniAc = () => {
-    setDahaOncePencereSecilmediMi(true);
+    setDahaOncePencereSecildiMi(true);
     setEtkinlikPenceresiniGoster(true);
   };
 
@@ -23,7 +22,7 @@ const EtkinlikOlusturButonu: React.FC<EtkinlikOlusturButonuProps> = ({etkinlikDa
       onClick={() => etkinlikPenceresiniAc()}
       className="create-event-button"
     >
-      <img src={plusImg} alt="create_event" className="button-img" />
+      <FaRegCalendarPlus className="button-img" />
       <span className="button-text">Etkinlik Oluştur</span>
     </button>
   );

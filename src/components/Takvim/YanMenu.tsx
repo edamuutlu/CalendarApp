@@ -7,7 +7,6 @@ import { tumEtkinlikleriGetir } from "../../yonetimler/TakvimYonetimi";
 import { tumKullanicilariGetir } from "../../yonetimler/KullaniciYonetimi";
 import Kullanici from "../../tipler/Kullanici";
 import EtkinlikOlusturButonu from "./EtkinlikOlusturButonu";
-import { Dayjs } from "dayjs";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -30,24 +29,22 @@ const initialItems: MenuItem[] = [
 ];
 
 interface YanMenuProps {
-  etkinlikData: Etkinlik[],
-  acilanEtkinlikPencereTarihi: Dayjs;
   setEtkinlikPenceresiniGoster: React.Dispatch<React.SetStateAction<boolean>>;
-  setDahaOncePencereSecilmediMi: React.Dispatch<React.SetStateAction<boolean>>;
+  setDahaOncePencereSecildiMi: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const YanMenu: React.FC<YanMenuProps> = ({
-  etkinlikData,
-  acilanEtkinlikPencereTarihi,
-  setEtkinlikPenceresiniGoster,
-  setDahaOncePencereSecilmediMi,
-}) => {
+const YanMenu = (props: YanMenuProps) => {
+  const {
+    setEtkinlikPenceresiniGoster,
+    setDahaOncePencereSecildiMi,
+  } = props;
+
   const [etkinlikler, setEtkinlikler] = useState<Etkinlik[]>([]);
   const [kullanicilar, setKullanicilar] = useState<Kullanici[]>([]);
   const [items, setItems] = useState<MenuItem[]>(initialItems);
 
   useEffect(() => {
-    const etkinlikleriCek = async () => {
+    const etkinlikleriAl = async () => {
       try {
         const fetchedEvents = await tumEtkinlikleriGetir();
         setEtkinlikler(fetchedEvents);
@@ -67,7 +64,7 @@ const YanMenu: React.FC<YanMenuProps> = ({
       }
     };
 
-    etkinlikleriCek();
+    etkinlikleriAl();
     kullanicilariCek();
   }, [etkinlikler]);
 
@@ -76,13 +73,15 @@ const YanMenu: React.FC<YanMenuProps> = ({
       const newItems = [...prevItems];
       const myEventsItem = newItems.find((item) => item?.key === "sub2");
       if (myEventsItem && "children" in myEventsItem) {
-        myEventsItem.children = events.map((event) => {
-          const key = event.id ? event.id.toString() : "";
-          return {
-            key,
-            label: event.baslik,
-          };
-        });
+        myEventsItem.children = events.length > 0
+          ? events.map((event) => {
+            const key = event.id ? event.id.toString() : "";
+            return {
+              key,
+              label: event.baslik,
+            };
+          })
+          : [{ key: "no-events", label: "Etkinlik yok" }];
       }
       return newItems;
     });
@@ -104,14 +103,12 @@ const YanMenu: React.FC<YanMenuProps> = ({
       return newItems;
     });
   };
-
+   
   return (
     <aside className="sidebar">
       <EtkinlikOlusturButonu
-        etkinlikData={etkinlikData}
-        acilanEtkinlikPencereTarihi={acilanEtkinlikPencereTarihi}
         setEtkinlikPenceresiniGoster={setEtkinlikPenceresiniGoster}
-        setDahaOncePencereSecilmediMi={setDahaOncePencereSecilmediMi}
+        setDahaOncePencereSecildiMi={setDahaOncePencereSecildiMi}
       />
       <Menu
         style={{ width: 256 }}

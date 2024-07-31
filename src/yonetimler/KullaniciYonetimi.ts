@@ -13,6 +13,8 @@ const apiUrlEtkinligeDavetliKullanicilariGetir =
   "http://localhost:5011/api/Etkinlik/EtkinligeDavetliKullanicilariGetir";
 const apiUrlKullaniciEtkinligiGetir =
   "http://localhost:5011/api/Etkinlik/KullaniciEtkinligiGetir";
+const apiUrlEtkinligeDavetliKullanicilariGuncelle =
+  "http://localhost:5011/api/Etkinlik/EtkinligeDavetliKullanicilariGuncelle";
 
 const apiUrlMevcutKullaniciGetir =
   "http://localhost:5011/api/Kullanici/MevcutKullaniciGetir";
@@ -25,6 +27,11 @@ export interface EtkinligeKullaniciEkleRequest {
 }
 
 export interface EtkinliktenDavetliKullanicilariSilRequest {
+  etkinlikId: number;
+  kullaniciIds: string[];
+}
+
+export interface EtkinligeDavetliKullanicilariGuncelleRequest {
   etkinlikId: number;
   kullaniciIds: string[];
 }
@@ -63,7 +70,7 @@ export const etkinliktenKullaniciSil = async (
       throw new Error("Token bulunamadı. Lütfen tekrar giriş yapın.");
     }
 
-    await axios.delete(apiUrletkinliktenKullaniciSil, {
+    await axios.delete(apiUrlEtkinligeDavetliKullanicilariGuncelle, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -72,6 +79,29 @@ export const etkinliktenKullaniciSil = async (
     });
 
     message.success("Kullanıcı silme işlemi başarıyla tamamlandı.");
+  } catch (error) {
+    /* console.error("Kullanıcı silme işlemi sırasında bir hata oluştu:", error); */
+  }
+};
+
+export const etkinligeDavetliKullanicilariGuncelle = async (
+  request: EtkinligeDavetliKullanicilariGuncelleRequest
+): Promise<void> => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("Token bulunamadı. Lütfen tekrar giriş yapın.");
+    }
+
+    await axios.put(apiUrletkinliktenKullaniciSil, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      data: request,
+    });
+
+    message.success("Davetli kullanıcı güncelleme işlemi başarıyla tamamlandı.");
   } catch (error) {
     /* console.error("Kullanıcı silme işlemi sırasında bir hata oluştu:", error); */
   }

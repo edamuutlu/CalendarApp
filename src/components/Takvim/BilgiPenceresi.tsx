@@ -26,19 +26,19 @@ const dateFormat = "YYYY/MM/DD";
 
 interface BilgiPenceresiProps {
   eklendigimEtkinlikler: Etkinlik[];
-}  
+}
 
-const BilgiPenceresi: React.FC<BilgiPenceresiProps> = ({
-  eklendigimEtkinlikler
-}) => {
+const BilgiPenceresi = (props: BilgiPenceresiProps) => {
+  const {
+    eklendigimEtkinlikler
+  } = props;
+
   const [modalAcikMi, setModalAcikMi] = useState(false);
-  const [secilenKullaniciIsimleri, setSecilenKullaniciIsimleri] = useState<
-  string[]
->([]);
+  const [secilenKullaniciIsimleri, setSecilenKullaniciIsimleri] = useState<string[]>([]);
 
-console.log('eklendigimEtkinlikler', eklendigimEtkinlikler)
+  console.log('eklendigimEtkinlikler', eklendigimEtkinlikler)
 
-useEffect(() => {
+  useEffect(() => {
     const fetchDavetliKullanicilar = async () => {
       try {
         const davetliKullanicilar: Kullanici[] =
@@ -49,7 +49,7 @@ useEffect(() => {
         console.error("Davetli kullanıcıları getirirken hata oluştu:", error);
       }
     };
-  
+
     fetchDavetliKullanicilar();
   }, [eklendigimEtkinlikler]); // etkinlik.id değiştiğinde effect tetiklenir
 

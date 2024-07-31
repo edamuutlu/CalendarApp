@@ -22,7 +22,6 @@ import {
 } from "react-icons/md";
 import {
   etkinlikEkle,
-  etkinlikGuncelle,
   etkinlikSil,
   TekrarEnum,
 } from "../../yonetimler/EtkinlikYonetimi";
@@ -53,7 +52,7 @@ interface MenuItem {
 }
 
 const TekrarEnumToString = {
-  [TekrarEnum.hic]: "Tekrarlama",
+  [TekrarEnum.hic]: "Tekrar Yok",
   [TekrarEnum.herGun]: "Her gün",
   [TekrarEnum.herHafta]: "Her hafta",
   [TekrarEnum.herAy]: "Her ay",
@@ -61,28 +60,28 @@ const TekrarEnumToString = {
 };
 
 interface EtkinlikPenceresiProps {
-  seciliGun: Dayjs;
+  varsayilanGun: Dayjs;
   etkinlikPenceresiniGoster: boolean;
   setEtkinlikPenceresiniGoster: React.Dispatch<React.SetStateAction<boolean>>;
-  etkinlikleriCek: () => Promise<Etkinlik[]>;
-  dahaOncePencereSecilmediMi: boolean;
-  etkinlikData: Etkinlik[];
+  etkinlikleriAl: () => Promise<Etkinlik[]>;
+  dahaOncePencereSecildiMi: boolean;
   acilanEtkinlikPencereTarihi: Dayjs;
-  setDahaOncePencereSecilmediMi: React.Dispatch<React.SetStateAction<boolean>>;
+  setDahaOncePencereSecildiMi: React.Dispatch<React.SetStateAction<boolean>>;
   tumKullanicilar: Kullanici[];
 }
 
-const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
-  seciliGun,
-  etkinlikPenceresiniGoster,
-  setEtkinlikPenceresiniGoster,
-  etkinlikleriCek,
-  dahaOncePencereSecilmediMi,
-  etkinlikData,
-  acilanEtkinlikPencereTarihi,
-  setDahaOncePencereSecilmediMi,
-  tumKullanicilar,
-}) => {
+const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
+  const {
+    varsayilanGun,
+    etkinlikPenceresiniGoster,
+    setEtkinlikPenceresiniGoster,
+    etkinlikleriAl,
+    dahaOncePencereSecildiMi,
+    acilanEtkinlikPencereTarihi,
+    setDahaOncePencereSecildiMi,
+    tumKullanicilar,
+  } = props;
+
   const [baslangicSaati, setBaslangicSaati] = useState<Dayjs>(dayjs());
   const [bitisSaati, setBitisSaati] = useState<Dayjs>(dayjs());
   const [tekrarTipi, setTekrarTipi] = useState<TekrarEnum | undefined>(
@@ -106,7 +105,7 @@ const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
   // Tekrar Durumu Ayarları Başlangıç
   const items: MenuItem[] = [
     {
-      label: "Tekrarlama",
+      label: "Tekrar Yok",
       key: TekrarEnum.hic,
     },
     {
@@ -144,7 +143,7 @@ const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
 
   // Tekrar Durumu Ayarları Bitiş
 
-  // Davenli Kullanıcı Durumu Ayarları Başlangıç
+  // Davetli Kullanıcı Durumu Ayarları Başlangıç
   const options: SelectProps["options"] = [];
 
   kullanicilar.map((kullanici) => {
@@ -162,42 +161,44 @@ const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
     const secilenKullaniciIsimleri = selectedUsers.map((user) => user.isim);
     setSecilenKullaniciIsimleri(secilenKullaniciIsimleri);
   };
-  // Davenli Kullanıcı Durumu Ayarları Bitiş
+  // Davetli Kullanıcı Durumu Ayarları Bitiş
 
-  const gununEtkinlikleri = (): Etkinlik[] => {
-    return etkinlikData.filter((event) => {
+  const gununEtkinlikleri = async():  Promise<Etkinlik[]> => {
+    const data: Etkinlik[] = await etkinlikleriAl();
+    return data.filter((event) => {
       const startDate = dayjs(event.baslangicTarihi);
       const endDate = dayjs(event.bitisTarihi);
       const currentDate = dayjs(acilanEtkinlikPencereTarihi);
-  
+
       return currentDate.isSame(startDate, "day") ||
-             currentDate.isSame(endDate, "day") ||
-             currentDate.isBetween(startDate, endDate, "day", "[]");
+        currentDate.isSame(endDate, "day") ||
+        currentDate.isBetween(startDate, endDate, "day", "[]");
     });
   };
-  
+
   const etkinlikPenceresiniAc = async () => {
-    const etkinlikler = gununEtkinlikleri();
-    
+    const etkinlikler: Etkinlik[] = await gununEtkinlikleri();
+    console.log('etkinlikler :>> ', etkinlikler);
+
     if (etkinlikler.length > 0) {
       for (const etkinlik of etkinlikler) {
-  
+
         const startDate = dayjs(etkinlik.baslangicTarihi);
         const endDate = dayjs(etkinlik.bitisTarihi);
-  
+
         // Tarih karşılaştırma işlemi
         const isInBetween = acilanEtkinlikPencereTarihi.isSame(startDate, 'day') ||
           acilanEtkinlikPencereTarihi.isSame(endDate, 'day') ||
           (acilanEtkinlikPencereTarihi.isAfter(startDate, 'day') && acilanEtkinlikPencereTarihi.isBefore(endDate, 'day'));
-  
+
         if (isInBetween) {
           const davetliKullanicilar: Kullanici[] =
             await etkinligeDavetliKullanicilariGetir(Number(etkinlik.id));
           const secilenKullaniciIsimleri = davetliKullanicilar.map(
             (user) => user.isim
           );
+          console.log('secilenKullaniciIsimleri :>> ', secilenKullaniciIsimleri);
           setSecilenKullaniciIsimleri(secilenKullaniciIsimleri);
-          console.log("davetliKullanicilar", davetliKullanicilar);
           setBaslik(etkinlik.baslik);
           setBaslangicTarihi(dayjs(etkinlik.baslangicTarihi));
           setBitisTarihi(dayjs(etkinlik.bitisTarihi));
@@ -205,21 +206,21 @@ const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
           setBitisSaati(dayjs(etkinlik.bitisTarihi));
           setAciklama(etkinlik.aciklama);
           setTekrarTipi(etkinlik.tekrarDurumu);
-          setDahaOncePencereSecilmediMi(
+          setDahaOncePencereSecildiMi(
             false
           ); /* update butonunun açılması için */
         } else {
-          setBaslangicTarihi(dayjs(seciliGun));
-          setDahaOncePencereSecilmediMi(true);
+          setBaslangicTarihi(dayjs(varsayilanGun));
+          setDahaOncePencereSecildiMi(true);
         }
       }
     } else {
-      setBaslangicTarihi(dayjs(seciliGun));
-      setDahaOncePencereSecilmediMi(true);
+      setBaslangicTarihi(dayjs(varsayilanGun));
+      setDahaOncePencereSecildiMi(true);
     }
     setEtkinlikPenceresiniGoster(true);
   };
-  
+
   useEffect(() => {
     setKullanicilar(tumKullanicilar);
     if (acilanEtkinlikPencereTarihi && ilkAcilisMi) {
@@ -248,7 +249,7 @@ const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
 
     // Etkinlik nesnesini oluştur
     const event: Etkinlik = {
-      date: seciliGun.toDate(),
+      date: varsayilanGun.toDate(),
       baslik: baslik,
       aciklama: aciklama,
       baslangicTarihi: startDateFormat,
@@ -258,20 +259,21 @@ const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
 
     try {
       await etkinlikEkle(event);
-      const data: Etkinlik[] = await etkinlikleriCek();
-      const etkinlikler = gununEtkinlikleri();
-
+      const data: Etkinlik[] = await etkinlikleriAl();
+      const etkinlikler: Etkinlik[] = await gununEtkinlikleri();
+      console.log('etkinlikler :>> ', etkinlikler);
       // İd'yi number'a çevirme veya uygun tipi kullanma
       const etkinlikId = Number(etkinlikler[0].id);
-
+      console.log('etkinlikId :>> ', etkinlikId);
       // davetliKullanici'nın null olmadığından emin olma
       if (secilenKullanicilar) {
+        
         const selectedUserIds = secilenKullanicilar.map((user) => user.id);
         const request: EtkinligeKullaniciEkleRequest = {
           etkinlikId: etkinlikId,
           kullaniciIds: selectedUserIds,
         };
-
+        console.log('selectedUserIds :>> ', selectedUserIds);
         await etkinligeKullaniciEkle(request);
       } else {
         console.error("Davetli kullanıcı null veya undefined.");
@@ -285,7 +287,7 @@ const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
   };
 
   const etkinlikGuncelleyeBas = async () => {
-    const etkinlikler = gununEtkinlikleri();
+    const etkinlikler: Etkinlik[] = await gununEtkinlikleri();
     const startDateFormat = DayjsToDate(baslangicTarihi);
     const endDateFormat = DayjsToDate(bitisTarihi);
     const startTimeFormat = DayjsToDate(baslangicSaati);
@@ -305,7 +307,7 @@ const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
 
     const event: Etkinlik = {
       id: etkinlikler[0].id,
-      date: seciliGun.toDate(),
+      date: varsayilanGun.toDate(),
       baslik: baslik,
       aciklama: aciklama,
       baslangicTarihi: startDateFormat,
@@ -313,23 +315,24 @@ const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
       tekrarDurumu: tekrarTipi ?? TekrarEnum.hic,
     };
     try {
-      const data: Etkinlik[] = await etkinlikleriCek();
-      const etkinlikler = gununEtkinlikleri();
+      const data: Etkinlik[] = await etkinlikleriAl();
+      const etkinlikler: Etkinlik[] = await gununEtkinlikleri();
 
       // İd'yi number'a çevirme veya uygun tipi kullanma
       const etkinlikId = Number(etkinlikler[0].id);
-
       // davetliKullanici'nın null olmadığından emin olma
       if (secilenKullanicilar) {
         const selectedUserIds = secilenKullanicilar.map((user) => user.id);
-        const request: EtkinliktenDavetliKullanicilariSilRequest = {
+          const request: EtkinliktenDavetliKullanicilariSilRequest = {
+          /*const request: EtkinligeDavetliKullanicilariGuncelleRequest = { */
           etkinlikId: etkinlikId,
           kullaniciIds: selectedUserIds, // `davetliKullanici`'yı `string` olarak belirtme
         };
-        await etkinliktenKullaniciSil(request);
-        await etkinlikGuncelle(event);
+        /* await etkinliktenKullaniciSil(request); */
+        /* await etkinlikGuncelle(event); */
         await etkinligeKullaniciEkle(request);
-        await etkinlikleriCek();
+        /* await etkinligeDavetliKullanicilariGuncelle(request); */
+        await etkinlikleriAl();
       } else {
         console.error("Davetli kullanıcı null veya undefined.");
       }
@@ -342,8 +345,9 @@ const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
 
   const etkinlikSileBas = async () => {
     try {
-      const data: Etkinlik[] = await etkinlikleriCek();
-      const etkinlikler = gununEtkinlikleri();
+      const data: Etkinlik[] = await etkinlikleriAl();
+      const etkinlikler: Etkinlik[] = await gununEtkinlikleri();
+
       // İd'yi number'a çevirme veya uygun tipi kullanma
       const etkinlikId = Number(etkinlikler[0].id);
 
@@ -356,7 +360,7 @@ const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
         };
         await etkinliktenKullaniciSil(request);
         await etkinlikSil(Number(etkinlikler[0].id));
-        await etkinlikleriCek();
+        await etkinlikleriAl();
       } else {
         console.error("Davetli kullanıcı null veya undefined.");
       }
@@ -386,6 +390,8 @@ const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
     setAciklama("");
     setBaslangicTarihi(dayjs());
     setBitisTarihi(dayjs());
+    setBaslangicSaati(dayjs());
+    setBitisSaati(dayjs());
     setSecilenKullaniciIsimleri([]);
     setTekrarTipi(0);
     setEtkinlikPenceresiniGoster(false);
@@ -394,7 +400,7 @@ const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
   return (
     <Modal
       title={
-        dahaOncePencereSecilmediMi ? " Etkinlik Ekle" : "Etkinlik Güncelle"
+        dahaOncePencereSecildiMi ? " Etkinlik Ekle" : "Etkinlik Güncelle"
       }
       open={etkinlikPenceresiniGoster}
       onCancel={etkinlikPencereKapat}
@@ -406,9 +412,9 @@ const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
           style={{ backgroundColor: "green", borderColor: "green" }}
           onClick={() => form.submit()}
         >
-          {dahaOncePencereSecilmediMi ? "Ekle" : "Güncelle"}
+          {dahaOncePencereSecildiMi ? "Ekle" : "Güncelle"}
         </Button>,
-        !dahaOncePencereSecilmediMi && (
+        !dahaOncePencereSecildiMi && (
           <Button
             key="delete"
             type="primary"
@@ -423,7 +429,7 @@ const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
       <Form
         form={form}
         onFinish={
-          dahaOncePencereSecilmediMi ? etkinlikEkleyeBas : etkinlikGuncelleyeBas
+          dahaOncePencereSecildiMi ? etkinlikEkleyeBas : etkinlikGuncelleyeBas
         }
       >
         <Form.Item name="title">
@@ -441,23 +447,25 @@ const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
           </div>
         </Form.Item>
 
-        <div className="event-input">
-          <MdEventRepeat className="event-icon" />
-          <Dropdown menu={menuProps} className="dropdown">
-            <Button>
-              <Space>
-                {TekrarEnumToString[tekrarTipi ?? TekrarEnum.hic]}
-                <DownOutlined />
-              </Space>
-            </Button>
-          </Dropdown>
+        <div className="event-input-wrapper">
+          <div className="event-input">
+            <MdEventRepeat className="event-icon" />
+            <Dropdown menu={menuProps} className="dropdown">
+              <Button>
+                <Space>
+                  {TekrarEnumToString[tekrarTipi ?? TekrarEnum.hic]}
+                  <DownOutlined />
+                </Space>
+              </Button>
+            </Dropdown>
+          </div>
         </div>
 
         <Form.Item
           name="dateRange"
           initialValue={
-            dahaOncePencereSecilmediMi
-              ? [seciliGun, seciliGun]
+            dahaOncePencereSecildiMi
+              ? [varsayilanGun, varsayilanGun]
               : [baslangicTarihi, bitisTarihi]
           }
           rules={[
@@ -470,18 +478,18 @@ const EtkinlikPenceresi: React.FC<EtkinlikPenceresiProps> = ({
               format={dateFormat}
               onChange={(values) => tarihleriAl(values?.[0], values?.[1])}
               minDate={
-                dahaOncePencereSecilmediMi
-                  ? dayjs(seciliGun, dateFormat)
+                dahaOncePencereSecildiMi
+                  ? dayjs(varsayilanGun, dateFormat)
                   : dayjs(baslangicTarihi, dateFormat)
               }
               maxDate={
                 tekrarTipi === 2
-                  ? dayjs(seciliGun).add(6, "day")
+                  ? dayjs(varsayilanGun).add(6, "day")
                   : tekrarTipi === 3
-                  ? dayjs(seciliGun).add(29, "day")
-                  : tekrarTipi === 4
-                  ? dayjs(seciliGun).add(364, "day")
-                  : dayjs(baslangicTarihi, dateFormat)
+                    ? dayjs(varsayilanGun).add(29, "day")
+                    : tekrarTipi === 4
+                      ? dayjs(varsayilanGun).add(364, "day")
+                      : dayjs(baslangicTarihi, dateFormat)
               }
               value={[baslangicTarihi, bitisTarihi]}
               disabled={tekrarTipi === 1}

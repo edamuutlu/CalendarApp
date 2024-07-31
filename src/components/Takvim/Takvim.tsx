@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Calendar } from "antd";
+import { Button, Calendar, Typography } from "antd";
 import "../../assets/css/Takvim.css";
 import dayjs, { Dayjs } from "dayjs";
 import {
   eklendigimEtkinlikleriGetir,
   tumKullanicilariGetir,
 } from "../../yonetimler/KullaniciYonetimi";
-import UstMenu from "./UstMenu";
+import UstMenu from "../UstMenu/UstMenu";
 import YanMenu from "./YanMenu";
 import Etkinlik from "../../tipler/Etkinlik";
 import Kullanici from "../../tipler/Kullanici";
@@ -17,30 +17,25 @@ import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { TekrarEnum } from "../../yonetimler/EtkinlikYonetimi";
 import BilgiPenceresi from "./BilgiPenceresi";
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 
 dayjs.extend(isBetween);
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
 const Takvim: React.FC = () => {
-  const [seciliGun, setSeciliGun] = useState(dayjs());
-  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] =
-    useState(false);
-  const [dahaOncePencereSecilmediMi, setDahaOncePencereSecilmediMi] =
-    useState(false);
+  const [varsayilanGun, setVarsayilanGun] = useState(dayjs());
+  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] = useState(false);
+  const [dahaOncePencereSecildiMi, setDahaOncePencereSecildiMi] = useState(false);
   const [etkinlikData, setEtkinlikData] = useState<Etkinlik[]>([]);
-  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<
-    Etkinlik[]
-  >([]);
-  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] =
-    useState<Dayjs>(dayjs());
+  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<Etkinlik[]>([]);
+  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] = useState<Dayjs>(dayjs());
   const [tumKullanicilar, setTumKullanicilar] = useState<Kullanici[]>([]);
 
-  const etkinlikleriCek = async (): Promise<Etkinlik[]> => {
+  const etkinlikleriAl = async (): Promise<Etkinlik[]> => {
     try {
       const kayitliEtkinlikler: Etkinlik[] = await tumEtkinlikleriGetir();
-      const eklendigimEtkinlikler: Etkinlik[] =
-        await eklendigimEtkinlikleriGetir();
+      const eklendigimEtkinlikler: Etkinlik[] = await eklendigimEtkinlikleriGetir();
       setEklendigimEtkinlikler(eklendigimEtkinlikler);
       setEtkinlikData(kayitliEtkinlikler);
       return kayitliEtkinlikler;
@@ -58,9 +53,9 @@ const Takvim: React.FC = () => {
     };
 
     kullanicilariCek();
-    etkinlikleriCek();
+    etkinlikleriAl();
     console.log("eklendigimEtkinlikler", eklendigimEtkinlikler);
-  }, [seciliGun]);
+  }, [varsayilanGun]);
 
   const dateCellRender = (value: Dayjs, info: any) => {
     if (!etkinlikData || !eklendigimEtkinlikler) {
@@ -132,7 +127,7 @@ const Takvim: React.FC = () => {
   };
 
   const tarihSec = (date: Dayjs) => {
-    setSeciliGun(date);
+    setVarsayilanGun(date);
     setAcilanEtkinlikPencereTarihi(date);
   };
 
@@ -140,30 +135,78 @@ const Takvim: React.FC = () => {
     return dateCellRender(value, info);
   };
 
+  const bugunuGetir = () => {
+    const now = dayjs();
+    setVarsayilanGun(now);
+  };
+
+  const sonrakiAyaGec = () => {
+    if (varsayilanGun) {
+      const nextMonthDate = varsayilanGun.add(1, "month");
+      setVarsayilanGun(nextMonthDate);
+    }
+  };
+
+  const oncekiAyaGec = () => {
+    if (varsayilanGun) {
+      const nextMonthDate = varsayilanGun.subtract(1, "month");
+      setVarsayilanGun(nextMonthDate);
+    }
+  };
+
+
+  const üstMenuRender = () => {
+    return (
+      <div>
+        <button onClick={oncekiAyaGec} className="calendar-button">
+          <LeftOutlined />
+        </button>
+        <button onClick={bugunuGetir} className="calendar-button">
+          Bugün
+        </button>
+        <button onClick={sonrakiAyaGec} className="calendar-button">
+          <RightOutlined />
+        </button>
+        <h2 className="calendar-month">{varsayilanGun.format("MMM YYYY")}</h2>
+      </div>
+    );
+  };
+
   return (
     <div>
-      <UstMenu seciliGun={seciliGun} setSeciliGun={setSeciliGun} />
+      <UstMenu varsayilanGun={varsayilanGun} setVarsayilanGun={setVarsayilanGun} />
       <div className="hero">
         <YanMenu
-          etkinlikData={etkinlikData}
-          acilanEtkinlikPencereTarihi={acilanEtkinlikPencereTarihi}
           setEtkinlikPenceresiniGoster={setEtkinlikPenceresiniGoster}
-          setDahaOncePencereSecilmediMi={setDahaOncePencereSecilmediMi}
+          setDahaOncePencereSecildiMi={setDahaOncePencereSecildiMi}
         />
+         <div className="takvim-baslik">
+          <Button onClick={oncekiAyaGec} className="calendar-button">
+            <LeftOutlined />
+          </Button>
+          <Button onClick={bugunuGetir} className="calendar-button">
+            Bugün
+          </Button>
+          <Button onClick={sonrakiAyaGec} className="calendar-button">
+            <RightOutlined />
+          </Button>
+          <Typography.Title level={4} className="calendar-month">
+            {varsayilanGun.format("MMM YYYY")}
+          </Typography.Title>
+        </div>
         <Calendar
           onSelect={tarihSec}
           cellRender={(date, info) => renderDateCell(date, info)}
-          value={seciliGun}
+          value={varsayilanGun}
         />
         <EtkinlikPenceresi
-          seciliGun={seciliGun}
+          varsayilanGun={varsayilanGun}
           etkinlikPenceresiniGoster={etkinlikPenceresiniGoster}
           setEtkinlikPenceresiniGoster={setEtkinlikPenceresiniGoster}
-          etkinlikleriCek={etkinlikleriCek}
-          dahaOncePencereSecilmediMi={dahaOncePencereSecilmediMi}
-          etkinlikData={etkinlikData}
+          etkinlikleriAl={etkinlikleriAl}
+          dahaOncePencereSecildiMi={dahaOncePencereSecildiMi}
           acilanEtkinlikPencereTarihi={acilanEtkinlikPencereTarihi}
-          setDahaOncePencereSecilmediMi={setDahaOncePencereSecilmediMi}
+          setDahaOncePencereSecildiMi={setDahaOncePencereSecildiMi}
           tumKullanicilar={tumKullanicilar}
         />
         {eklendigimEtkinlikler.length > 0 ? (

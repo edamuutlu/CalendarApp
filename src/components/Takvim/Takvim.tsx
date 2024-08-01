@@ -64,10 +64,10 @@ const Takvim: React.FC = () => {
     }
 
     const gununEtkinlikleri = etkinlikData.filter((etkinlik) =>
-      isEtkinlikOnDate(etkinlik, value)
+      etkinlikTarihiKontrol(etkinlik, value)
     );
     const eklenenEtkinlikler = eklendigimEtkinlikler.filter((etkinlik) =>
-      isEtkinlikOnDate(etkinlik, value)
+      etkinlikTarihiKontrol(etkinlik, value)
     );
 
     return (
@@ -88,7 +88,11 @@ const Takvim: React.FC = () => {
     );
   };
 
-  const isEtkinlikOnDate = (etkinlik: Etkinlik, date: Dayjs) => {
+  const renderDateCell = (value: Dayjs, info: any) => {
+    return dateCellRender(value, info);
+  };
+
+  const etkinlikTarihiKontrol = (etkinlik: Etkinlik, date: Dayjs) => {
     const { baslangicTarihi, bitisTarihi, tekrarDurumu } = etkinlik;
     const startDate = dayjs(baslangicTarihi);
     const endDate = dayjs(bitisTarihi);
@@ -130,10 +134,6 @@ const Takvim: React.FC = () => {
   const tarihSec = (date: Dayjs) => {
     setVarsayilanGun(date);
     setAcilanEtkinlikPencereTarihi(date);
-  };
-
-  const renderDateCell = (value: Dayjs, info: any) => {
-    return dateCellRender(value, info);
   };
 
   const bugunuGetir = () => {

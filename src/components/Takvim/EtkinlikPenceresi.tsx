@@ -22,6 +22,7 @@ import {
 } from "react-icons/md";
 import {
   etkinlikEkle,
+  etkinlikGuncelle,
   etkinlikSil,
   TekrarEnum,
 } from "../../yonetimler/EtkinlikYonetimi";
@@ -328,8 +329,8 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
           etkinlikId: etkinlikId,
           kullaniciIds: selectedUserIds, // `davetliKullanici`'yı `string` olarak belirtme
         };
-        /* await etkinliktenKullaniciSil(request); */
-        /* await etkinlikGuncelle(event); */
+        await etkinliktenKullaniciSil(request);
+        await etkinlikGuncelle(event);
         await etkinligeKullaniciEkle(request);
         /* await etkinligeDavetliKullanicilariGuncelle(request); */
         await etkinlikleriAl();

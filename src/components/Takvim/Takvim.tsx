@@ -24,7 +24,7 @@ dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
 const Takvim: React.FC = () => {
-  const [varsayilanGun, setVarsayilanGun] = useState(dayjs());
+  const [seciliGun, setSeciliGun] = useState(dayjs());
   const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] = useState(false);
   const [dahaOncePencereSecildiMi, setDahaOncePencereSecildiMi] = useState(false);
   const [etkinlikData, setEtkinlikData] = useState<Etkinlik[]>([]);
@@ -56,7 +56,7 @@ const Takvim: React.FC = () => {
     kullanicilariCek();
     etkinlikleriAl();
     console.log("eklendigimEtkinlikler", eklendigimEtkinlikler);
-  }, [varsayilanGun]);
+  }, [seciliGun]);
 
   const dateCellRender = (value: Dayjs, info: any) => {
     if (!etkinlikData || !eklendigimEtkinlikler) {
@@ -86,10 +86,6 @@ const Takvim: React.FC = () => {
         ))}
       </ul>
     );
-  };
-
-  const renderDateCell = (value: Dayjs, info: any) => {
-    return dateCellRender(value, info);
   };
 
   const etkinlikTarihiKontrol = (etkinlik: Etkinlik, date: Dayjs) => {
@@ -132,32 +128,13 @@ const Takvim: React.FC = () => {
   };
 
   const tarihSec = (date: Dayjs) => {
-    setVarsayilanGun(date);
+    setSeciliGun(date);
     setAcilanEtkinlikPencereTarihi(date);
-  };
-
-  const bugunuGetir = () => {
-    const now = dayjs();
-    setVarsayilanGun(now);
-  };
-
-  const sonrakiAyaGec = () => {
-    if (varsayilanGun) {
-      const nextMonthDate = varsayilanGun.add(1, "month");
-      setVarsayilanGun(nextMonthDate);
-    }
-  };
-
-  const oncekiAyaGec = () => {
-    if (varsayilanGun) {
-      const nextMonthDate = varsayilanGun.subtract(1, "month");
-      setVarsayilanGun(nextMonthDate);
-    }
   };
 
   return (
     <div>
-      <UstMenu/>
+      <UstMenu />
       <div className="hero">
         <YanMenu
           setEtkinlikPenceresiniGoster={setEtkinlikPenceresiniGoster}
@@ -166,28 +143,45 @@ const Takvim: React.FC = () => {
         <div className="main">
           <div className="takvim-baslik-container">
             <div className="takvim-baslik">
-              <Button onClick={oncekiAyaGec} className="calendar-button">
+              <Button onClick={() => { /* önceki aya git */
+                if (seciliGun) {
+                  const nextMonthDate = seciliGun.subtract(1, "month");
+                  setSeciliGun(nextMonthDate);
+                }
+              }} className="calendar-button">
                 <LeftOutlined />
               </Button>
-              <Button onClick={bugunuGetir} className="calendar-button">
+              <Button
+                onClick={() => { /* bugüne git */
+                  const now = dayjs();
+                  setSeciliGun(now);
+                }}
+                className="calendar-button"
+              >
                 Bugün
               </Button>
-              <Button onClick={sonrakiAyaGec} className="calendar-button">
+
+              <Button onClick={() => { /* sonraki aya git */
+                if (seciliGun) {
+                  const nextMonthDate = seciliGun.add(1, "month");
+                  setSeciliGun(nextMonthDate);
+                }
+              }} className="calendar-button">
                 <RightOutlined />
               </Button>
               <h2 className="calendar-month">
-                {varsayilanGun.format("MMM YYYY")}
+                {seciliGun.format("MMM YYYY")}
               </h2>
             </div>
           </div>
           <Calendar
             onSelect={tarihSec}
-            cellRender={(date, info) => renderDateCell(date, info)}
-            value={varsayilanGun}
+            cellRender={dateCellRender}
+            value={seciliGun}
           />
         </div>
         <EtkinlikPenceresi
-          varsayilanGun={varsayilanGun}
+          seciliGun={seciliGun}
           etkinlikPenceresiniGoster={etkinlikPenceresiniGoster}
           setEtkinlikPenceresiniGoster={setEtkinlikPenceresiniGoster}
           etkinlikleriAl={etkinlikleriAl}

@@ -41,6 +41,8 @@ import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import isBetween from "dayjs/plugin/isBetween";
 import "../../assets/css/Takvim.css";
 
+export const nameof = <T,>(name: keyof T) => name;
+
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isBetween);
 
@@ -61,7 +63,7 @@ const TekrarEnumToString = {
 };
 
 interface EtkinlikPenceresiProps {
-  varsayilanGun: Dayjs;
+  seciliGun: Dayjs;
   etkinlikPenceresiniGoster: boolean;
   setEtkinlikPenceresiniGoster: React.Dispatch<React.SetStateAction<boolean>>;
   etkinlikleriAl: () => Promise<Etkinlik[]>;
@@ -73,7 +75,7 @@ interface EtkinlikPenceresiProps {
 
 const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
   const {
-    varsayilanGun,
+    seciliGun,
     etkinlikPenceresiniGoster,
     setEtkinlikPenceresiniGoster,
     etkinlikleriAl,
@@ -82,25 +84,19 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     setDahaOncePencereSecildiMi,
     tumKullanicilar,
   } = props;
-
-  const [baslangicSaati, setBaslangicSaati] = useState<Dayjs>(dayjs());
-  const [bitisSaati, setBitisSaati] = useState<Dayjs>(dayjs());
-  const [tekrarTipi, setTekrarTipi] = useState<TekrarEnum | undefined>(
-    undefined
-  );
+  
   const [form] = Form.useForm();
   const [ilkAcilisMi, setIlkAcilisMi] = useState(false);
   const [kullanicilar, setKullanicilar] = useState<Kullanici[]>([]);
-  const [secilenKullanicilar, setSecilenKullanicilar] = useState<Kullanici[]>(
-    []
-  );
-  const [secilenKullaniciIsimleri, setSecilenKullaniciIsimleri] = useState<
-    string[]
-  >([]);
+  const [secilenKullanicilar, setSecilenKullanicilar] = useState<Kullanici[]>([]);
+  const [secilenKullaniciIsimleri, setSecilenKullaniciIsimleri] = useState<string[]>([]);
 
   const [baslik, setBaslik] = useState("");
+  const [tekrarTipi, setTekrarTipi] = useState<TekrarEnum | undefined>(undefined);
   const [baslangicTarihi, setBaslangicTarihi] = useState<Dayjs>(dayjs());
   const [bitisTarihi, setBitisTarihi] = useState<Dayjs>(dayjs());
+  const [baslangicSaati, setBaslangicSaati] = useState<Dayjs>(dayjs());
+  const [bitisSaati, setBitisSaati] = useState<Dayjs>(dayjs());
   const [aciklama, setAciklama] = useState("");
 
   // Tekrar Durumu Ayarları Başlangıç
@@ -211,12 +207,12 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
             false
           ); /* update butonunun açılması için */
         } else {
-          setBaslangicTarihi(dayjs(varsayilanGun));
+          setBaslangicTarihi(dayjs(seciliGun));
           setDahaOncePencereSecildiMi(true);
         }
       }
     } else {
-      setBaslangicTarihi(dayjs(varsayilanGun));
+      setBaslangicTarihi(dayjs(seciliGun));
       setDahaOncePencereSecildiMi(true);
     }
     setEtkinlikPenceresiniGoster(true);
@@ -250,7 +246,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
 
     // Etkinlik nesnesini oluştur
     const event: Etkinlik = {
-      date: varsayilanGun.toDate(),
+      date: seciliGun.toDate(),
       baslik: baslik,
       aciklama: aciklama,
       baslangicTarihi: startDateFormat,
@@ -308,7 +304,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
 
     const event: Etkinlik = {
       id: etkinlikler[0].id,
-      date: varsayilanGun.toDate(),
+      date: seciliGun.toDate(),
       baslik: baslik,
       aciklama: aciklama,
       baslangicTarihi: startDateFormat,
@@ -433,12 +429,12 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
           dahaOncePencereSecildiMi ? etkinlikEkleyeBas : etkinlikGuncelleyeBas
         }
       >
-        <Form.Item name="title">
+        <Form.Item name={nameof<Etkinlik>("baslik")}>
           <div className="event-input">
             <MdOutlineModeEditOutline className="event-icon" />
             <Input
               placeholder="Etkinlik Başlığı"
-              value={baslik}
+              /* value={baslik} */
               onChange={(e) => setBaslik(e.target.value)}
               style={{
                 borderStartStartRadius: "0",
@@ -466,7 +462,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
           name="dateRange"
           initialValue={
             dahaOncePencereSecildiMi
-              ? [varsayilanGun, varsayilanGun]
+              ? [seciliGun, seciliGun]
               : [baslangicTarihi, bitisTarihi]
           }
           rules={[
@@ -480,16 +476,16 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
               onChange={(values) => tarihleriAl(values?.[0], values?.[1])}
               minDate={
                 dahaOncePencereSecildiMi
-                  ? dayjs(varsayilanGun, dateFormat)
+                  ? dayjs(seciliGun, dateFormat)
                   : dayjs(baslangicTarihi, dateFormat)
               }
               maxDate={
                 tekrarTipi === 2
-                  ? dayjs(varsayilanGun).add(6, "day")
+                  ? dayjs(seciliGun).add(6, "day")
                   : tekrarTipi === 3
-                    ? dayjs(varsayilanGun).add(29, "day")
+                    ? dayjs(seciliGun).add(29, "day")
                     : tekrarTipi === 4
-                      ? dayjs(varsayilanGun).add(364, "day")
+                      ? dayjs(seciliGun).add(364, "day")
                       : dayjs(baslangicTarihi, dateFormat)
               }
               value={[baslangicTarihi, bitisTarihi]}
@@ -520,7 +516,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
           </div>
         </Form.Item>
 
-        <Form.Item name="text">
+        <Form.Item name={nameof<Etkinlik>("baslik")}>
           <div className="event-input">
             <MdNotes className="desc-icon" />
             <Input.TextArea

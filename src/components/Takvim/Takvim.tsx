@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Calendar } from "antd";
+import { Button, Calendar, Popover } from "antd";
 import "../../assets/css/Takvim.css";
 import dayjs, { Dayjs } from "dayjs";
 import {
@@ -29,8 +29,10 @@ const Takvim: React.FC = () => {
   const [dahaOncePencereSecildiMi, setDahaOncePencereSecildiMi] = useState(false);
   const [etkinlikData, setEtkinlikData] = useState<Etkinlik[]>([]);
   const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<Etkinlik[]>([]);
+  const [seciliEtkinlik, setseciliEtkinlik] = useState<Etkinlik | null>(null);
   const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] = useState<Dayjs>(dayjs());
   const [tumKullanicilar, setTumKullanicilar] = useState<Kullanici[]>([]);
+  const [open, setOpen] = useState(false);
 
   const etkinlikleriAl = async (): Promise<Etkinlik[]> => {
     try {
@@ -55,8 +57,11 @@ const Takvim: React.FC = () => {
 
     kullanicilariCek();
     etkinlikleriAl();
-    console.log("eklendigimEtkinlikler", eklendigimEtkinlikler);
   }, [seciliGun]);
+
+  const etkinligiSeciliYap = (event: Etkinlik) => {
+    setseciliEtkinlik(event);
+  };
 
   const dateCellRender = (value: Dayjs, info: any) => {
     if (!etkinlikData || !eklendigimEtkinlikler) {
@@ -70,20 +75,33 @@ const Takvim: React.FC = () => {
       etkinlikTarihiKontrol(etkinlik, value)
     );
 
+    const renderEventItem = (etkinlik: Etkinlik, className: string) => (
+      <li
+        className={className}
+        key={etkinlik.id}
+        onClick={() => etkinligiSeciliYap(etkinlik)}
+      >
+        {dayjs(etkinlik.baslangicTarihi).format("HH:mm")} - {etkinlik.baslik}
+        {/* <Popover
+          content={<a onClick={hide}>{dayjs(etkinlik.baslangicTarihi).format("HH:mm")} - {etkinlik.baslik}</a>}
+          title="Title"
+          trigger="click"
+          open={open}
+          onOpenChange={handleOpenChange}
+        >
+          <Button>Click me</Button>
+        </Popover> */}
+      </li>
+    );
+
     return (
       <ul className="etkinlik-listesi">
-        {gununEtkinlikleri.map((etkinlik) => (
-          <li className="cell-style" key={etkinlik.id}>
-            {dayjs(etkinlik.baslangicTarihi).format("HH:mm")} -{" "}
-            {etkinlik.baslik}
-          </li>
-        ))}
-        {eklenenEtkinlikler.map((etkinlik) => (
-          <li className="guest-cell-style" key={etkinlik.id}>
-            {dayjs(etkinlik.baslangicTarihi).format("HH:mm")} -{" "}
-            {etkinlik.baslik}
-          </li>
-        ))}
+        {gununEtkinlikleri.map((etkinlik) =>
+          renderEventItem(etkinlik, "cell-style")
+        )}
+        {eklenenEtkinlikler.map((etkinlik) =>
+          renderEventItem(etkinlik, "guest-cell-style")
+        )}
       </ul>
     );
   };
@@ -130,6 +148,14 @@ const Takvim: React.FC = () => {
   const tarihSec = (date: Dayjs) => {
     setSeciliGun(date);
     setAcilanEtkinlikPencereTarihi(date);
+  };
+
+  const hide = () => {
+    setOpen(false);
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
   };
 
   return (
@@ -188,13 +214,15 @@ const Takvim: React.FC = () => {
           dahaOncePencereSecildiMi={dahaOncePencereSecildiMi}
           acilanEtkinlikPencereTarihi={acilanEtkinlikPencereTarihi}
           setDahaOncePencereSecildiMi={setDahaOncePencereSecildiMi}
-          tumKullanicilar={tumKullanicilar}
+          tumKullanicilar={tumKullanicilar}/* 
+          seciliEtkinlikForm={seciliEtkinlik} */
         />
         {eklendigimEtkinlikler.length > 0 ? (
           <BilgiPenceresi eklendigimEtkinlikler={eklendigimEtkinlikler} />
         ) : (
           ""
         )}
+
       </div>
     </div>
   );

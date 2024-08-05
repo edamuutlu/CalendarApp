@@ -169,16 +169,21 @@ const Takvim: React.FC = () => {
         <div className="main">
           <div className="takvim-baslik-container">
             <div className="takvim-baslik">
-              <Button onClick={() => { /* önceki aya git */
-                if (seciliGun) {
-                  const nextMonthDate = seciliGun.subtract(1, "month");
-                  setSeciliGun(nextMonthDate);
-                }
-              }} className="calendar-button">
+              <Button
+                onClick={() => {
+                  /* önceki aya git */
+                  if (seciliGun) {
+                    const nextMonthDate = seciliGun.subtract(1, "month");
+                    setSeciliGun(nextMonthDate);
+                  }
+                }}
+                className="calendar-button"
+              >
                 <LeftOutlined />
               </Button>
               <Button
-                onClick={() => { /* bugüne git */
+                onClick={() => {
+                  /* bugüne git */
                   const now = dayjs();
                   setSeciliGun(now);
                 }}
@@ -187,17 +192,19 @@ const Takvim: React.FC = () => {
                 Bugün
               </Button>
 
-              <Button onClick={() => { /* sonraki aya git */
-                if (seciliGun) {
-                  const nextMonthDate = seciliGun.add(1, "month");
-                  setSeciliGun(nextMonthDate);
-                }
-              }} className="calendar-button">
+              <Button
+                onClick={() => {
+                  /* sonraki aya git */
+                  if (seciliGun) {
+                    const nextMonthDate = seciliGun.add(1, "month");
+                    setSeciliGun(nextMonthDate);
+                  }
+                }}
+                className="calendar-button"
+              >
                 <RightOutlined />
               </Button>
-              <h2 className="calendar-month">
-                {seciliGun.format("MMM YYYY")}
-              </h2>
+              <h2 className="calendar-month">{seciliGun.format("MMM YYYY")}</h2>
             </div>
           </div>
           <Calendar
@@ -214,15 +221,14 @@ const Takvim: React.FC = () => {
           dahaOncePencereSecildiMi={dahaOncePencereSecildiMi}
           acilanEtkinlikPencereTarihi={acilanEtkinlikPencereTarihi}
           setDahaOncePencereSecildiMi={setDahaOncePencereSecildiMi}
-          tumKullanicilar={tumKullanicilar}/* 
-          seciliEtkinlikForm={seciliEtkinlik} */
+          tumKullanicilar={tumKullanicilar}
+          seciliEtkinlikForm={seciliEtkinlik}
         />
         {eklendigimEtkinlikler.length > 0 ? (
           <BilgiPenceresi eklendigimEtkinlikler={eklendigimEtkinlikler} />
         ) : (
           ""
         )}
-
       </div>
     </div>
   );

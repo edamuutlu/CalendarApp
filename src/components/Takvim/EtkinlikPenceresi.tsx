@@ -40,6 +40,8 @@ import isBetween from "dayjs/plugin/isBetween";
 import "../../assets/css/Takvim.css";
 const { RangePicker } = DatePicker;
 
+export const nameof = <T,>(name: keyof T) => name;
+
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isBetween);
 
@@ -57,7 +59,7 @@ interface EtkinlikPenceresiProps {
   acilanEtkinlikPencereTarihi: Dayjs;
   setDahaOncePencereSecildiMi: React.Dispatch<React.SetStateAction<boolean>>;
   tumKullanicilar: Kullanici[];
-  /* seciliEtkinlikForm: Etkinlik | null; */
+  seciliEtkinlikForm: Etkinlik | null;
 }
 
 const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
@@ -69,18 +71,24 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     dahaOncePencereSecildiMi,
     acilanEtkinlikPencereTarihi,
     setDahaOncePencereSecildiMi,
-    tumKullanicilar,/* 
-    seciliEtkinlikForm, */
+    tumKullanicilar,
+    seciliEtkinlikForm,
   } = props;
-  
+
   const [form] = Form.useForm();
   const [ilkAcilisMi, setIlkAcilisMi] = useState(false);
   const [kullanicilar, setKullanicilar] = useState<Kullanici[]>([]);
-  const [secilenKullanicilar, setSecilenKullanicilar] = useState<Kullanici[]>([]);
-  const [secilenKullaniciIsimleri, setSecilenKullaniciIsimleri] = useState<string[]>([]);
+  const [secilenKullanicilar, setSecilenKullanicilar] = useState<Kullanici[]>(
+    []
+  );
+  const [secilenKullaniciIsimleri, setSecilenKullaniciIsimleri] = useState<
+    string[]
+  >([]);
 
   const [baslik, setBaslik] = useState("");
-  const [tekrarTipi, setTekrarTipi] = useState<TekrarEnum | undefined>(undefined);
+  const [tekrarTipi, setTekrarTipi] = useState<TekrarEnum | undefined>(
+    undefined
+  );
   const [baslangicTarihi, setBaslangicTarihi] = useState<Dayjs>(dayjs());
   const [bitisTarihi, setBitisTarihi] = useState<Dayjs>(dayjs());
   const [aciklama, setAciklama] = useState("");
@@ -145,16 +153,18 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
   };
   // Davetli Kullanıcı Durumu Ayarları Bitiş
 
-  const gununEtkinlikleri = async():  Promise<Etkinlik[]> => {
+  const gununEtkinlikleri = async (): Promise<Etkinlik[]> => {
     const data: Etkinlik[] = await etkinlikleriAl();
     return data.filter((event) => {
       const startDate = dayjs(event.baslangicTarihi);
       const endDate = dayjs(event.bitisTarihi);
       const currentDate = dayjs(acilanEtkinlikPencereTarihi);
 
-      return currentDate.isSame(startDate, "day") ||
+      return (
+        currentDate.isSame(startDate, "day") ||
         currentDate.isSame(endDate, "day") ||
-        currentDate.isBetween(startDate, endDate, "day", "[]");
+        currentDate.isBetween(startDate, endDate, "day", "[]")
+      );
     });
   };
 
@@ -163,14 +173,15 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
 
     if (etkinlikler.length > 0) {
       for (const etkinlik of etkinlikler) {
-
         const startDate = dayjs(etkinlik.baslangicTarihi);
         const endDate = dayjs(etkinlik.bitisTarihi);
 
         // Tarih karşılaştırma işlemi
-        const isInBetween = acilanEtkinlikPencereTarihi.isSame(startDate, 'day') ||
-          acilanEtkinlikPencereTarihi.isSame(endDate, 'day') ||
-          (acilanEtkinlikPencereTarihi.isAfter(startDate, 'day') && acilanEtkinlikPencereTarihi.isBefore(endDate, 'day'));
+        const isInBetween =
+          acilanEtkinlikPencereTarihi.isSame(startDate, "day") ||
+          acilanEtkinlikPencereTarihi.isSame(endDate, "day") ||
+          (acilanEtkinlikPencereTarihi.isAfter(startDate, "day") &&
+            acilanEtkinlikPencereTarihi.isBefore(endDate, "day"));
 
         if (isInBetween) {
           const davetliKullanicilar: Kullanici[] =
@@ -184,7 +195,9 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
           setBitisTarihi(dayjs(etkinlik.bitisTarihi));
           setAciklama(etkinlik.aciklama);
           setTekrarTipi(etkinlik.tekrarDurumu);
-          setDahaOncePencereSecildiMi(false); /* update butonunun açılması için */
+          setDahaOncePencereSecildiMi(
+            false
+          ); /* update butonunun açılması için */
         } else {
           setBaslangicTarihi(dayjs(seciliGun));
           setDahaOncePencereSecildiMi(true);
@@ -204,7 +217,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     }
     setIlkAcilisMi(true);
   }, [acilanEtkinlikPencereTarihi]);
-  
+
   const etkinlikEkleyeBas = async () => {
     // Etkinlik nesnesini oluştur
     const event: Etkinlik = {
@@ -239,7 +252,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     // Etkinlik penceresini kapat ve formu sıfırla
     etkinlikPencereKapat();
   };
-  
+
   const etkinlikGuncelleyeBas = async () => {
     const etkinlikler: Etkinlik[] = await gununEtkinlikleri();
 
@@ -260,7 +273,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
       // davetliKullanici'nın null olmadığından emin olma
       if (secilenKullanicilar) {
         const selectedUserIds = secilenKullanicilar.map((user) => user.id);
-          const request: EtkinliktenDavetliKullanicilariSilRequest = {
+        const request: EtkinliktenDavetliKullanicilariSilRequest = {
           /*const request: EtkinligeDavetliKullanicilariGuncelleRequest = { */
           etkinlikId: etkinlikId,
           kullaniciIds: selectedUserIds, // `davetliKullanici`'yı `string` olarak belirtme
@@ -282,7 +295,6 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
 
   const etkinlikSileBas = async () => {
     try {
-      const data: Etkinlik[] = await etkinlikleriAl();
       const etkinlikler: Etkinlik[] = await gununEtkinlikleri();
 
       // İd'yi number'a çevirme veya uygun tipi kullanma
@@ -329,9 +341,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
 
   return (
     <Modal
-      title={
-        dahaOncePencereSecildiMi ? " Etkinlik Ekle" : "Etkinlik Güncelle"
-      }
+      title={dahaOncePencereSecildiMi ? " Etkinlik Ekle" : "Etkinlik Güncelle"}
       open={etkinlikPenceresiniGoster}
       onCancel={etkinlikPencereKapat}
       className="modal"
@@ -383,7 +393,9 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
             <Dropdown menu={menuProps} className="dropdown">
               <Button>
                 <Space>
-                {items.find((item) => item.key === (tekrarTipi ?? TekrarEnum.hic))?.label ?? "Tekrar Yok"}
+                  {items.find(
+                    (item) => item.key === (tekrarTipi ?? TekrarEnum.hic)
+                  )?.label ?? "Tekrar Yok"}
                   <DownOutlined />
                 </Space>
               </Button>
@@ -394,7 +406,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
         <Form.Item
           name="dateRange"
           initialValue={
-            dahaOncePencereSecildiMi 
+            dahaOncePencereSecildiMi
               ? [seciliGun, seciliGun]
               : [baslangicTarihi, bitisTarihi]
           }
@@ -418,10 +430,10 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
                 tekrarTipi === 2
                   ? dayjs(seciliGun).add(6, "day")
                   : tekrarTipi === 3
-                    ? dayjs(seciliGun).add(29, "day")
-                    : tekrarTipi === 4
-                      ? dayjs(seciliGun).add(364, "day")
-                      : dayjs(baslangicTarihi, "YYYY/MM/DD")
+                  ? dayjs(seciliGun).add(29, "day")
+                  : tekrarTipi === 4
+                  ? dayjs(seciliGun).add(364, "day")
+                  : dayjs(baslangicTarihi, "YYYY/MM/DD")
               }
               value={[baslangicTarihi, bitisTarihi]}
               disabled={tekrarTipi === 1}

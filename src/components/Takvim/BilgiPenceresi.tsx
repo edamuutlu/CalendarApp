@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Etkinlik from "../../tipler/Etkinlik";
 import {
   Input,
@@ -25,24 +25,24 @@ const { RangePicker } = DatePicker;
 const dateFormat = "YYYY/MM/DD";
 
 interface BilgiPenceresiProps {
-  eklendigimEtkinlikler: Etkinlik[];
+  etkinlik: Etkinlik[];
 }
 
 const BilgiPenceresi = (props: BilgiPenceresiProps) => {
   const {
-    eklendigimEtkinlikler
+    etkinlik
   } = props;
 
   const [modalAcikMi, setModalAcikMi] = useState(false);
   const [secilenKullaniciIsimleri, setSecilenKullaniciIsimleri] = useState<string[]>([]);
 
-  console.log('eklendigimEtkinlikler', eklendigimEtkinlikler)
+  console.log('etkinlik', etkinlik)
 
   useEffect(() => {
     const fetchDavetliKullanicilar = async () => {
       try {
         const davetliKullanicilar: Kullanici[] =
-          await etkinligeDavetliKullanicilariGetir(Number(eklendigimEtkinlikler[0].id));
+          await etkinligeDavetliKullanicilariGetir(Number(etkinlik[0].id));
         const secilenKullaniciIsimleri = davetliKullanicilar.map((user) => user.isim);
         setSecilenKullaniciIsimleri(secilenKullaniciIsimleri);
       } catch (error) {
@@ -51,11 +51,7 @@ const BilgiPenceresi = (props: BilgiPenceresiProps) => {
     };
 
     fetchDavetliKullanicilar();
-  }, [eklendigimEtkinlikler]); // etkinlik.id değiştiğinde effect tetiklenir
-
-  const bilgiPenceresiniAc = () => {
-    setModalAcikMi(true);
-  };
+  }, [etkinlik]); // etkinlik.id değiştiğinde effect tetiklenir
 
   const bilgiPenceresiniKapat = () => {
     setModalAcikMi(false);
@@ -74,7 +70,7 @@ const BilgiPenceresi = (props: BilgiPenceresiProps) => {
             <MdOutlineModeEditOutline className="event-icon" />
             <Input
               placeholder="Etkinlik Başlığı"
-              value={eklendigimEtkinlikler[0].baslik}
+              value={etkinlik[0].baslik}
               style={{
                 borderStartStartRadius: "0",
                 borderEndStartRadius: "0",
@@ -89,8 +85,8 @@ const BilgiPenceresi = (props: BilgiPenceresiProps) => {
             <RangePicker
               format={dateFormat}
               value={[
-                dayjs(eklendigimEtkinlikler[0].baslangicTarihi),
-                dayjs(eklendigimEtkinlikler[0].bitisTarihi),
+                dayjs(etkinlik[0].baslangicTarihi),
+                dayjs(etkinlik[0].bitisTarihi),
               ]}
               disabled={true}
               className="range-picker"
@@ -109,8 +105,8 @@ const BilgiPenceresi = (props: BilgiPenceresiProps) => {
               needConfirm={false}
               format={"HH:mm"}
               value={[
-                dayjs(eklendigimEtkinlikler[0].baslangicTarihi),
-                dayjs(eklendigimEtkinlikler[0].bitisTarihi),
+                dayjs(etkinlik[0].baslangicTarihi),
+                dayjs(etkinlik[0].bitisTarihi),
               ]}
               className="range-picker"
               style={{
@@ -126,7 +122,7 @@ const BilgiPenceresi = (props: BilgiPenceresiProps) => {
             <MdNotes className="desc-icon" />
             <Input.TextArea
               placeholder="Etkinlik Açıklaması"
-              value={eklendigimEtkinlikler[0].aciklama}
+              value={etkinlik[0].aciklama}
               style={{
                 borderStartStartRadius: "0",
                 borderEndStartRadius: "0",
@@ -151,7 +147,7 @@ const BilgiPenceresi = (props: BilgiPenceresiProps) => {
           <MdEventRepeat className="event-icon" />
           <Input
             placeholder="Tekrar Tipi"
-            value={eklendigimEtkinlikler[0].tekrarDurumu}
+            value={etkinlik[0].tekrarDurumu}
             style={{
               borderStartStartRadius: "0",
               borderEndStartRadius: "0",

@@ -5,12 +5,12 @@ import {
   Dropdown,
   Input,
   Modal,
-  Space,
   Form,
   Select,
   message,
   Popconfirm,
   Menu,
+  Typography,
 } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
@@ -51,9 +51,15 @@ interface EtkinlikPenceresiProps {
   setEtkinlikPenceresiniGoster: React.Dispatch<React.SetStateAction<boolean>>;
   etkinlikleriAl: () => Promise<Etkinlik[]>;
   acilanEtkinlikPencereTarihi: Dayjs;
-  setDahaOncePencereSecildiMi: React.Dispatch<React.SetStateAction<boolean>>;
   tumKullanicilar: Kullanici[];
   seciliEtkinlikForm: Etkinlik | null;
+}
+
+interface EtkinlikFormValues {
+  baslik: string;
+  aciklama: string;
+  tarihAraligi: [Dayjs, Dayjs];
+  tekrarSayisi: TekrarEnum;
 }
 
 const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
@@ -63,7 +69,6 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     setEtkinlikPenceresiniGoster,
     etkinlikleriAl,
     acilanEtkinlikPencereTarihi,
-    setDahaOncePencereSecildiMi,
     tumKullanicilar,
     seciliEtkinlikForm,
   } = props;
@@ -78,21 +83,23 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     if (seciliEtkinlikForm) {
       console.log("Selected Event:", seciliEtkinlikForm);
       form.setFieldsValue({
-        title: seciliEtkinlikForm.baslik,
-        text: seciliEtkinlikForm.aciklama,
-        dateRange: [
+        baslik: seciliEtkinlikForm.baslik,
+        aciklama: seciliEtkinlikForm.aciklama,
+        tarihAraligi: [
           dayjs(seciliEtkinlikForm.baslangicTarihi),
           dayjs(seciliEtkinlikForm.bitisTarihi),
         ],
-        timeRange: [
+        saatAraligi: [
           dayjs(seciliEtkinlikForm.baslangicTarihi),
           dayjs(seciliEtkinlikForm.bitisTarihi),
         ],
+        tekrarSayisi: seciliEtkinlikForm.tekrarDurumu,
       });
     } else {
+      form.resetFields();
       form.setFieldsValue({
-        dateRange: [dayjs(seciliGun), dayjs(seciliGun)],
-        timeRange: [dayjs(seciliGun), dayjs(seciliGun).add(1, "hour")],
+        tarihAraligi: [dayjs(seciliGun), dayjs(seciliGun).add(1, "hour")],
+        tekrarSayisi: TekrarEnum.hic,
       });
     }
   }, [seciliEtkinlikForm, form, etkinlikPenceresiniGoster]);
@@ -125,8 +132,10 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     const selectedItem = items.find((item) => item.key === keyAsNumber);
 
     if (selectedItem) {
+      form.setFieldsValue({
+        tekrarSayisi: keyAsNumber as TekrarEnum,
+      });
       message.info(`Selected: ${selectedItem.label}`);
-      form.setFieldValue("tekrarDurumu", keyAsNumber as TekrarEnum);
     }
   };
 
@@ -190,13 +199,8 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
           );
           setSecilenKullaniciIsimleri(secilenKullaniciIsimleri);
           form.setFieldValue("tekrarDurumu", etkinlik.tekrarDurumu);
-          setDahaOncePencereSecildiMi(false);
-        } else {
-          setDahaOncePencereSecildiMi(true);
         }
       }
-    } else {
-      setDahaOncePencereSecildiMi(true);
     }
     setEtkinlikPenceresiniGoster(true);
   };
@@ -209,17 +213,17 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     setIlkAcilisMi(true);
   }, [acilanEtkinlikPencereTarihi]);
 
-  const etkinlikKaydet = async (values: any) => {
-    const baslangicTarihi = values.dateRange[0];
-    const bitisTarihi = values.dateRange[1];
+  const etkinlikKaydet = async (values: EtkinlikFormValues) => {
+    const baslangicTarihi = values.tarihAraligi[0];
+    const bitisTarihi = values.tarihAraligi[1];
 
     let etkinlik: Etkinlik = {
       date: seciliGun.toDate(),
       baslangicTarihi: DayjsToDate(baslangicTarihi),
       bitisTarihi: DayjsToDate(bitisTarihi),
-      baslik: values.title,
-      aciklama: values.text,
-      tekrarDurumu: values.tekrarDurumu,
+      baslik: values.baslik,
+      aciklama: values.aciklama,
+      tekrarDurumu: values.tekrarSayisi,
     };
 
     try {
@@ -228,7 +232,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
       if (seciliEtkinlikForm) {
         const etkinlikler: Etkinlik[] = await gununEtkinlikleri();
         etkinlik = { ...etkinlik, id: etkinlikler[0].id };
-      
+
         // İd'yi number'a çevirme veya uygun tipi kullanma
         const etkinlikId = Number(etkinlikler[0].id);
         if (secilenKullanicilar) {
@@ -278,7 +282,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     return dayjsObject.add(3, "hour").toDate();
   };
 
-  const etkinlikPencereKapat  = () => {
+  const etkinlikPencereKapat = () => {
     form.resetFields();
     setSecilenKullaniciIsimleri([]);
     setEtkinlikPenceresiniGoster(false);
@@ -288,13 +292,13 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     <Modal
       title={seciliEtkinlikForm ? "Etkinliği Düzenle" : "Etkinlik Ekle"}
       open={etkinlikPenceresiniGoster}
-      onCancel={etkinlikPencereKapat }
+      onCancel={etkinlikPencereKapat}
       className="modal"
       footer={[
         <Button
           key="save"
           type="primary"
-          onClick={() => {form.submit();}}
+          onClick={() => { form.submit(); }}
           style={{ backgroundColor: "green", borderColor: "green" }}
         >
           Kaydet
@@ -327,7 +331,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     >
       <Form form={form} onFinish={etkinlikKaydet} layout="vertical">
         <Form.Item
-          name="title"
+          name="baslik"
           label={
             <span>
               <MdOutlineModeEditOutline /> Başlık
@@ -342,7 +346,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
           <Input placeholder="Etkinlik Başlığı" />
         </Form.Item>
         <Form.Item
-          name="text"
+          name="aciklama"
           label={
             <span>
               <MdNotes /> Açıklama
@@ -352,7 +356,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
           <Input.TextArea placeholder="Etkinlik Açıklaması" />
         </Form.Item>
         <Form.Item
-          name="dateRange"
+          name="tarihAraligi"
           label={
             <span>
               <MdDateRange /> Tarih Aralığı
@@ -379,19 +383,26 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
           />
         </Form.Item>
         <Form.Item
-          name="tekrarDurumu"
+          name="tekrarSayisi"
           label="Tekrar Durumu"
           rules={[{ required: true, message: "Lütfen tekrar durumunu seçin" }]}
         >
           <Dropdown overlay={<Menu {...menuProps} />}>
             <Button>
               {items.find(
-                (item) => item.key === form.getFieldValue("tekrarDurumu")
+                (item) => item.key === form.getFieldValue("tekrarSayisi")
               )?.label || "Tekrar Durumu Seçin"}{" "}
               <DownOutlined />
             </Button>
           </Dropdown>
         </Form.Item>
+        {/* <Form.Item noStyle shouldUpdate>
+          {() => (
+            <Typography style={{ maxHeight: 250, overflow: "auto" }}>
+              <pre>{JSON.stringify(form.getFieldsValue(), null, 2)}</pre>
+            </Typography>
+          )}
+        </Form.Item> */}
       </Form>
     </Modal>
   );

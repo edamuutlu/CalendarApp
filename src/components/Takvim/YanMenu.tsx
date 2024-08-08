@@ -4,8 +4,6 @@ import "../../assets/css/YanMenu.css";
 import { AppstoreAddOutlined } from "@ant-design/icons";
 import Etkinlik from "../../tipler/Etkinlik";
 import { tumEtkinlikleriGetir } from "../../yonetimler/TakvimYonetimi";
-import { tumKullanicilariGetir } from "../../yonetimler/KullaniciYonetimi";
-import Kullanici from "../../tipler/Kullanici";
 import EtkinlikOlusturButonu from "./EtkinlikOlusturButonu";
 
 type MenuItem = Required<MenuProps>["items"][number];
@@ -20,27 +18,20 @@ const initialItems: MenuItem[] = [
   {
     type: "divider",
   },
-  {
-    key: "grp",
-    label: "Tüm Kullanıcılar",
-    type: "group",
-    children: [], // Kullanıcılar burada listelenecek
-  },
 ];
 
 interface YanMenuProps {
   setEtkinlikPenceresiniGoster: React.Dispatch<React.SetStateAction<boolean>>;
-  setDahaOncePencereSecildiMi: React.Dispatch<React.SetStateAction<boolean>>;
+  setseciliEtkinlik: React.Dispatch<React.SetStateAction<Etkinlik | null>>
 }
 
 const YanMenu = (props: YanMenuProps) => {
   const {
     setEtkinlikPenceresiniGoster,
-    setDahaOncePencereSecildiMi,
+    setseciliEtkinlik
   } = props;
 
   const [etkinlikler, setEtkinlikler] = useState<Etkinlik[]>([]);
-  const [kullanicilar, setKullanicilar] = useState<Kullanici[]>([]);
   const [items, setItems] = useState<MenuItem[]>(initialItems);
 
   useEffect(() => {
@@ -54,18 +45,7 @@ const YanMenu = (props: YanMenuProps) => {
       }
     };
 
-    const kullanicilariCek = async () => {
-      try {
-        const fetchedUsers = await tumKullanicilariGetir();
-        setKullanicilar(fetchedUsers);
-        setUsersMenuItems(fetchedUsers);
-      } catch (error) {
-        console.error("Kullanıcılar getirilirken hata oluştu:", error);
-      }
-    };
-
     etkinlikleriAl();
-    kullanicilariCek();
   }, [etkinlikler]);
 
   const setMyEventsMenuItems = (events: Etkinlik[]) => {
@@ -86,29 +66,12 @@ const YanMenu = (props: YanMenuProps) => {
       return newItems;
     });
   };
-
-  const setUsersMenuItems = (users: Kullanici[]) => {
-    setItems((prevItems) => {
-      const newItems = [...prevItems];
-      const usersItem = newItems.find((item) => item?.key === "grp");
-      if (usersItem && "children" in usersItem) {
-        usersItem.children = users.map((user) => {
-          const key = user.id ? user.id.toString() : "";
-          return {
-            key,
-            label: user.kullaniciAdi,
-          };
-        });
-      }
-      return newItems;
-    });
-  };
    
   return (
     <aside className="sidebar">
       <EtkinlikOlusturButonu
         setEtkinlikPenceresiniGoster={setEtkinlikPenceresiniGoster}
-        setDahaOncePencereSecildiMi={setDahaOncePencereSecildiMi}
+        setseciliEtkinlik={setseciliEtkinlik}
       />
       <Menu
         style={{ width: 256 }}

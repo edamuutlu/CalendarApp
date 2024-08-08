@@ -18,6 +18,7 @@ import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { TekrarEnum } from "../../yonetimler/EtkinlikYonetimi";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { MdDateRange, MdNotes, MdOutlineModeEditOutline } from "react-icons/md";
+import BilgiPenceresi from "./BilgiPenceresi";
 
 dayjs.extend(isBetween);
 dayjs.extend(isSameOrAfter);
@@ -26,13 +27,12 @@ dayjs.extend(isSameOrBefore);
 const Takvim: React.FC = () => {
   const [seciliGun, setSeciliGun] = useState(dayjs());
   const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] = useState(false);
-  const [dahaOncePencereSecildiMi, setDahaOncePencereSecildiMi] = useState(false);
   const [etkinlikData, setEtkinlikData] = useState<Etkinlik[]>([]);
   const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<Etkinlik[]>([]);
   const [seciliEtkinlik, setseciliEtkinlik] = useState<Etkinlik | null>(null);
   const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] = useState<Dayjs>(dayjs());
   const [tumKullanicilar, setTumKullanicilar] = useState<Kullanici[]>([]);
-  const [acilanPopoverId, setAcilanPopoverId] = useState<number | null>(null);
+  const [bilgiPenceresiGorunurluk, setBilgiPenceresiGorunurluk] = useState(false);
 
   const etkinlikleriAl = async (): Promise<Etkinlik[]> => {
     try {
@@ -61,70 +61,30 @@ const Takvim: React.FC = () => {
 
   const etkinligiSeciliYap = (event: Etkinlik) => {
     setseciliEtkinlik(event);
-    setEtkinlikPenceresiniGoster(true);
+    setBilgiPenceresiGorunurluk(false); // BilgiPenceresi'ni kapat
+    setEtkinlikPenceresiniGoster(true); // EtkinlikPenceresi'ni aç
   };
 
-  const popoverAc = (id: number) => {
-    setAcilanPopoverId(id);
-  };
-
-  const popoverKapat = () => {
-    setAcilanPopoverId(null);
-  };
-
-  const hucreyeVeriIsle = (value: Dayjs, info: any) => {
+  const cellRender = (value: Dayjs) => {
     if (!etkinlikData || !eklendigimEtkinlikler) {
       return <ul style={{ padding: "0px 4px" }}></ul>;
     }
 
     const gununEtkinlikleri = etkinlikData.filter((etkinlik) =>
-      etkinlikTarihiKontrol(etkinlik, value)
+      etkinlikTekrarKontrolu(etkinlik, value)
     );
     const eklenenEtkinlikler = eklendigimEtkinlikler.filter((etkinlik) =>
-      etkinlikTarihiKontrol(etkinlik, value)
+      etkinlikTekrarKontrolu(etkinlik, value)
     );
 
     const renderEventItem = (etkinlik: Etkinlik) => (
       <li key={etkinlik.id}>
-        <Popover
-          content={
-            <div>
-              <p className="popup-item">
-                <MdOutlineModeEditOutline />
-                <strong> Başlık:</strong> {etkinlik.baslik}
-              </p>
-              <p className="popup-item">
-                <MdNotes />
-                <strong> Açıklama:</strong> {etkinlik.aciklama}
-              </p>
-              <p className="popup-item">
-                <MdDateRange /> <strong> Tarih:</strong>{" "}
-                {dayjs(etkinlik.baslangicTarihi).format("YYYY/MM/DD HH:mm")} | {dayjs(etkinlik.bitisTarihi).format("YYYY/MM/DD HH:mm")}
-              </p>
-              {/* <p className="popup-item">
-                <UserOutlined />
-                <strong> Kullanıcı Adı:</strong> {etkinlik.ekleyenKullaniciAdi}
-              </p> */}
-              <Button onClick={() => etkinligiSeciliYap(etkinlik)}>
-                Etkinliği Düzenle
-              </Button>
-            </div>
-          }
-          title="Event Details"
-          trigger="click"
-          open={acilanPopoverId === Number(seciliEtkinlik?.id)}
-          onOpenChange={(open) => {
-            if (open) {
-              popoverAc(Number(seciliEtkinlik?.id));
-            } else {
-              popoverKapat();
-            }
-          }}
+        <Button
+          className="cell-style"
+          onClick={() => etkinligiSeciliYap(etkinlik)}
         >
-          <Button className="cell-style">
-            {dayjs(etkinlik.baslangicTarihi).format("HH:mm")} - {etkinlik.baslik}
-          </Button>
-        </Popover>
+          {dayjs(etkinlik.baslangicTarihi).format("HH:mm")} - {etkinlik.baslik}
+        </Button>
       </li>
     );
 
@@ -140,7 +100,7 @@ const Takvim: React.FC = () => {
     );
   };
 
-  const etkinlikTarihiKontrol = (etkinlik: Etkinlik, date: Dayjs) => {
+  const etkinlikTekrarKontrolu = (etkinlik: Etkinlik, date: Dayjs) => {
     const { baslangicTarihi, bitisTarihi, tekrarDurumu } = etkinlik;
     const startDate = dayjs(baslangicTarihi);
     const endDate = dayjs(bitisTarihi);
@@ -181,18 +141,21 @@ const Takvim: React.FC = () => {
 
   const tarihSec = (date: Dayjs) => {
     const gununEtkinlikleri = etkinlikData.filter((etkinlik) =>
-      etkinlikTarihiKontrol(etkinlik, date)
+      etkinlikTekrarKontrolu(etkinlik, date)
     );
     const eklenenEtkinlikler = eklendigimEtkinlikler.filter((etkinlik) =>
-      etkinlikTarihiKontrol(etkinlik, date)
+      etkinlikTekrarKontrolu(etkinlik, date)
     );
     setSeciliGun(date);
     if (gununEtkinlikleri.length || eklenenEtkinlikler.length) {
       const selectedEvent = gununEtkinlikleri.length ? gununEtkinlikleri[0] : (eklenenEtkinlikler.length ? eklenenEtkinlikler[0] : null);
       setseciliEtkinlik(selectedEvent);
+      setBilgiPenceresiGorunurluk(true);
+      setEtkinlikPenceresiniGoster(false);
     } else {
+      setseciliEtkinlik(null);
       setAcilanEtkinlikPencereTarihi(date);
-      setEtkinlikPenceresiniGoster(true); // Open the event window
+      setEtkinlikPenceresiniGoster(true);
     }
   };
 
@@ -202,7 +165,7 @@ const Takvim: React.FC = () => {
       <div className="hero">
         <YanMenu
           setEtkinlikPenceresiniGoster={setEtkinlikPenceresiniGoster}
-          setDahaOncePencereSecildiMi={setDahaOncePencereSecildiMi}
+          setseciliEtkinlik={setseciliEtkinlik}
         />
         <div className="main">
           <div className="takvim-baslik-container">
@@ -247,7 +210,7 @@ const Takvim: React.FC = () => {
           </div>
           <Calendar
             onSelect={tarihSec}
-            cellRender={hucreyeVeriIsle}
+            cellRender={cellRender}
             value={seciliGun}
           />
         </div>
@@ -257,9 +220,14 @@ const Takvim: React.FC = () => {
           setEtkinlikPenceresiniGoster={setEtkinlikPenceresiniGoster}
           etkinlikleriAl={etkinlikleriAl}
           acilanEtkinlikPencereTarihi={acilanEtkinlikPencereTarihi}
-          setDahaOncePencereSecildiMi={setDahaOncePencereSecildiMi}
           tumKullanicilar={tumKullanicilar}
           seciliEtkinlikForm={seciliEtkinlik}
+        />
+        <BilgiPenceresi
+          bilgiPenceresiGorunurluk={bilgiPenceresiGorunurluk}
+          setBilgiPenceresiGorunurluk={setBilgiPenceresiGorunurluk}
+          seciliEtkinlikForm={seciliEtkinlik}
+          etkinligiSeciliYap={etkinligiSeciliYap} // Yeni prop olarak ekliyoruz
         />
         {/* {eklendigimEtkinlikler.length > 0 ? (
           <BilgiPenceresi eklendigimEtkinlikler={eklendigimEtkinlikler} />

@@ -1,160 +1,57 @@
-import { useEffect, useState } from "react";
+import React from "react";
+import { Modal, Descriptions, Button } from "antd";
 import Etkinlik from "../../tipler/Etkinlik";
-import {
-  Input,
-  Modal,
-  Select,
-  Space,
-  TimePicker,
-  Form,
-  DatePicker,
-} from "antd";
-import {
-  MdAccessTime,
-  MdDateRange,
-  MdEventRepeat,
-  MdNotes,
-  MdOutlineModeEditOutline,
-} from "react-icons/md";
-import { UserOutlined } from "@ant-design/icons";
-import Kullanici from "../../tipler/Kullanici";
-import { etkinligeDavetliKullanicilariGetir } from "../../yonetimler/KullaniciYonetimi";
 import dayjs from "dayjs";
 
-const { RangePicker } = DatePicker;
-const dateFormat = "YYYY/MM/DD";
-
 interface BilgiPenceresiProps {
-  etkinlik: Etkinlik[];
+  bilgiPenceresiGorunurluk: boolean;
+  setBilgiPenceresiGorunurluk: (visible: boolean) => void;
+  seciliEtkinlikForm: Etkinlik | null;
+  etkinligiSeciliYap: (event: Etkinlik) => void; // Yeni prop olarak etkinliği düzenleme fonksiyonu
 }
 
-const BilgiPenceresi = (props: BilgiPenceresiProps) => {
-  const {
-    etkinlik
-  } = props;
+const BilgiPenceresi: React.FC<BilgiPenceresiProps> = ({
+  bilgiPenceresiGorunurluk,
+  setBilgiPenceresiGorunurluk,
+  seciliEtkinlikForm,
+  etkinligiSeciliYap,
+}) => {
+  if (!seciliEtkinlikForm) return null;
 
-  const [modalAcikMi, setModalAcikMi] = useState(false);
-  const [secilenKullaniciIsimleri, setSecilenKullaniciIsimleri] = useState<string[]>([]);
+  const { baslik, aciklama, baslangicTarihi, bitisTarihi, tekrarDurumu } = seciliEtkinlikForm;
 
-  console.log('etkinlik', etkinlik)
+  const handleOk = () => {
+    setBilgiPenceresiGorunurluk(false);
+  };
 
-  useEffect(() => {
-    const fetchDavetliKullanicilar = async () => {
-      try {
-        const davetliKullanicilar: Kullanici[] =
-          await etkinligeDavetliKullanicilariGetir(Number(etkinlik[0].id));
-        const secilenKullaniciIsimleri = davetliKullanicilar.map((user) => user.isim);
-        setSecilenKullaniciIsimleri(secilenKullaniciIsimleri);
-      } catch (error) {
-        console.error("Davetli kullanıcıları getirirken hata oluştu:", error);
-      }
-    };
-
-    fetchDavetliKullanicilar();
-  }, [etkinlik]); // etkinlik.id değiştiğinde effect tetiklenir
-
-  const bilgiPenceresiniKapat = () => {
-    setModalAcikMi(false);
+  const handleCancel = () => {
+    setBilgiPenceresiGorunurluk(false);
   };
 
   return (
     <Modal
-      title={"Etkinlik Detayı"}
-      open={modalAcikMi}
-      onCancel={bilgiPenceresiniKapat}
-      className="modal"
+      title="Etkinlik Bilgileri"
+      visible={bilgiPenceresiGorunurluk}
+      onOk={handleOk}
+      onCancel={handleCancel}
+      footer={null} // Kapat butonu eklemek istemiyorsanız bu satırı ekleyin
     >
-      <Form>
-        <Form.Item name="title">
-          <div className="event-input">
-            <MdOutlineModeEditOutline className="event-icon" />
-            <Input
-              placeholder="Etkinlik Başlığı"
-              value={etkinlik[0].baslik}
-              style={{
-                borderStartStartRadius: "0",
-                borderEndStartRadius: "0",
-              }}
-            />
-          </div>
-        </Form.Item>
-
-        <Form.Item name="dateRange">
-          <div className="event-input">
-            <MdDateRange className="event-icon" />
-            <RangePicker
-              format={dateFormat}
-              value={[
-                dayjs(etkinlik[0].baslangicTarihi),
-                dayjs(etkinlik[0].bitisTarihi),
-              ]}
-              disabled={true}
-              className="range-picker"
-              style={{
-                borderStartStartRadius: "0",
-                borderEndStartRadius: "0",
-              }}
-            />
-          </div>
-        </Form.Item>
-
-        <Form.Item name="timeRange">
-          <div className="event-input">
-            <MdAccessTime className="event-icon" />
-            <TimePicker.RangePicker
-              needConfirm={false}
-              format={"HH:mm"}
-              value={[
-                dayjs(etkinlik[0].baslangicTarihi),
-                dayjs(etkinlik[0].bitisTarihi),
-              ]}
-              className="range-picker"
-              style={{
-                borderStartStartRadius: "0",
-                borderEndStartRadius: "0",
-              }}
-            />
-          </div>
-        </Form.Item>
-
-        <Form.Item name="text">
-          <div className="event-input">
-            <MdNotes className="desc-icon" />
-            <Input.TextArea
-              placeholder="Etkinlik Açıklaması"
-              value={etkinlik[0].aciklama}
-              style={{
-                borderStartStartRadius: "0",
-                borderEndStartRadius: "0",
-              }}
-            />
-          </div>
-        </Form.Item>
-
-        <div className="event-input">
-          <UserOutlined className="event-icon" />
-          <Space style={{ width: "100%" }} direction="vertical">
-            <Select
-              mode="multiple"
-              style={{ width: "100%" }}
-              placeholder="Please select"
-              value={secilenKullaniciIsimleri}
-            />
-          </Space>
-        </div>
-
-        <div className="event-input">
-          <MdEventRepeat className="event-icon" />
-          <Input
-            placeholder="Tekrar Tipi"
-            value={etkinlik[0].tekrarDurumu}
-            style={{
-              borderStartStartRadius: "0",
-              borderEndStartRadius: "0",
-            }}
-          />
-        </div>
-      </Form>
+      <Descriptions column={1}>
+        <Descriptions.Item label="Başlık">{baslik}</Descriptions.Item>
+        <Descriptions.Item label="Açıklama">{aciklama}</Descriptions.Item>
+        <Descriptions.Item label="Başlangıç Tarihi">
+          {dayjs(baslangicTarihi).format("YYYY-MM-DD HH:mm")}
+        </Descriptions.Item>
+        <Descriptions.Item label="Bitiş Tarihi">
+          {dayjs(bitisTarihi).format("YYYY-MM-DD HH:mm")}
+        </Descriptions.Item>
+        <Descriptions.Item label="Tekrar Durumu">
+          {tekrarDurumu || "Tekrar Yok"}
+        </Descriptions.Item>
+      </Descriptions>
+      <Button onClick={() => etkinligiSeciliYap(seciliEtkinlikForm)}>
+        Etkinliği Düzenle
+      </Button>
     </Modal>
   );
 };

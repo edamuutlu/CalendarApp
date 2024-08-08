@@ -1,25 +1,28 @@
 import { FaRegCalendarPlus } from "react-icons/fa";
 import "../../assets/css/EtkinlikOlusturButonu.css";
+import Etkinlik from "../../tipler/Etkinlik";
 
 interface EtkinlikOlusturButonuProps {
   setEtkinlikPenceresiniGoster: React.Dispatch<React.SetStateAction<boolean>>;
-  setDahaOncePencereSecildiMi: React.Dispatch<React.SetStateAction<boolean>>;
+  setseciliEtkinlik: React.Dispatch<React.SetStateAction<Etkinlik | null>>
 }
 
 const EtkinlikOlusturButonu = (props: EtkinlikOlusturButonuProps) => {
   const {
     setEtkinlikPenceresiniGoster,
-    setDahaOncePencereSecildiMi
+    setseciliEtkinlik
   } = props;
 
   const etkinlikPenceresiniAc = () => {
-    setDahaOncePencereSecildiMi(true);
+    /* setseciliEtkinlik(null); */
     setEtkinlikPenceresiniGoster(true);
   };
 
   return (
     <button
-      onClick={() => etkinlikPenceresiniAc()}
+      onClick={() => {
+        etkinlikPenceresiniAc();
+      }}
       className="create-event-button"
     >
       <FaRegCalendarPlus className="button-img" />

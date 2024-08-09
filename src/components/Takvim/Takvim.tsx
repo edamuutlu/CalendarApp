@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Calendar, Popover } from "antd";
+import { Button, Calendar } from "antd";
 import "../../assets/css/Takvim.css";
 import dayjs, { Dayjs } from "dayjs";
 import {
@@ -17,7 +17,6 @@ import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { TekrarEnum } from "../../yonetimler/EtkinlikYonetimi";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
-import { MdDateRange, MdNotes, MdOutlineModeEditOutline } from "react-icons/md";
 import BilgiPenceresi from "./BilgiPenceresi";
 
 dayjs.extend(isBetween);
@@ -70,35 +69,40 @@ const Takvim: React.FC = () => {
       return <ul style={{ padding: "0px 4px" }}></ul>;
     }
 
-    const gununEtkinlikleri = etkinlikData.filter((etkinlik) =>
-      etkinlikTekrarKontrolu(etkinlik, value)
-    );
-    const eklenenEtkinlikler = eklendigimEtkinlikler.filter((etkinlik) =>
-      etkinlikTekrarKontrolu(etkinlik, value)
-    );
+    // Saate göre etkinlik sıralama
+    const gununEtkinlikleri = etkinlikData
+      .filter((etkinlik) => etkinlikTekrarKontrolu(etkinlik, value))
+      .sort((a, b) => dayjs(a.baslangicTarihi).diff(dayjs(b.baslangicTarihi)));
 
+    const eklenenEtkinlikler = eklendigimEtkinlikler
+      .filter((etkinlik) => etkinlikTekrarKontrolu(etkinlik, value))
+      .sort((a, b) => dayjs(a.baslangicTarihi).diff(dayjs(b.baslangicTarihi)));
+
+    // Render event item
     const renderEventItem = (etkinlik: Etkinlik) => (
       <li key={etkinlik.id}>
         <Button
           className="cell-style"
-          onClick={() => etkinligiSeciliYap(etkinlik)}
+          onClick={() => {
+            setseciliEtkinlik(etkinlik);
+            setEtkinlikPenceresiniGoster(false);
+            setBilgiPenceresiGorunurluk(true);
+          }}
         >
           {dayjs(etkinlik.baslangicTarihi).format("HH:mm")} - {etkinlik.baslik}
         </Button>
       </li>
     );
 
+    // Render the sorted list of events
     return (
       <ul className="etkinlik-listesi">
-        {gununEtkinlikleri.map((etkinlik) =>
-          renderEventItem(etkinlik)
-        )}
-        {eklenenEtkinlikler.map((etkinlik) =>
-          renderEventItem(etkinlik) /* guest için style vermelisin */
-        )}
+        {gununEtkinlikleri.map((etkinlik) => renderEventItem(etkinlik))}
+        {eklenenEtkinlikler.map((etkinlik) => renderEventItem(etkinlik))}
       </ul>
     );
   };
+
 
   const etkinlikTekrarKontrolu = (etkinlik: Etkinlik, date: Dayjs) => {
     const { baslangicTarihi, bitisTarihi, tekrarDurumu } = etkinlik;
@@ -148,10 +152,7 @@ const Takvim: React.FC = () => {
     );
     setSeciliGun(date);
     if (gununEtkinlikleri.length || eklenenEtkinlikler.length) {
-      const selectedEvent = gununEtkinlikleri.length ? gununEtkinlikleri[0] : (eklenenEtkinlikler.length ? eklenenEtkinlikler[0] : null);
-      setseciliEtkinlik(selectedEvent);
-      setBilgiPenceresiGorunurluk(true);
-      setEtkinlikPenceresiniGoster(false);
+      setEtkinlikPenceresiniGoster(true);
     } else {
       setseciliEtkinlik(null);
       setAcilanEtkinlikPencereTarihi(date);

@@ -81,7 +81,6 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
 
   useEffect(() => {
     if (seciliEtkinlikForm) {
-      console.log("Selected Event:", seciliEtkinlikForm);
       form.setFieldsValue({
         baslik: seciliEtkinlikForm.baslik,
         aciklama: seciliEtkinlikForm.aciklama,
@@ -98,7 +97,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     } else {
       form.resetFields();
       form.setFieldsValue({
-        tarihAraligi: [dayjs(seciliGun), dayjs(seciliGun).add(1, "hour")],
+        tarihAraligi: [dayjs(seciliGun).add(1, "hour"), dayjs(seciliGun).add(2, "hour")],
         tekrarSayisi: TekrarEnum.hic,
       });
     }
@@ -227,13 +226,11 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     };
 
     try {
-      console.log('seciliEtkinlikForm :>> ', seciliEtkinlikForm);
-      console.log('etkinlik :>> ', etkinlik);
-      if (seciliEtkinlikForm) {
+      if (seciliEtkinlikForm) { /* Etkinlik Güncelleme */
         const etkinlikler: Etkinlik[] = await gununEtkinlikleri();
+        console.log('etkinlikler :>> ', etkinlikler);
         etkinlik = { ...etkinlik, id: etkinlikler[0].id };
 
-        // İd'yi number'a çevirme veya uygun tipi kullanma
         const etkinlikId = Number(etkinlikler[0].id);
         if (secilenKullanicilar) {
           const selectedUserIds = secilenKullanicilar.map((user) => user.id);
@@ -250,12 +247,11 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
         } else {
           console.error("Davetli kullanıcı null veya undefined.");
         }
-      } else {
+      } else { /* Etkinlik Ekleme */
         await etkinlikEkle(etkinlik);
         const etkinlikler: Etkinlik[] = await gununEtkinlikleri();
-        // İd'yi number'a çevirme veya uygun tipi kullanma
         const etkinlikId = Number(etkinlikler[0].id);
-        // davetliKullanici'nın null olmadığından emin olma
+        
         if (secilenKullanicilar) {
           const selectedUserIds = secilenKullanicilar.map((user) => user.id);
           const request: EtkinligeKullaniciEkleRequest = {

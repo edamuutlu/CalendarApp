@@ -1,17 +1,26 @@
 .etkinlik-listesi {
   padding: 0;
+  margin: 0;
   font-size: 12px;
 }
 
 .cell-style {
+  position: absolute;
+  top: 3%;
+  left: 0px;
   list-style: none;
-  padding: 3px 10px;
+  width: 100%;
+  padding: 3px 5px;
   font-weight: 500;
   background: #cce7ff;
-  border-radius: 16px;
+  border-radius: 0px;
+  border: none;
   margin-bottom: 2px;
+  display: flex !important;
+  justify-content: start;
   cursor: pointer;
 }
+
 
 .guest-cell-style {
   list-style: none;
@@ -65,6 +74,8 @@
 }
 
 .main {
+  position: relative;
+  width: 100%;
   margin-top: 10px;
   margin-right: 10px;
   margin-left: 10px;

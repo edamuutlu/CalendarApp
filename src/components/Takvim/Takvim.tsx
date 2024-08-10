@@ -223,11 +223,13 @@ const Takvim: React.FC = () => {
           acilanEtkinlikPencereTarihi={acilanEtkinlikPencereTarihi}
           tumKullanicilar={tumKullanicilar}
           seciliEtkinlikForm={seciliEtkinlik}
+          setseciliEtkinlik={setseciliEtkinlik}
         />
         <BilgiPenceresi
           bilgiPenceresiGorunurluk={bilgiPenceresiGorunurluk}
           setBilgiPenceresiGorunurluk={setBilgiPenceresiGorunurluk}
           seciliEtkinlikForm={seciliEtkinlik}
+          setseciliEtkinlik={setseciliEtkinlik}
           etkinligiSeciliYap={etkinligiSeciliYap} // Yeni prop olarak ekliyoruz
         />
         {/* {eklendigimEtkinlikler.length > 0 ? (

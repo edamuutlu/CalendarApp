@@ -7,6 +7,8 @@ interface BilgiPenceresiProps {
   bilgiPenceresiGorunurluk: boolean;
   setBilgiPenceresiGorunurluk: (visible: boolean) => void;
   seciliEtkinlikForm: Etkinlik | null;
+  setseciliEtkinlik: React.Dispatch<React.SetStateAction<Etkinlik | null>>
+
   etkinligiSeciliYap: (event: Etkinlik) => void; // Yeni prop olarak etkinliği düzenleme fonksiyonu
 }
 
@@ -14,6 +16,7 @@ const BilgiPenceresi: React.FC<BilgiPenceresiProps> = ({
   bilgiPenceresiGorunurluk,
   setBilgiPenceresiGorunurluk,
   seciliEtkinlikForm,
+  setseciliEtkinlik,
   etkinligiSeciliYap,
 }) => {
   if (!seciliEtkinlikForm) return null;
@@ -26,6 +29,7 @@ const BilgiPenceresi: React.FC<BilgiPenceresiProps> = ({
 
   const handleCancel = () => {
     setBilgiPenceresiGorunurluk(false);
+    setseciliEtkinlik(null);
   };
 
   return (

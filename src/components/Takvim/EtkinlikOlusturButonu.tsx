@@ -14,7 +14,7 @@ const EtkinlikOlusturButonu = (props: EtkinlikOlusturButonuProps) => {
   } = props;
 
   const etkinlikPenceresiniAc = () => {
-    /* setseciliEtkinlik(null); */
+    setseciliEtkinlik(null);
     setEtkinlikPenceresiniGoster(true);
   };
 

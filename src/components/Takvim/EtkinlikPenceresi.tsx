@@ -53,6 +53,7 @@ interface EtkinlikPenceresiProps {
   acilanEtkinlikPencereTarihi: Dayjs;
   tumKullanicilar: Kullanici[];
   seciliEtkinlikForm: Etkinlik | null;
+  setseciliEtkinlik: React.Dispatch<React.SetStateAction<Etkinlik | null>>
 }
 
 interface EtkinlikFormValues {
@@ -71,6 +72,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     acilanEtkinlikPencereTarihi,
     tumKullanicilar,
     seciliEtkinlikForm,
+    setseciliEtkinlik
   } = props;
 
   const [form] = Form.useForm();
@@ -163,10 +165,11 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
 
   const gununEtkinlikleri = async (): Promise<Etkinlik[]> => {
     const data: Etkinlik[] = await etkinlikleriAl();
+    console.log('data', data)
     return data.filter((event) => {
       const startDate = dayjs(event.baslangicTarihi);
       const endDate = dayjs(event.bitisTarihi);
-      const currentDate = dayjs(acilanEtkinlikPencereTarihi);
+      const currentDate = dayjs(seciliGun);
 
       return (
         currentDate.isSame(startDate, "day") ||
@@ -282,6 +285,8 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     form.resetFields();
     setSecilenKullaniciIsimleri([]);
     setEtkinlikPenceresiniGoster(false);
+    setseciliEtkinlik(null);
+    
   };
 
   return (
@@ -365,7 +370,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
             format="YYYY-MM-DD HH:mm"
             style={{ width: "100%" }}
             disabledDate={(current) =>
-              current && current.isBefore(dayjs().startOf("day"))
+              current && current.isBefore(seciliGun.startOf("day"))
             }
           />
         </Form.Item>

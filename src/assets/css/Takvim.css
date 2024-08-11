@@ -21,6 +21,50 @@
   cursor: pointer;
 }
 
+/* styles.css */
+.event-item {
+  position: absolute;
+  background-color: #cce7ff;
+  height: 20px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 1px 4px;
+  font-size: 12px;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.event-item.guest {
+  background-color: #a692ff;
+}
+
+.event-item.start {
+  border-left: 1px solid #91d5ff;
+  border-radius: 4px 0 0 4px;
+}
+
+.event-item.end {
+  border-right: 1px solid #91d5ff;
+  border-radius: 0 4px 4px 0;
+}
+
+.event-item.start-end {
+  border-radius: 4px;
+}
+
+.event-item.active {
+  background-color: #91d5ff !important;
+  color: #303030 !important;
+}
+
+:where(
+    .css-dev-only-do-not-override-p8b6i
+  ).ant-picker-calendar.ant-picker-calendar-full
+  .ant-picker-calendar-date {
+  padding: 0 !important;
+  margin: 0 !important;
+}
 
 .guest-cell-style {
   list-style: none;

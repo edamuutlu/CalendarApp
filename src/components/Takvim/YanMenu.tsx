@@ -22,14 +22,11 @@ const initialItems: MenuItem[] = [
 
 interface YanMenuProps {
   setEtkinlikPenceresiniGoster: React.Dispatch<React.SetStateAction<boolean>>;
-  setseciliEtkinlik: React.Dispatch<React.SetStateAction<Etkinlik | null>>
+  setseciliEtkinlik: React.Dispatch<React.SetStateAction<Etkinlik | null>>;
 }
 
 const YanMenu = (props: YanMenuProps) => {
-  const {
-    setEtkinlikPenceresiniGoster,
-    setseciliEtkinlik
-  } = props;
+  const { setEtkinlikPenceresiniGoster, setseciliEtkinlik } = props;
 
   const [etkinlikler, setEtkinlikler] = useState<Etkinlik[]>([]);
   const [items, setItems] = useState<MenuItem[]>(initialItems);
@@ -46,27 +43,28 @@ const YanMenu = (props: YanMenuProps) => {
     };
 
     etkinlikleriAl();
-  }, [etkinlikler]);
+  }, []);
 
   const setMyEventsMenuItems = (events: Etkinlik[]) => {
     setItems((prevItems) => {
       const newItems = [...prevItems];
       const myEventsItem = newItems.find((item) => item?.key === "sub2");
       if (myEventsItem && "children" in myEventsItem) {
-        myEventsItem.children = events.length > 0
-          ? events.map((event) => {
-            const key = event.id ? event.id.toString() : "";
-            return {
-              key,
-              label: event.baslik,
-            };
-          })
-          : [{ key: "no-events", label: "Etkinlik yok" }];
+        myEventsItem.children =
+          events.length > 0
+            ? events.map((event) => {
+                const key = event.id ? event.id.toString() : "";
+                return {
+                  key,
+                  label: event.baslik,
+                };
+              })
+            : [{ key: "no-events", label: "Etkinlik yok" }];
       }
       return newItems;
     });
   };
-   
+
   return (
     <aside className="sidebar">
       <EtkinlikOlusturButonu

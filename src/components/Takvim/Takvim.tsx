@@ -25,13 +25,18 @@ dayjs.extend(isSameOrBefore);
 
 const Takvim: React.FC = () => {
   const [seciliGun, setSeciliGun] = useState(dayjs());
-  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] = useState(false);
+  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] =
+    useState(false);
   const [etkinlikData, setEtkinlikData] = useState<Etkinlik[]>([]);
-  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<Etkinlik[]>([]);
+  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<
+    Etkinlik[]
+  >([]);
   const [seciliEtkinlik, setseciliEtkinlik] = useState<Etkinlik | null>(null);
-  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] = useState<Dayjs>(dayjs());
+  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] =
+    useState<Dayjs>(dayjs());
   const [tumKullanicilar, setTumKullanicilar] = useState<Kullanici[]>([]);
-  const [bilgiPenceresiGorunurluk, setBilgiPenceresiGorunurluk] = useState(false);
+  const [bilgiPenceresiGorunurluk, setBilgiPenceresiGorunurluk] =
+    useState(false);
 
   const etkinlikleriAl = async (): Promise<Etkinlik[]> => {
     try {
@@ -56,7 +61,7 @@ const Takvim: React.FC = () => {
 
     kullanicilariCek();
     etkinlikleriAl();
-  }, [seciliGun]);
+  }, [etkinlikPenceresiniGoster]);
 
   const etkinligiSeciliYap = (event: Etkinlik) => {
     setseciliEtkinlik(event);
@@ -64,45 +69,106 @@ const Takvim: React.FC = () => {
     setEtkinlikPenceresiniGoster(true); // EtkinlikPenceresi'ni aç
   };
 
+  const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
   const cellRender = (value: Dayjs) => {
     if (!etkinlikData || !eklendigimEtkinlikler) {
       return <ul style={{ padding: "0px 4px" }}></ul>;
     }
 
-    // Saate göre etkinlik sıralama
-    const gununEtkinlikleri = etkinlikData
-      .filter((etkinlik) => etkinlikTekrarKontrolu(etkinlik, value))
-      .sort((a, b) => dayjs(a.baslangicTarihi).diff(dayjs(b.baslangicTarihi)));
+    const allEvents = [...etkinlikData, ...eklendigimEtkinlikler];
 
-    const eklenenEtkinlikler = eklendigimEtkinlikler
-      .filter((etkinlik) => etkinlikTekrarKontrolu(etkinlik, value))
-      .sort((a, b) => dayjs(a.baslangicTarihi).diff(dayjs(b.baslangicTarihi)));
+    const indexedEvents = allEvents.map((event) => {
+      const overlappingEvents = allEvents.filter(
+        (e) =>
+          (dayjs(e.baslangicTarihi).isBefore(dayjs(event.bitisTarihi)) &&
+            dayjs(e.bitisTarihi).isAfter(dayjs(event.baslangicTarihi))) ||
+          (dayjs(e.baslangicTarihi).isSame(dayjs(event.baslangicTarihi)) &&
+            dayjs(e.bitisTarihi).isSame(dayjs(event.bitisTarihi)))
+      );
+      console.log("overlappingEvents", overlappingEvents);
+      const index = overlappingEvents.indexOf(event);
+      return { ...event, index };
+    });
 
-    // Render event item
-    const renderEventItem = (etkinlik: Etkinlik) => (
-      <li key={etkinlik.id}>
-        <Button
-          className="cell-style"
-          onClick={() => {
+    console.log('indexedEvents', indexedEvents)
+
+    /* const relevantEvents = indexedEvents
+      .filter((etkinlik) => etkinlikTekrarKontrolu(etkinlik, value))
+      .map((event, index) => ({ ...event, index }))
+      .sort((a, b) => dayjs(a.baslangicTarihi).diff(dayjs(b.baslangicTarihi))); */
+
+      const relevantEvents = indexedEvents.filter((etkinlik) =>
+        etkinlikTekrarKontrolu(etkinlik, value)
+      );
+  
+      relevantEvents.sort((a, b) => a.index - b.index);
+
+    const renderEventItem = (etkinlik: Etkinlik & { index: number }) => {
+      const start = dayjs(etkinlik.baslangicTarihi);
+      const end = dayjs(etkinlik.bitisTarihi);
+      const isStart = value.isSame(start, "day");
+      const isEnd = value.isSame(end, "day");
+
+      let classes = "event-item";
+
+      if (etkinlik.ekleyenKullaniciAdi) {
+        classes += " guest";
+      }
+      if (isStart && isEnd) {
+        classes += " start-end";
+      } else if (isStart) {
+        classes += " start";
+      } else if (isEnd) {
+        classes += " end";
+      }
+
+      return (
+        <div
+          key={etkinlik.id}
+          className={`${classes} ${
+            hoveredEventId === String(etkinlik.id) ? "active" : ""
+          }`}
+          style={{
+            top: `${etkinlik.index * 25}px`,
+            width: isEnd ? "calc(100% - 12px)" : "calc(100% - 4px)",
+            left: "0",
+            right: isEnd ? "0" : "0",
+            position: "absolute",
+          }}
+          onMouseEnter={() => setHoveredEventId(String(etkinlik.id))}
+          onMouseLeave={() => setHoveredEventId(null)}
+          onClick={(e) => {
+            e.stopPropagation();
             setseciliEtkinlik(etkinlik);
-            setEtkinlikPenceresiniGoster(false);
-            setBilgiPenceresiGorunurluk(true);
+            tarihSec(value, true);
           }}
         >
-          {dayjs(etkinlik.baslangicTarihi).format("HH:mm")} - {etkinlik.baslik}
-        </Button>
-      </li>
-    );
+          {isStart
+            ? `${dayjs(etkinlik.baslangicTarihi).format("HH:mm")} - ${
+                etkinlik.baslik
+              }`
+            : ""}
+        </div>
+      );
+    };
 
-    // Render the sorted list of events
+    const maxIndex = Math.max(...relevantEvents.map((e) => e.index), 0);
+
     return (
-      <ul className="etkinlik-listesi">
-        {gununEtkinlikleri.map((etkinlik) => renderEventItem(etkinlik))}
-        {eklenenEtkinlikler.map((etkinlik) => renderEventItem(etkinlik))}
-      </ul>
+      <div
+    style={{
+      position: "relative",
+      height: `${(maxIndex + 1) * 30}px`, // Burada `${}` ile bir template literal kullanmalısınız
+      overflow: "hidden",
+      width: "100%",
+      zIndex: 10,
+    }}
+  >
+    {relevantEvents.map(renderEventItem)}
+  </div>
+
     );
   };
-
 
   const etkinlikTekrarKontrolu = (etkinlik: Etkinlik, date: Dayjs) => {
     const { baslangicTarihi, bitisTarihi, tekrarDurumu } = etkinlik;
@@ -143,7 +209,7 @@ const Takvim: React.FC = () => {
     }
   };
 
-  const tarihSec = (date: Dayjs) => {
+  const tarihSec = (date: Dayjs, isEventClick: boolean = false) => {
     const gununEtkinlikleri = etkinlikData.filter((etkinlik) =>
       etkinlikTekrarKontrolu(etkinlik, date)
     );
@@ -151,12 +217,21 @@ const Takvim: React.FC = () => {
       etkinlikTekrarKontrolu(etkinlik, date)
     );
     setSeciliGun(date);
-    if (gununEtkinlikleri.length || eklenenEtkinlikler.length) {
+
+    if (isEventClick) {
+      // Etkinliğe tıklandıysa sadece BilgiPenceresi'ni aç
+      setBilgiPenceresiGorunurluk(true);
+      setEtkinlikPenceresiniGoster(false);
+    } else if (gununEtkinlikleri.length || eklenenEtkinlikler.length) {
+      // Etkinlik olan bir günün boş alanına tıklandıysa EtkinlikPenceresi'ni aç
       setEtkinlikPenceresiniGoster(true);
+      setBilgiPenceresiGorunurluk(false);
     } else {
+      // Boş bir güne tıklandıysa EtkinlikPenceresi'ni aç
       setseciliEtkinlik(null);
       setAcilanEtkinlikPencereTarihi(date);
       setEtkinlikPenceresiniGoster(true);
+      setBilgiPenceresiGorunurluk(false);
     }
   };
 
@@ -210,7 +285,7 @@ const Takvim: React.FC = () => {
             </div>
           </div>
           <Calendar
-            onSelect={tarihSec}
+            onSelect={(date) => tarihSec(date, false)} // isEventClick parametresini false olarak gönder
             cellRender={cellRender}
             value={seciliGun}
           />

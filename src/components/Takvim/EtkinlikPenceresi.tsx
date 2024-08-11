@@ -128,17 +128,17 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     },
   ];
 
-  const tekrarTipiSec: MenuProps["onClick"] = (e) => {
-    const keyAsNumber = Number(e.key);
-    const selectedItem = items.find((item) => item.key === keyAsNumber);
-
-    if (selectedItem) {
-      form.setFieldsValue({
-        tekrarSayisi: keyAsNumber as TekrarEnum,
-      });
-      message.info(`Selected: ${selectedItem.label}`);
-    }
+  const tekrarTipiSec: MenuProps["onClick"] = ({ key }) => {
+    form.setFieldsValue({ tekrarSayisi: Number(key) as TekrarEnum });
   };
+
+  const menu = (
+    <Menu onClick={tekrarTipiSec}>
+      {items.map((item) => (
+        <Menu.Item key={item.key}>{item.label}</Menu.Item>
+      ))}
+    </Menu>
+  );
 
   const menuProps = {
     items: items.map((item) => ({ key: item.key, label: item.label })),
@@ -383,17 +383,10 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
             value={secilenKullaniciIsimleri}
           />
         </Form.Item>
-        <Form.Item
-          name="tekrarSayisi"
-          label="Tekrar Durumu"
-          rules={[{ required: true, message: "Lütfen tekrar durumunu seçin" }]}
-        >
-          <Dropdown overlay={<Menu {...menuProps} />}>
+        <Form.Item name="tekrarSayisi" label="Tekrar Durumu">
+          <Dropdown overlay={menu}>
             <Button>
-              {items.find(
-                (item) => item.key === form.getFieldValue("tekrarSayisi")
-              )?.label || "Tekrar Durumu Seçin"}{" "}
-              <DownOutlined />
+              {items.find((item) => item.key === form.getFieldValue('tekrarSayisi'))?.label || 'Tekrar Durumu Seçin'} <DownOutlined />
             </Button>
           </Dropdown>
         </Form.Item>

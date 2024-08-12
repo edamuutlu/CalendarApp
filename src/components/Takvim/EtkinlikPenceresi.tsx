@@ -14,11 +14,7 @@ import {
 } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
-import {
-  MdDateRange,
-  MdNotes,
-  MdOutlineModeEditOutline,
-} from "react-icons/md";
+import { MdDateRange, MdNotes, MdOutlineModeEditOutline } from "react-icons/md";
 import {
   etkinlikEkle,
   etkinlikGuncelle,
@@ -53,7 +49,7 @@ interface EtkinlikPenceresiProps {
   acilanEtkinlikPencereTarihi: Dayjs;
   tumKullanicilar: Kullanici[];
   seciliEtkinlikForm: Etkinlik | null;
-  setseciliEtkinlik: React.Dispatch<React.SetStateAction<Etkinlik | null>>
+  setseciliEtkinlik: React.Dispatch<React.SetStateAction<Etkinlik | null>>;
 }
 
 interface EtkinlikFormValues {
@@ -72,14 +68,18 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     acilanEtkinlikPencereTarihi,
     tumKullanicilar,
     seciliEtkinlikForm,
-    setseciliEtkinlik
+    setseciliEtkinlik,
   } = props;
 
   const [form] = Form.useForm();
   const [ilkAcilisMi, setIlkAcilisMi] = useState(false);
   const [kullanicilar, setKullanicilar] = useState<Kullanici[]>([]);
-  const [secilenKullanicilar, setSecilenKullanicilar] = useState<Kullanici[]>([]);
-  const [secilenKullaniciIsimleri, setSecilenKullaniciIsimleri] = useState<string[]>([]);
+  const [secilenKullanicilar, setSecilenKullanicilar] = useState<Kullanici[]>(
+    []
+  );
+  const [secilenKullaniciIsimleri, setSecilenKullaniciIsimleri] = useState<
+    string[]
+  >([]);
 
   useEffect(() => {
     if (seciliEtkinlikForm) {
@@ -99,7 +99,10 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     } else {
       form.resetFields();
       form.setFieldsValue({
-        tarihAraligi: [dayjs(seciliGun).add(1, "hour"), dayjs(seciliGun).add(2, "hour")],
+        tarihAraligi: [
+          dayjs(seciliGun).add(1, "hour"),
+          dayjs(seciliGun).add(2, "hour"),
+        ],
         tekrarSayisi: TekrarEnum.hic,
       });
     }
@@ -128,22 +131,27 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     },
   ];
 
-  const tekrarTipiSec: MenuProps["onClick"] = ({ key }) => {
-    form.setFieldsValue({ tekrarSayisi: Number(key) as TekrarEnum });
-  };
+  const tekrarTipiSec: MenuProps["onClick"] = (e) => {
+    const keyAsNumber = Number(e.key);
+    const selectedItem = items.find((item) => item.key === keyAsNumber);
 
-  const menu = (
-    <Menu onClick={tekrarTipiSec}>
-      {items.map((item) => (
-        <Menu.Item key={item.key}>{item.label}</Menu.Item>
-      ))}
-    </Menu>
-  );
+    if (selectedItem) {
+      form.setFieldsValue({
+        tekrarSayisi: keyAsNumber as TekrarEnum,
+      });
+      message.info(`Selected: ${selectedItem.label}`);
+    }
+  };
 
   const menuProps = {
     items: items.map((item) => ({ key: item.key, label: item.label })),
     onClick: tekrarTipiSec,
   };
+
+  console.log(
+    'form.getFieldValue("tekrarSayisi")',
+    form.getFieldValue("tekrarSayisi")
+  );
 
   const options: SelectProps["options"] = [];
 
@@ -165,7 +173,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
 
   const gununEtkinlikleri = async (): Promise<Etkinlik[]> => {
     const data: Etkinlik[] = await etkinlikleriAl();
-    console.log('data', data)
+    console.log("data", data);
     return data.filter((event) => {
       const startDate = dayjs(event.baslangicTarihi);
       const endDate = dayjs(event.bitisTarihi);
@@ -229,9 +237,10 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     };
 
     try {
-      if (seciliEtkinlikForm) { /* Etkinlik Güncelleme */
+      if (seciliEtkinlikForm) {
+        /* Etkinlik Güncelleme */
         const etkinlikler: Etkinlik[] = await gununEtkinlikleri();
-        console.log('etkinlikler :>> ', etkinlikler);
+        console.log("etkinlikler :>> ", etkinlikler);
         etkinlik = { ...etkinlik, id: etkinlikler[0].id };
 
         const etkinlikId = Number(etkinlikler[0].id);
@@ -250,11 +259,12 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
         } else {
           console.error("Davetli kullanıcı null veya undefined.");
         }
-      } else { /* Etkinlik Ekleme */
+      } else {
+        /* Etkinlik Ekleme */
         await etkinlikEkle(etkinlik);
         const etkinlikler: Etkinlik[] = await gununEtkinlikleri();
         const etkinlikId = Number(etkinlikler[0].id);
-        
+
         if (secilenKullanicilar) {
           const selectedUserIds = secilenKullanicilar.map((user) => user.id);
           const request: EtkinligeKullaniciEkleRequest = {
@@ -286,7 +296,6 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     setSecilenKullaniciIsimleri([]);
     setEtkinlikPenceresiniGoster(false);
     setseciliEtkinlik(null);
-    
   };
 
   return (
@@ -299,7 +308,9 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
         <Button
           key="save"
           type="primary"
-          onClick={() => { form.submit(); }}
+          onClick={() => {
+            form.submit();
+          }}
           style={{ backgroundColor: "green", borderColor: "green" }}
         >
           Kaydet
@@ -328,7 +339,6 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
           </Popconfirm>
         ),
       ].filter(Boolean)}
-
     >
       <Form form={form} onFinish={etkinlikKaydet} layout="vertical">
         <Form.Item
@@ -383,12 +393,29 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
             value={secilenKullaniciIsimleri}
           />
         </Form.Item>
-        <Form.Item name="tekrarSayisi" label="Tekrar Durumu">
-          <Dropdown overlay={menu}>
-            <Button>
-              {items.find((item) => item.key === form.getFieldValue('tekrarSayisi'))?.label || 'Tekrar Durumu Seçin'} <DownOutlined />
-            </Button>
-          </Dropdown>
+        <Form.Item
+          shouldUpdate={(prevValues, currentValues) =>
+            prevValues.tekrarSayisi !== currentValues.tekrarSayisi
+          }
+        >
+          {({ getFieldValue }) => (
+            <Form.Item
+              name="tekrarSayisi"
+              label="Tekrar Durumu"
+              rules={[
+                { required: true, message: "Lütfen tekrar durumunu seçin" },
+              ]}
+            >
+              <Dropdown overlay={<Menu {...menuProps} />}>
+                <Button>
+                  {items.find(
+                    (item) => item.key === getFieldValue("tekrarSayisi")
+                  )?.label || "Tekrar Durumu Seçin"}{" "}
+                  <DownOutlined />
+                </Button>
+              </Dropdown>
+            </Form.Item>
+          )}
         </Form.Item>
         {/* <Form.Item noStyle shouldUpdate>
           {() => (

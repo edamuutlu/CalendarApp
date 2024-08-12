@@ -29,7 +29,7 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  padding: 1px 4px;
+  padding: 0px 4px;
   font-size: 12px;
   line-height: 18px;
   cursor: pointer;

@@ -61,7 +61,7 @@ const Takvim: React.FC = () => {
 
     kullanicilariCek();
     etkinlikleriAl();
-  }, [etkinlikPenceresiniGoster]);
+  }, []);
 
   const etkinligiSeciliYap = (event: Etkinlik) => {
     setseciliEtkinlik(event);
@@ -71,37 +71,28 @@ const Takvim: React.FC = () => {
 
   const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
   const cellRender = (value: Dayjs) => {
-    if (!etkinlikData || !eklendigimEtkinlikler) {
-      return <ul style={{ padding: "0px 4px" }}></ul>;
-    }
+    const tumEtkinlikler  = [...etkinlikData, ...eklendigimEtkinlikler];
 
-    const allEvents = [...etkinlikData, ...eklendigimEtkinlikler];
-
-    const indexedEvents = allEvents.map((event) => {
-      const overlappingEvents = allEvents.filter(
+    const indeksliEtkinlikler  = tumEtkinlikler .map((event) => {
+      const cakisanEtkinlikler  = tumEtkinlikler .filter(
         (e) =>
-          (dayjs(e.baslangicTarihi).isBefore(dayjs(event.bitisTarihi)) &&
-            dayjs(e.bitisTarihi).isAfter(dayjs(event.baslangicTarihi))) ||
-          (dayjs(e.baslangicTarihi).isSame(dayjs(event.baslangicTarihi)) &&
-            dayjs(e.bitisTarihi).isSame(dayjs(event.bitisTarihi)))
+          dayjs(e.baslangicTarihi).isSame(
+            dayjs(event.baslangicTarihi),
+            "day"
+          ) ||
+          dayjs(e.bitisTarihi).isSame(dayjs(event.bitisTarihi), "day") ||
+          (dayjs(e.baslangicTarihi).isBefore(dayjs(event.bitisTarihi), "day") &&
+            dayjs(e.bitisTarihi).isAfter(dayjs(event.baslangicTarihi), "day"))
       );
-      console.log("overlappingEvents", overlappingEvents);
-      const index = overlappingEvents.indexOf(event);
+      const index = cakisanEtkinlikler .indexOf(event);
       return { ...event, index };
     });
 
-    console.log('indexedEvents', indexedEvents)
+    const relevantEvents = indeksliEtkinlikler .filter((etkinlik) =>
+      etkinlikTekrarKontrolu(etkinlik, value)
+    );
 
-    /* const relevantEvents = indexedEvents
-      .filter((etkinlik) => etkinlikTekrarKontrolu(etkinlik, value))
-      .map((event, index) => ({ ...event, index }))
-      .sort((a, b) => dayjs(a.baslangicTarihi).diff(dayjs(b.baslangicTarihi))); */
-
-      const relevantEvents = indexedEvents.filter((etkinlik) =>
-        etkinlikTekrarKontrolu(etkinlik, value)
-      );
-  
-      relevantEvents.sort((a, b) => a.index - b.index);
+    relevantEvents.sort((a, b) => a.index - b.index);
 
     const renderEventItem = (etkinlik: Etkinlik & { index: number }) => {
       const start = dayjs(etkinlik.baslangicTarihi);
@@ -133,7 +124,6 @@ const Takvim: React.FC = () => {
             width: isEnd ? "calc(100% - 12px)" : "calc(100% - 4px)",
             left: "0",
             right: isEnd ? "0" : "0",
-            position: "absolute",
           }}
           onMouseEnter={() => setHoveredEventId(String(etkinlik.id))}
           onMouseLeave={() => setHoveredEventId(null)}
@@ -147,7 +137,7 @@ const Takvim: React.FC = () => {
             ? `${dayjs(etkinlik.baslangicTarihi).format("HH:mm")} - ${
                 etkinlik.baslik
               }`
-            : ""}
+            : etkinlik.baslik}
         </div>
       );
     };
@@ -156,17 +146,16 @@ const Takvim: React.FC = () => {
 
     return (
       <div
-    style={{
-      position: "relative",
-      height: `${(maxIndex + 1) * 30}px`, // Burada `${}` ile bir template literal kullanmalısınız
-      overflow: "hidden",
-      width: "100%",
-      zIndex: 10,
-    }}
-  >
-    {relevantEvents.map(renderEventItem)}
-  </div>
-
+        style={{
+          position: "relative",
+          height: `${(maxIndex + 1) * 30}px`,
+          overflow: "hidden",
+          width: "100%",
+          zIndex: "10",
+        }}
+      >
+        {relevantEvents.map(renderEventItem)}
+      </div>
     );
   };
 

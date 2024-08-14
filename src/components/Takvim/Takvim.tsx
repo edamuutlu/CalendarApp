@@ -18,6 +18,7 @@ import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { TekrarEnum } from "../../yonetimler/EtkinlikYonetimi";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import BilgiPenceresi from "./BilgiPenceresi";
+import EtkinlikListele from "./EtkinlikListele";
 
 dayjs.extend(isBetween);
 dayjs.extend(isSameOrAfter);
@@ -25,18 +26,13 @@ dayjs.extend(isSameOrBefore);
 
 const Takvim: React.FC = () => {
   const [seciliGun, setSeciliGun] = useState(dayjs());
-  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] =
-    useState(false);
+  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] = useState(false);
   const [etkinlikData, setEtkinlikData] = useState<Etkinlik[]>([]);
-  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<
-    Etkinlik[]
-  >([]);
+  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<Etkinlik[]>([]);
   const [seciliEtkinlik, setseciliEtkinlik] = useState<Etkinlik | null>(null);
-  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] =
-    useState<Dayjs>(dayjs());
+  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] = useState<Dayjs>(dayjs());
   const [tumKullanicilar, setTumKullanicilar] = useState<Kullanici[]>([]);
-  const [bilgiPenceresiGorunurluk, setBilgiPenceresiGorunurluk] =
-    useState(false);
+  const [bilgiPenceresiGorunurluk, setBilgiPenceresiGorunurluk] = useState(false);
 
   const etkinlikleriAl = async (): Promise<Etkinlik[]> => {
     try {
@@ -63,99 +59,22 @@ const Takvim: React.FC = () => {
     etkinlikleriAl();
   }, []);
 
-  const etkinligiSeciliYap = (event: Etkinlik) => {
-    setseciliEtkinlik(event);
-    setBilgiPenceresiGorunurluk(false); // BilgiPenceresi'ni kapat
-    setEtkinlikPenceresiniGoster(true); // EtkinlikPenceresi'ni aç
-  };
-
   const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
   const cellRender = (value: Dayjs) => {
-    const tumEtkinlikler  = [...etkinlikData, ...eklendigimEtkinlikler];
-
-    const indeksliEtkinlikler  = tumEtkinlikler .map((event) => {
-      const cakisanEtkinlikler  = tumEtkinlikler .filter(
-        (e) =>
-          dayjs(e.baslangicTarihi).isSame(
-            dayjs(event.baslangicTarihi),
-            "day"
-          ) ||
-          dayjs(e.bitisTarihi).isSame(dayjs(event.bitisTarihi), "day") ||
-          (dayjs(e.baslangicTarihi).isBefore(dayjs(event.bitisTarihi), "day") &&
-            dayjs(e.bitisTarihi).isAfter(dayjs(event.baslangicTarihi), "day"))
-      );
-      const index = cakisanEtkinlikler .indexOf(event);
-      return { ...event, index };
-    });
-
-    const relevantEvents = indeksliEtkinlikler .filter((etkinlik) =>
-      etkinlikTekrarKontrolu(etkinlik, value)
-    );
-
-    relevantEvents.sort((a, b) => a.index - b.index);
-
-    const renderEventItem = (etkinlik: Etkinlik & { index: number }) => {
-      const start = dayjs(etkinlik.baslangicTarihi);
-      const end = dayjs(etkinlik.bitisTarihi);
-      const isStart = value.isSame(start, "day");
-      const isEnd = value.isSame(end, "day");
-
-      let classes = "event-item";
-
-      if (etkinlik.ekleyenKullaniciAdi) {
-        classes += " guest";
-      }
-      if (isStart && isEnd) {
-        classes += " start-end";
-      } else if (isStart) {
-        classes += " start";
-      } else if (isEnd) {
-        classes += " end";
-      }
-
-      return (
-        <div
-          key={etkinlik.id}
-          className={`${classes} ${
-            hoveredEventId === String(etkinlik.id) ? "active" : ""
-          }`}
-          style={{
-            top: `${etkinlik.index * 25}px`,
-            width: isEnd ? "calc(100% - 12px)" : "calc(100% - 4px)",
-            left: "0",
-            right: isEnd ? "0" : "0",
-          }}
-          onMouseEnter={() => setHoveredEventId(String(etkinlik.id))}
-          onMouseLeave={() => setHoveredEventId(null)}
-          onClick={(e) => {
-            e.stopPropagation();
-            setseciliEtkinlik(etkinlik);
-            tarihSec(value, true);
-          }}
-        >
-          {isStart
-            ? `${dayjs(etkinlik.baslangicTarihi).format("HH:mm")} - ${
-                etkinlik.baslik
-              }`
-            : etkinlik.baslik}
-        </div>
-      );
-    };
-
-    const maxIndex = Math.max(...relevantEvents.map((e) => e.index), 0);
+    const tumEtkinlikler = [...etkinlikData, ...eklendigimEtkinlikler];
 
     return (
-      <div
-        style={{
-          position: "relative",
-          height: `${(maxIndex + 1) * 30}px`,
-          overflow: "hidden",
-          width: "100%",
-          zIndex: "10",
+      <EtkinlikListele
+        tumEtkinlikler={tumEtkinlikler}
+        value={value}
+        etkinlikTekrarKontrolu={etkinlikTekrarKontrolu}
+        onEventClick={(etkinlik) => {
+          setseciliEtkinlik(etkinlik);
+          tarihSec(value, true);
         }}
-      >
-        {relevantEvents.map(renderEventItem)}
-      </div>
+        hoveredEventId={hoveredEventId}
+        setHoveredEventId={setHoveredEventId}
+      />
     );
   };
 
@@ -222,6 +141,12 @@ const Takvim: React.FC = () => {
       setEtkinlikPenceresiniGoster(true);
       setBilgiPenceresiGorunurluk(false);
     }
+  };
+
+  const etkinligiSeciliYap = (event: Etkinlik) => {
+    setseciliEtkinlik(event);
+    setBilgiPenceresiGorunurluk(false); // BilgiPenceresi'ni kapat
+    setEtkinlikPenceresiniGoster(true); // EtkinlikPenceresi'ni aç
   };
 
   return (
@@ -294,13 +219,8 @@ const Takvim: React.FC = () => {
           setBilgiPenceresiGorunurluk={setBilgiPenceresiGorunurluk}
           seciliEtkinlikForm={seciliEtkinlik}
           setseciliEtkinlik={setseciliEtkinlik}
-          etkinligiSeciliYap={etkinligiSeciliYap} // Yeni prop olarak ekliyoruz
+          etkinligiSeciliYap={etkinligiSeciliYap}
         />
-        {/* {eklendigimEtkinlikler.length > 0 ? (
-          <BilgiPenceresi eklendigimEtkinlikler={eklendigimEtkinlikler} />
-        ) : (
-          ""
-        )} */}
       </div>
     </div>
   );

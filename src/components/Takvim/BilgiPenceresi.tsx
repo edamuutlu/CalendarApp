@@ -8,7 +8,6 @@ interface BilgiPenceresiProps {
   setBilgiPenceresiGorunurluk: (visible: boolean) => void;
   seciliEtkinlikForm: Etkinlik | null;
   setseciliEtkinlik: React.Dispatch<React.SetStateAction<Etkinlik | null>>
-
   etkinligiSeciliYap: (event: Etkinlik) => void; // Yeni prop olarak etkinliği düzenleme fonksiyonu
 }
 
@@ -38,7 +37,7 @@ const BilgiPenceresi: React.FC<BilgiPenceresiProps> = ({
       visible={bilgiPenceresiGorunurluk}
       onOk={handleOk}
       onCancel={handleCancel}
-      footer={null} // Kapat butonu eklemek istemiyorsanız bu satırı ekleyin
+      footer={null} 
     >
       <Descriptions column={1}>
         <Descriptions.Item label="Başlık">{baslik}</Descriptions.Item>
@@ -53,9 +52,11 @@ const BilgiPenceresi: React.FC<BilgiPenceresiProps> = ({
           {tekrarDurumu || "Tekrar Yok"}
         </Descriptions.Item>
       </Descriptions>
-      <Button onClick={() => etkinligiSeciliYap(seciliEtkinlikForm)}>
-        Etkinliği Düzenle
-      </Button>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "16px" }}>
+        <Button type="primary" onClick={() => etkinligiSeciliYap(seciliEtkinlikForm)}>
+          Etkinliği Düzenle
+        </Button>
+      </div>
     </Modal>
   );
 };

@@ -148,11 +148,6 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     onClick: tekrarTipiSec,
   };
 
-  console.log(
-    'form.getFieldValue("tekrarSayisi")',
-    form.getFieldValue("tekrarSayisi")
-  );
-
   const options: SelectProps["options"] = [];
 
   kullanicilar.map((kullanici) => {

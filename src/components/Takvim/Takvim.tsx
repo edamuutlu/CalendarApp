@@ -26,18 +26,13 @@ dayjs.extend(isSameOrBefore);
 
 const Takvim: React.FC = () => {
   const [seciliGun, setSeciliGun] = useState(dayjs());
-  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] =
-    useState(false);
+  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] = useState(false);
   const [etkinlikData, setEtkinlikData] = useState<Etkinlik[]>([]);
-  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<
-    Etkinlik[]
-  >([]);
+  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<Etkinlik[]>([]);
   const [seciliEtkinlik, setseciliEtkinlik] = useState<Etkinlik | null>(null);
-  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] =
-    useState<Dayjs>(dayjs());
+  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] = useState<Dayjs>(dayjs());
   const [tumKullanicilar, setTumKullanicilar] = useState<Kullanici[]>([]);
-  const [bilgiPenceresiGorunurluk, setBilgiPenceresiGorunurluk] =
-    useState(false);
+  const [bilgiPenceresiGorunurluk, setBilgiPenceresiGorunurluk] = useState(false);
 
   const etkinlikleriAl = async (): Promise<Etkinlik[]> => {
     try {

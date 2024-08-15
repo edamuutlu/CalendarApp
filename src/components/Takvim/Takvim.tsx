@@ -18,7 +18,7 @@ import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { TekrarEnum } from "../../yonetimler/EtkinlikYonetimi";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import BilgiPenceresi from "./BilgiPenceresi";
-import EtkinlikListele from "./EtkinlikListele";
+import EtkinlikListesi from "./EtkinlikListesi";
 
 dayjs.extend(isBetween);
 dayjs.extend(isSameOrAfter);
@@ -26,13 +26,18 @@ dayjs.extend(isSameOrBefore);
 
 const Takvim: React.FC = () => {
   const [seciliGun, setSeciliGun] = useState(dayjs());
-  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] = useState(false);
+  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] =
+    useState(false);
   const [etkinlikData, setEtkinlikData] = useState<Etkinlik[]>([]);
-  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<Etkinlik[]>([]);
+  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<
+    Etkinlik[]
+  >([]);
   const [seciliEtkinlik, setseciliEtkinlik] = useState<Etkinlik | null>(null);
-  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] = useState<Dayjs>(dayjs());
+  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] =
+    useState<Dayjs>(dayjs());
   const [tumKullanicilar, setTumKullanicilar] = useState<Kullanici[]>([]);
-  const [bilgiPenceresiGorunurluk, setBilgiPenceresiGorunurluk] = useState(false);
+  const [bilgiPenceresiGorunurluk, setBilgiPenceresiGorunurluk] =
+    useState(false);
 
   const etkinlikleriAl = async (): Promise<Etkinlik[]> => {
     try {
@@ -64,7 +69,7 @@ const Takvim: React.FC = () => {
     const tumEtkinlikler = [...etkinlikData, ...eklendigimEtkinlikler];
 
     return (
-      <EtkinlikListele
+      <EtkinlikListesi
         tumEtkinlikler={tumEtkinlikler}
         value={value}
         etkinlikTekrarKontrolu={etkinlikTekrarKontrolu}
@@ -156,6 +161,7 @@ const Takvim: React.FC = () => {
         <YanMenu
           setEtkinlikPenceresiniGoster={setEtkinlikPenceresiniGoster}
           setseciliEtkinlik={setseciliEtkinlik}
+          etkinlikData={etkinlikData}
         />
         <div className="main">
           <div className="takvim-baslik-container">

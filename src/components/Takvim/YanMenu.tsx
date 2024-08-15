@@ -3,7 +3,6 @@ import { Menu, MenuProps } from "antd";
 import "../../assets/css/YanMenu.css";
 import { AppstoreAddOutlined } from "@ant-design/icons";
 import Etkinlik from "../../tipler/Etkinlik";
-import { tumEtkinlikleriGetir } from "../../yonetimler/TakvimYonetimi";
 import EtkinlikOlusturButonu from "./EtkinlikOlusturButonu";
 
 type MenuItem = Required<MenuProps>["items"][number];
@@ -13,7 +12,7 @@ const initialItems: MenuItem[] = [
     key: "sub2",
     label: "Etkinliklerim",
     icon: <AppstoreAddOutlined />,
-    children: [], // Etkinlikler burada listelenecek
+    children: [],
   },
   {
     type: "divider",
@@ -23,27 +22,18 @@ const initialItems: MenuItem[] = [
 interface YanMenuProps {
   setEtkinlikPenceresiniGoster: React.Dispatch<React.SetStateAction<boolean>>;
   setseciliEtkinlik: React.Dispatch<React.SetStateAction<Etkinlik | null>>;
+  etkinlikData: Etkinlik[];
 }
 
 const YanMenu = (props: YanMenuProps) => {
-  const { setEtkinlikPenceresiniGoster, setseciliEtkinlik } = props;
+  const { setEtkinlikPenceresiniGoster, setseciliEtkinlik, etkinlikData } =
+    props; // Burada destructure işlemi
 
-  const [etkinlikler, setEtkinlikler] = useState<Etkinlik[]>([]);
   const [items, setItems] = useState<MenuItem[]>(initialItems);
 
   useEffect(() => {
-    const etkinlikleriAl = async () => {
-      try {
-        const fetchedEvents = await tumEtkinlikleriGetir();
-        setEtkinlikler(fetchedEvents);
-        setMyEventsMenuItems(fetchedEvents);
-      } catch (error) {
-        console.error("Etkinlikler getirilirken hata oluştu:", error);
-      }
-    };
-
-    etkinlikleriAl();
-  }, []);
+    setMyEventsMenuItems(etkinlikData);
+  }, [etkinlikData]);
 
   const setMyEventsMenuItems = (events: Etkinlik[]) => {
     setItems((prevItems) => {

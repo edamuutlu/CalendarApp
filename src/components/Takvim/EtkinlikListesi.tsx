@@ -2,7 +2,7 @@ import React from "react";
 import dayjs, { Dayjs } from "dayjs";
 import Etkinlik from "../../tipler/Etkinlik";
 
-interface EtkinlikListeleProps {
+interface EtkinlikListesiProps {
   tumEtkinlikler: Etkinlik[];
   value: Dayjs;
   onEventClick: (event: Etkinlik) => void;
@@ -11,31 +11,39 @@ interface EtkinlikListeleProps {
   setHoveredEventId: (id: string | null) => void;
 }
 
-const EtkinlikListele: React.FC<EtkinlikListeleProps> = ({
-  tumEtkinlikler,
-  value,
-  onEventClick,
-  etkinlikTekrarKontrolu,
-  hoveredEventId,
-  setHoveredEventId
-}) => {
+const EtkinlikListesi = (props: EtkinlikListesiProps) => {
+  const {
+    tumEtkinlikler,
+    value,
+    onEventClick,
+    etkinlikTekrarKontrolu,
+    hoveredEventId,
+    setHoveredEventId,
+  } = props;
 
-  const indeksliEtkinlikler  = tumEtkinlikler .map((event) => {
-    const cakisanEtkinlikler  = tumEtkinlikler .filter(
+  const indeksliEtkinlikler = tumEtkinlikler.map((event) => {
+    const cakisanEtkinlikler = tumEtkinlikler.filter(
       (e) =>
-        dayjs(e.baslangicTarihi).isSame(
-          dayjs(event.baslangicTarihi),
-          "day"
-        ) ||
+        dayjs(e.baslangicTarihi).isSame(dayjs(event.baslangicTarihi), "day") ||
         dayjs(e.bitisTarihi).isSame(dayjs(event.bitisTarihi), "day") ||
         (dayjs(e.baslangicTarihi).isBefore(dayjs(event.bitisTarihi), "day") &&
           dayjs(e.bitisTarihi).isAfter(dayjs(event.baslangicTarihi), "day"))
     );
-    const index = cakisanEtkinlikler .indexOf(event);
+    cakisanEtkinlikler.sort((a, b) => {
+      const aTime =
+        dayjs(a.baslangicTarihi).hour() * 60 +
+        dayjs(a.baslangicTarihi).minute();
+      const bTime =
+        dayjs(b.baslangicTarihi).hour() * 60 +
+        dayjs(b.baslangicTarihi).minute();
+      return aTime - bTime;
+    });
+
+    const index = cakisanEtkinlikler.indexOf(event);
     return { ...event, index };
   });
 
-  const relevantEvents = indeksliEtkinlikler .filter((etkinlik) =>
+  const relevantEvents = indeksliEtkinlikler.filter((etkinlik) =>
     etkinlikTekrarKontrolu(etkinlik, value)
   );
 
@@ -105,4 +113,4 @@ const EtkinlikListele: React.FC<EtkinlikListeleProps> = ({
   );
 };
 
-export default EtkinlikListele;
+export default EtkinlikListesi;

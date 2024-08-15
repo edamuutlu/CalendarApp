@@ -7,17 +7,19 @@ interface BilgiPenceresiProps {
   bilgiPenceresiGorunurluk: boolean;
   setBilgiPenceresiGorunurluk: (visible: boolean) => void;
   seciliEtkinlikForm: Etkinlik | null;
-  setseciliEtkinlik: React.Dispatch<React.SetStateAction<Etkinlik | null>>
-  etkinligiSeciliYap: (event: Etkinlik) => void; // Yeni prop olarak etkinliği düzenleme fonksiyonu
+  setseciliEtkinlik: React.Dispatch<React.SetStateAction<Etkinlik | null>>;
+  etkinligiSeciliYap: (event: Etkinlik) => void; // Etkinlik düzenleme fonksiyonu
 }
 
-const BilgiPenceresi: React.FC<BilgiPenceresiProps> = ({
-  bilgiPenceresiGorunurluk,
-  setBilgiPenceresiGorunurluk,
-  seciliEtkinlikForm,
-  setseciliEtkinlik,
-  etkinligiSeciliYap,
-}) => {
+const BilgiPenceresi = (props: BilgiPenceresiProps) => {
+  const {
+    bilgiPenceresiGorunurluk,
+    setBilgiPenceresiGorunurluk,
+    seciliEtkinlikForm,
+    setseciliEtkinlik,
+    etkinligiSeciliYap,
+  } = props;
+
   if (!seciliEtkinlikForm) return null;
 
   const { baslik, aciklama, baslangicTarihi, bitisTarihi, tekrarDurumu } = seciliEtkinlikForm;
@@ -37,7 +39,7 @@ const BilgiPenceresi: React.FC<BilgiPenceresiProps> = ({
       visible={bilgiPenceresiGorunurluk}
       onOk={handleOk}
       onCancel={handleCancel}
-      footer={null} 
+      footer={null}
     >
       <Descriptions column={1}>
         <Descriptions.Item label="Başlık">{baslik}</Descriptions.Item>

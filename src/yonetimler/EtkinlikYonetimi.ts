@@ -11,6 +11,7 @@ export enum TekrarEnum {
 }
 
 export const etkinlikEkle = async (event: Etkinlik): Promise<Etkinlik> => {
+  console.log("event", event);
   try {
     const response = await axios.post(
       "http://localhost:5011/api/Etkinlik/EtkinlikOlustur",

@@ -278,8 +278,8 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
       console.error("Error adding/updating event:", error);
       message.error("Etkinlik eklenirken/güncellenirken hata oluştu.");
     }
-
     setEtkinlikPenceresiniGoster(false);
+    /* window.location.reload(); */
   };
 
   const DayjsToDate = (dayjsObject: Dayjs): Date => {

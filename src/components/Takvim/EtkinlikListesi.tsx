@@ -1,4 +1,3 @@
-import React from "react";
 import dayjs, { Dayjs } from "dayjs";
 import Etkinlik from "../../tipler/Etkinlik";
 
@@ -43,13 +42,13 @@ const EtkinlikListesi = (props: EtkinlikListesiProps) => {
     return { ...event, index };
   });
 
-  const relevantEvents = indeksliEtkinlikler.filter((etkinlik) =>
+  const ilgiliEtkinlikler = indeksliEtkinlikler.filter((etkinlik) =>
     etkinlikTekrarKontrolu(etkinlik, value)
   );
 
-  relevantEvents.sort((a, b) => a.index - b.index);
+  ilgiliEtkinlikler.sort((a, b) => a.index - b.index);
 
-  const renderEventItem = (etkinlik: Etkinlik & { index: number }) => {
+  const etkinlikListele = (etkinlik: Etkinlik & { index: number }) => {
     const start = dayjs(etkinlik.baslangicTarihi);
     const end = dayjs(etkinlik.bitisTarihi);
     const isStart = value.isSame(start, "day");
@@ -96,7 +95,7 @@ const EtkinlikListesi = (props: EtkinlikListesiProps) => {
     );
   };
 
-  const maxIndex = Math.max(...relevantEvents.map((e) => e.index), 0);
+  const maxIndex = Math.max(...ilgiliEtkinlikler.map((e) => e.index), 0);
 
   return (
     <div
@@ -108,7 +107,7 @@ const EtkinlikListesi = (props: EtkinlikListesiProps) => {
         zIndex: "10",
       }}
     >
-      {relevantEvents.map(renderEventItem)}
+      {ilgiliEtkinlikler.map(etkinlikListele)}
     </div>
   );
 };

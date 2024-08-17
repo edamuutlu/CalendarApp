@@ -18,6 +18,7 @@ import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { TekrarEnum } from "../../yonetimler/EtkinlikYonetimi";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import BilgiPenceresi from "./BilgiPenceresi";
+import Etkinlikler from "./Etkinlikler";
 import EtkinlikListesi from "./EtkinlikListesi";
 
 dayjs.extend(isBetween);
@@ -26,13 +27,18 @@ dayjs.extend(isSameOrBefore);
 
 const Takvim: React.FC = () => {
   const [seciliGun, setSeciliGun] = useState(dayjs());
-  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] = useState(false);
+  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] =
+    useState(false);
   const [etkinlikData, setEtkinlikData] = useState<Etkinlik[]>([]);
-  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<Etkinlik[]>([]);
+  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<
+    Etkinlik[]
+  >([]);
   const [seciliEtkinlik, setseciliEtkinlik] = useState<Etkinlik | null>(null);
-  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] = useState<Dayjs>(dayjs());
+  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] =
+    useState<Dayjs>(dayjs());
   const [tumKullanicilar, setTumKullanicilar] = useState<Kullanici[]>([]);
-  const [bilgiPenceresiGorunurluk, setBilgiPenceresiGorunurluk] = useState(false);
+  const [bilgiPenceresiGorunurluk, setBilgiPenceresiGorunurluk] =
+    useState(false);
 
   const etkinlikleriAl = async (): Promise<Etkinlik[]> => {
     try {
@@ -58,11 +64,10 @@ const Takvim: React.FC = () => {
     kullanicilariCek();
     etkinlikleriAl();
   }, []);
-
+  const tumEtkinlikler = [...etkinlikData, ...eklendigimEtkinlikler];
   const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
-  const cellRender = (value: Dayjs) => {
-    const tumEtkinlikler = [...etkinlikData, ...eklendigimEtkinlikler];
 
+  /*  const cellRender = (value: Dayjs) => {
     return (
       <EtkinlikListesi
         tumEtkinlikler={tumEtkinlikler}
@@ -76,7 +81,7 @@ const Takvim: React.FC = () => {
         setHoveredEventId={setHoveredEventId}
       />
     );
-  };
+  }; */
 
   const etkinlikTekrarKontrolu = (etkinlik: Etkinlik, date: Dayjs) => {
     const { baslangicTarihi, bitisTarihi, tekrarDurumu } = etkinlik;
@@ -199,9 +204,23 @@ const Takvim: React.FC = () => {
               <h2 className="calendar-month">{seciliGun.format("MMM YYYY")}</h2>
             </div>
           </div>
+          <Etkinlikler
+            ay={seciliGun.format("MMM")}
+            oncekiAySonGun={dayjs(seciliGun)
+              .subtract(1, "month")
+              .endOf("month")
+              .add(1, "day")
+              .format("ddd")}
+            tumEtkinlikler={tumEtkinlikler}
+            etkinlikTekrarKontrolu={etkinlikTekrarKontrolu}
+            onEventClick={(etkinlik) => {
+              setseciliEtkinlik(etkinlik);
+              tarihSec(dayjs(etkinlik.baslangicTarihi), true);
+            }}
+          />
           <Calendar
             onSelect={(date) => tarihSec(date, false)} // isEventClick parametresini false olarak gönder
-            cellRender={cellRender}
+            /* cellRender={cellRender} */
             value={seciliGun}
           />
         </div>

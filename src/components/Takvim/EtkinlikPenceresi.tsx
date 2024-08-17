@@ -233,12 +233,14 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
 
     try {
       if (seciliEtkinlikForm) {
+        console.log("Güncelle yaptı");
+        console.log("seciliEtkinlikForm", seciliEtkinlikForm);
         /* Etkinlik Güncelleme */
         const etkinlikler: Etkinlik[] = await gununEtkinlikleri();
         console.log("etkinlikler :>> ", etkinlikler);
-        etkinlik = { ...etkinlik, id: etkinlikler[0].id };
+        etkinlik = { ...etkinlik, id: seciliEtkinlikForm.id };
 
-        const etkinlikId = Number(etkinlikler[0].id);
+        const etkinlikId = Number(seciliEtkinlikForm.id);
         if (secilenKullanicilar) {
           const selectedUserIds = secilenKullanicilar.map((user) => user.id);
           const request: EtkinliktenDavetliKullanicilariSilRequest = {
@@ -255,6 +257,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
           console.error("Davetli kullanıcı null veya undefined.");
         }
       } else {
+        console.log("Ekleme yaptı");
         /* Etkinlik Ekleme */
         await etkinlikEkle(etkinlik);
         const etkinlikler: Etkinlik[] = await gununEtkinlikleri();
@@ -318,7 +321,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
               if (seciliEtkinlikForm) {
                 await etkinlikSil(Number(seciliEtkinlikForm.id));
                 message.success("Etkinlik silindi.");
-                setEtkinlikPenceresiniGoster(false);
+                etkinlikPencereKapat();
                 await etkinlikleriAl();
               }
             }}

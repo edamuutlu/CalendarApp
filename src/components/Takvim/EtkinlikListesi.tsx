@@ -1,3 +1,4 @@
+import React from "react";
 import dayjs, { Dayjs } from "dayjs";
 import Etkinlik from "../../tipler/Etkinlik";
 
@@ -20,35 +21,34 @@ const EtkinlikListesi = (props: EtkinlikListesiProps) => {
     setHoveredEventId,
   } = props;
 
-  const indeksliEtkinlikler = tumEtkinlikler.map((event) => {
-    const cakisanEtkinlikler = tumEtkinlikler.filter(
+  const indeksliEtkinlikler = tumEtkinlikler.reduce((acc, event) => {
+    const cakisanEtkinlikler = acc.filter(
       (e) =>
         dayjs(e.baslangicTarihi).isSame(dayjs(event.baslangicTarihi), "day") ||
         dayjs(e.bitisTarihi).isSame(dayjs(event.bitisTarihi), "day") ||
         (dayjs(e.baslangicTarihi).isBefore(dayjs(event.bitisTarihi), "day") &&
           dayjs(e.bitisTarihi).isAfter(dayjs(event.baslangicTarihi), "day"))
     );
-    cakisanEtkinlikler.sort((a, b) => {
-      const aTime =
-        dayjs(a.baslangicTarihi).hour() * 60 +
-        dayjs(a.baslangicTarihi).minute();
-      const bTime =
-        dayjs(b.baslangicTarihi).hour() * 60 +
-        dayjs(b.baslangicTarihi).minute();
-      return aTime - bTime;
-    });
 
-    const index = cakisanEtkinlikler.indexOf(event);
-    return { ...event, index };
-  });
+    const kullanilmisIndeksler = new Set(
+      cakisanEtkinlikler.map((e) => e.index)
+    );
+    let index = 0;
+    while (kullanilmisIndeksler.has(index)) {
+      index++;
+    }
 
-  const ilgiliEtkinlikler = indeksliEtkinlikler.filter((etkinlik) =>
+    acc.push({ ...event, index });
+    return acc;
+  }, [] as (Etkinlik & { index: number })[]);
+
+  const relevantEvents = indeksliEtkinlikler.filter((etkinlik) =>
     etkinlikTekrarKontrolu(etkinlik, value)
   );
 
-  ilgiliEtkinlikler.sort((a, b) => a.index - b.index);
+  relevantEvents.sort((a, b) => a.index - b.index);
 
-  const etkinlikListele = (etkinlik: Etkinlik & { index: number }) => {
+  const renderEventItem = (etkinlik: Etkinlik & { index: number }) => {
     const start = dayjs(etkinlik.baslangicTarihi);
     const end = dayjs(etkinlik.bitisTarihi);
     const isStart = value.isSame(start, "day");
@@ -59,7 +59,7 @@ const EtkinlikListesi = (props: EtkinlikListesiProps) => {
     if (etkinlik.ekleyenKullaniciAdi) {
       classes += " guest";
     }
-    if (isStart && isEnd) {
+    if (!isStart && !isEnd) {
       classes += " start-end";
     } else if (isStart) {
       classes += " start";
@@ -95,7 +95,7 @@ const EtkinlikListesi = (props: EtkinlikListesiProps) => {
     );
   };
 
-  const maxIndex = Math.max(...ilgiliEtkinlikler.map((e) => e.index), 0);
+  const maxIndex = Math.max(...relevantEvents.map((e) => e.index), 0);
 
   return (
     <div
@@ -107,7 +107,7 @@ const EtkinlikListesi = (props: EtkinlikListesiProps) => {
         zIndex: "10",
       }}
     >
-      {ilgiliEtkinlikler.map(etkinlikListele)}
+      {relevantEvents.map(renderEventItem)}
     </div>
   );
 };

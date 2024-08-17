@@ -1,8 +1,8 @@
 import { TekrarEnum } from "../yonetimler/EtkinlikYonetimi";
 
-
 interface Etkinlik {
   id?: string | undefined;
+  index?: number;
   date?: Date;
 
   baslik: string;

@@ -30,7 +30,9 @@ const Etkinlikler: React.FC<EtkinliklerProps> = ({
   onEventClick,
 }) => {
   // Hover edilen etkinliğin ID'sini tutan state
-  const [hoveredEtkinlikId, setHoveredEtkinlikId] = useState<string | null>(null);
+  const [hoveredEtkinlikId, setHoveredEtkinlikId] = useState<string | null>(
+    null
+  );
   const [dahaFazlaPenceresiniAc, setDahaFazlaPenceresiniAc] = useState(false);
 
   // Seçili günün hangi ayda olduğunu bulan değişken
@@ -43,11 +45,15 @@ const Etkinlikler: React.FC<EtkinliklerProps> = ({
     .format("ddd");
 
   // Ay görünümünde önceki aydan gelen günlerin sayısını hesaplar
-  const oncekiAydanGelenGunSayisi = () => DAY_OFFSET[oncekiAySonGun as DayName] || 1;
+  const oncekiAydanGelenGunSayisi = () =>
+    DAY_OFFSET[oncekiAySonGun as DayName] || 1;
 
   // Etkinlikleri belirli bir aya göre filtreleyip, tarih sırasına göre sıralar
   const ayinEtkinlikleri = tumEtkinlikler
-    .filter((etkinlik) => dayjs(etkinlik.baslangicTarihi).format("MMM") === seciliGunAy)
+    .filter(
+      (etkinlik) =>
+        dayjs(etkinlik.baslangicTarihi).format("MMM") === seciliGunAy
+    )
     .sort((a, b) => dayjs(a.baslangicTarihi).diff(dayjs(b.baslangicTarihi)));
 
   // Her etkinlik için çakışan diğer etkinlikleri bulur ve etkinliği bu listeye göre sıralar
@@ -103,7 +109,10 @@ const Etkinlikler: React.FC<EtkinliklerProps> = ({
 
     let guncelBaslangic = baslangic;
     // Etkinliği haftalara böler ve her parçayı listeye ekler
-    while (guncelBaslangic.isBefore(bitis) || guncelBaslangic.isSame(bitis, "day")) {
+    while (
+      guncelBaslangic.isBefore(bitis) ||
+      guncelBaslangic.isSame(bitis, "day")
+    ) {
       const haftaninSonGunu = guncelBaslangic.endOf("week");
       const parceEnd = minDate(haftaninSonGunu, bitis);
 
@@ -124,7 +133,12 @@ const Etkinlikler: React.FC<EtkinliklerProps> = ({
     if (!seciliGun) return null;
 
     const gunEtkinlikleri = indeksliEtkinlikler.filter((etkinlik) =>
-      dayjs(seciliGun).isBetween(etkinlik.baslangicTarihi, etkinlik.bitisTarihi, "day", "[]")
+      dayjs(seciliGun).isBetween(
+        etkinlik.baslangicTarihi,
+        etkinlik.bitisTarihi,
+        "day",
+        "[]"
+      )
     );
 
     return (
@@ -150,73 +164,72 @@ const Etkinlikler: React.FC<EtkinliklerProps> = ({
     );
   };
 
-  const etkinlikSayisiHesapla = (date: dayjs.Dayjs) => {
-    return indeksliEtkinlikler.filter((etkinlik) =>
-      dayjs(date).isBetween(
-        etkinlik.baslangicTarihi,
-        etkinlik.bitisTarihi,
-        "day",
-        "[]"
-      )
-    ).length;
-  };
-
-  const dahaFazlaEtkinlikListesi = etkinlikParcalari.filter((etkinlik) => {
-    return etkinlik.index < 2;
-  });
-
   return (
     <div style={{ position: "relative", width: "100%", zIndex: 10 }}>
-      {dahaFazlaEtkinlikListesi.map((parca, index) => {
+      {etkinlikParcalari.map((parca, index) => {
+        const etkinlikSayisiHesapla = (date: dayjs.Dayjs) => {
+          return indeksliEtkinlikler.filter((etkinlik) =>
+            dayjs(date).isBetween(
+              etkinlik.baslangicTarihi,
+              etkinlik.bitisTarihi,
+              "day",
+              "[]"
+            )
+          ).length;
+        };
         const start = parca.etkinlikParcaBaslangic;
         const end = parca.etkinlikParcaBitis;
-        const gunFarki = parseInt(end.format("D")) - parseInt(start.format("D")) + 1; // etkinlik butonunun genişliği için
+        const gunFarki =
+          parseInt(end.format("D")) - parseInt(start.format("D")) + 1; // etkinlik butonunun genişliği için
         /* console.log(`${start} - ${end} - ${gunFarki}`); */
         let classes = "event-item";
         if (parca.ekleyenKullaniciAdi) classes += " guest";
-
         return (
           <>
-            <div
-              key={`${parca.id}-${index}`}
-              className={`${classes} ${hoveredEtkinlikId === String(parca.id) ? "active" : ""
+            {parca.index < 2 && (
+              <div
+                key={`${parca.id}-${index}`}
+                className={`${classes} ${
+                  hoveredEtkinlikId === String(parca.id) ? "active" : ""
                 }`}
-              style={{
-                // Etkinliğin genişliği, gün farkına göre hesaplanır
-                width: `${gunFarki * 200 + (gunFarki - 1) * 32}px`,
-                // Etkinliğin sol pozisyonu haftadaki gün sırasına göre belirlenir
-                left: `calc(${(1630 / 7) * solUzunluk(start) + 5}px)`,
-                // Etkinliğin üst pozisyonu hafta sırası ve çakışan etkinlik sayısına göre ayarlanır
-                top: `${ustUzunluk(start) * 118 + (parca.index as number) * 25}px`,
-                height: "auto",
-              }}
-              // Etkinliğin üzerine gelindiğinde hover state'i değiştirir
-              onMouseEnter={() => setHoveredEtkinlikId(String(parca.id))}
-              onMouseLeave={() => setHoveredEtkinlikId(null)}
-              // Etkinliğe tıklanıldığında callback fonksiyonunu tetikler
-              onClick={(e) => {
-                e.stopPropagation();
-                onEventClick(parca);
-              }}
-            >
-              {/* Etkinliğin başlangıç saati ve başlığı */}
-              {start.format("HH:mm")} - {parca.baslik}
-            </div>
-            {etkinlikSayisiHesapla(start) > 2 && (
+                style={{
+                  width: `${gunFarki * 200 + (gunFarki - 1) * 32}px`,
+                  left: `calc(${(1630 / 7) * solUzunluk(start) + 5}px)`,
+                  top: `${
+                    ustUzunluk(start) * 118 + (parca.index as number) * 25
+                  }px`,
+                  height: "auto",
+                }}
+                onMouseEnter={() => setHoveredEtkinlikId(String(parca.id))}
+                onMouseLeave={() => setHoveredEtkinlikId(null)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEventClick(parca);
+                }}
+              >
+                {start.format("HH:mm")} - {parca.baslik}
+              </div>
+            )}
+            {etkinlikSayisiHesapla(dayjs(parca.baslangicTarihi)) > 2 && (
               <div
                 className="daha-fazla-goster"
                 style={{
                   position: "absolute",
-                  left: `calc(${(1630 / 7) * solUzunluk(start) + 5}px)`,
-                  top: `${ustUzunluk(start) * 118 + 50}px`,
-                  zIndex: 20,
+                  left: `calc(${
+                    (1630 / 7) * solUzunluk(dayjs(parca.baslangicTarihi)) + 5
+                  }px)`,
+                  top: `${
+                    ustUzunluk(dayjs(parca.baslangicTarihi)) * 118 + 50
+                  }px`,
+                  zIndex: 50,
                 }}
                 onClick={() => {
-                  setSeciliGun(dayjs(start));
+                  setSeciliGun(dayjs(dayjs(parca.baslangicTarihi)));
                   setDahaFazlaPenceresiniAc(true);
                 }}
               >
-                Daha fazla göster ({etkinlikSayisiHesapla(start) - 2})
+                Daha fazla göster (
+                {etkinlikSayisiHesapla(dayjs(parca.baslangicTarihi)) - 2})
               </div>
             )}
           </>

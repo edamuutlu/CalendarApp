@@ -74,12 +74,8 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
   const [form] = Form.useForm();
   const [ilkAcilisMi, setIlkAcilisMi] = useState(false);
   const [kullanicilar, setKullanicilar] = useState<Kullanici[]>([]);
-  const [secilenKullanicilar, setSecilenKullanicilar] = useState<Kullanici[]>(
-    []
-  );
-  const [secilenKullaniciIsimleri, setSecilenKullaniciIsimleri] = useState<
-    string[]
-  >([]);
+  const [secilenKullanicilar, setSecilenKullanicilar] = useState<Kullanici[]>([]);
+  const [secilenKullaniciIsimleri, setSecilenKullaniciIsimleri] = useState<string[]>([]);
 
   useEffect(() => {
     if (seciliEtkinlikForm) {
@@ -100,8 +96,8 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
       form.resetFields();
       form.setFieldsValue({
         tarihAraligi: [
-          dayjs(seciliGun).add(1, "hour"),
-          dayjs(seciliGun).add(2, "hour"),
+          dayjs(seciliGun).set("hour", dayjs().hour()).add(1, "hour"),
+          dayjs(seciliGun).set("hour", dayjs().hour()).add(2, "hour"),
         ],
         tekrarSayisi: TekrarEnum.hic,
       });
@@ -150,7 +146,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
 
   const options: SelectProps["options"] = [];
 
-  kullanicilar.map((kullanici) => {
+  tumKullanicilar.map((kullanici) => {
     options.push({
       label: kullanici.isim,
       value: kullanici.isim,
@@ -233,8 +229,6 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
 
     try {
       if (seciliEtkinlikForm) {
-        console.log("Güncelle yaptı");
-        console.log("seciliEtkinlikForm", seciliEtkinlikForm);
         /* Etkinlik Güncelleme */
         const etkinlikler: Etkinlik[] = await gununEtkinlikleri();
         console.log("etkinlikler :>> ", etkinlikler);
@@ -257,7 +251,6 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
           console.error("Davetli kullanıcı null veya undefined.");
         }
       } else {
-        console.log("Ekleme yaptı");
         /* Etkinlik Ekleme */
         await etkinlikEkle(etkinlik);
         const etkinlikler: Etkinlik[] = await gununEtkinlikleri();
@@ -282,7 +275,6 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
       message.error("Etkinlik eklenirken/güncellenirken hata oluştu.");
     }
     setEtkinlikPenceresiniGoster(false);
-    /* window.location.reload(); */
   };
 
   const DayjsToDate = (dayjsObject: Dayjs): Date => {

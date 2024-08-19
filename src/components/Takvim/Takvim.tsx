@@ -27,18 +27,13 @@ dayjs.extend(isSameOrBefore);
 
 const Takvim: React.FC = () => {
   const [seciliGun, setSeciliGun] = useState(dayjs());
-  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] =
-    useState(false);
+  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] = useState(false);
   const [etkinlikData, setEtkinlikData] = useState<Etkinlik[]>([]);
-  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<
-    Etkinlik[]
-  >([]);
+  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<Etkinlik[]>([]);
   const [seciliEtkinlik, setseciliEtkinlik] = useState<Etkinlik | null>(null);
-  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] =
-    useState<Dayjs>(dayjs());
+  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] = useState<Dayjs>(dayjs());
   const [tumKullanicilar, setTumKullanicilar] = useState<Kullanici[]>([]);
-  const [bilgiPenceresiGorunurluk, setBilgiPenceresiGorunurluk] =
-    useState(false);
+  const [bilgiPenceresiGorunurluk, setBilgiPenceresiGorunurluk] = useState(false);
 
   const etkinlikleriAl = async (): Promise<Etkinlik[]> => {
     try {
@@ -205,14 +200,9 @@ const Takvim: React.FC = () => {
             </div>
           </div>
           <Etkinlikler
-            ay={seciliGun.format("MMM")}
-            oncekiAySonGun={dayjs(seciliGun)
-              .subtract(1, "month")
-              .endOf("month")
-              .add(1, "day")
-              .format("ddd")}
+            seciliGun={seciliGun}
+            setSeciliGun={setSeciliGun}
             tumEtkinlikler={tumEtkinlikler}
-            etkinlikTekrarKontrolu={etkinlikTekrarKontrolu}
             onEventClick={(etkinlik) => {
               setseciliEtkinlik(etkinlik);
               tarihSec(dayjs(etkinlik.baslangicTarihi), true);

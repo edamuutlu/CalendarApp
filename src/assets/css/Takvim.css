@@ -36,6 +36,33 @@
   border-radius: 6px;
 }
 
+.daha-fazla-etkinlik {
+  background-color: #cce7ff;
+  height: auto;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 0px 8px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.daha-fazla-etkinlik:hover {
+  background-color: #91d5ff !important;
+  color: #303030 !important;
+}
+.daha-fazla-goster {
+  font-size: 13px;
+  padding: 2px 4px;
+  color: #303030;
+  border-radius: 4px;
+  width: 200px;
+  cursor: pointer;
+}
+.daha-fazla-goster:hover {
+  color: #303030;
+  background-color: #9c9c9c5e;
+}
 /* .event-item.start {
   border-left: 1px solid #91d5ff;
   border-radius: 4px 0 0 4px;

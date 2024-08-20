@@ -19,7 +19,6 @@ import { TekrarEnum } from "../../yonetimler/EtkinlikYonetimi";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import BilgiPenceresi from "./BilgiPenceresi";
 import Etkinlikler from "./Etkinlikler";
-import EtkinlikListesi from "./EtkinlikListesi";
 
 dayjs.extend(isBetween);
 dayjs.extend(isSameOrAfter);
@@ -60,23 +59,6 @@ const Takvim: React.FC = () => {
     etkinlikleriAl();
   }, []);
   const tumEtkinlikler = [...etkinlikData, ...eklendigimEtkinlikler];
-  const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
-
-  /*  const cellRender = (value: Dayjs) => {
-    return (
-      <EtkinlikListesi
-        tumEtkinlikler={tumEtkinlikler}
-        value={value}
-        etkinlikTekrarKontrolu={etkinlikTekrarKontrolu}
-        onEventClick={(etkinlik) => {
-          setseciliEtkinlik(etkinlik);
-          tarihSec(value, true);
-        }}
-        hoveredEventId={hoveredEventId}
-        setHoveredEventId={setHoveredEventId}
-      />
-    );
-  }; */
 
   const etkinlikTekrarKontrolu = (etkinlik: Etkinlik, date: Dayjs) => {
     const { baslangicTarihi, bitisTarihi, tekrarDurumu } = etkinlik;
@@ -145,8 +127,8 @@ const Takvim: React.FC = () => {
 
   const etkinligiSeciliYap = (event: Etkinlik) => {
     setseciliEtkinlik(event);
-    setBilgiPenceresiGorunurluk(false); // BilgiPenceresi'ni kapat
-    setEtkinlikPenceresiniGoster(true); // EtkinlikPenceresi'ni aç
+    setBilgiPenceresiGorunurluk(false); 
+    setEtkinlikPenceresiniGoster(true); 
   };
 
   return (
@@ -155,6 +137,7 @@ const Takvim: React.FC = () => {
       <div className="hero">
         <YanMenu
           setEtkinlikPenceresiniGoster={setEtkinlikPenceresiniGoster}
+          setBilgiPenceresiGorunurluk={setBilgiPenceresiGorunurluk}
           setseciliEtkinlik={setseciliEtkinlik}
           etkinlikData={etkinlikData}
         />
@@ -210,7 +193,6 @@ const Takvim: React.FC = () => {
           />
           <Calendar
             onSelect={(date) => tarihSec(date, false)} // isEventClick parametresini false olarak gönder
-            /* cellRender={cellRender} */
             value={seciliGun}
           />
         </div>

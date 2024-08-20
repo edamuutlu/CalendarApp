@@ -10,3 +10,28 @@
   background-color: #fff;  
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);  
 }
+
+/* Menü item yüksekliğini ve line-height'ı geçersiz kılmak için */
+.ant-menu-inline .ant-menu-item {
+  height: 65px; 
+  line-height: 20px; 
+  list-style-position: inside; 
+  list-style-type: disc; 
+}
+
+.event-details{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  color: #6f7275;
+}
+
+.event-title {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #555555;;
+}

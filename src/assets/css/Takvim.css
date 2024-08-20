@@ -1,3 +1,7 @@
+body, html{
+  overflow: hidden;
+}
+
 .etkinlik-listesi {
   padding: 0;
   margin: 0;
@@ -53,7 +57,7 @@
 }
 .daha-fazla-goster {
   font-size: 13px;
-  padding: 2px 4px;
+  padding: 2px 15px;
   color: #303030;
   border-radius: 4px;
   width: 200px;

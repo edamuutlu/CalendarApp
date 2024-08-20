@@ -76,11 +76,12 @@ const YanMenu = (props: YanMenuProps) => {
         setseciliEtkinlik={setseciliEtkinlik}
       />
       <Menu
-        style={{ width: 256}}
+        style={{ width: 256 }}
         defaultSelectedKeys={["1"]}
         defaultOpenKeys={["sub2", "grp"]}
         mode="inline"
         items={items}
+        className="scrollable-menu"
       />
     </aside>
   );

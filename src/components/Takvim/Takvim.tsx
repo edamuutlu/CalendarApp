@@ -190,6 +190,7 @@ const Takvim: React.FC = () => {
               setseciliEtkinlik(etkinlik);
               tarihSec(dayjs(etkinlik.baslangicTarihi), true);
             }}
+            etkinlikTekrarKontrolu={etkinlikTekrarKontrolu}
           />
           <Calendar
             onSelect={(date) => tarihSec(date, false)} // isEventClick parametresini false olarak gönder

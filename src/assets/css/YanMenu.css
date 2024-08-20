@@ -19,6 +19,15 @@
   list-style-type: disc; 
 }
 
+.event-title {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #555555;;
+}
+
 .event-details{
   overflow: hidden;
   text-overflow: ellipsis;
@@ -27,11 +36,7 @@
   color: #6f7275;
 }
 
-.event-title {
-  font-size: 15px;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #555555;;
+.scrollable-menu {
+  max-height: 708px; 
+  overflow-y: auto; 
 }

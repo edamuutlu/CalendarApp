@@ -189,44 +189,47 @@ const Etkinlikler = (props: EtkinliklerProps) => {
   );
 
   // Şimdi, etkinlik parçalarının index değerlerini güncelleyelim
-  const indeksliEtkinlikler = ayinEtkinlikleri.reduce((acc, parca) => {
-    const cakisanParcalar = acc.filter(
-      (e) =>
-        dayjs(e.etkinlikParcaBaslangic).isSame(
-          dayjs(parca.etkinlikParcaBaslangic),
-          "day"
-        ) ||
-        dayjs(e.etkinlikParcaBitis).isSame(
-          dayjs(parca.etkinlikParcaBitis),
-          "day"
-        ) ||
-        (dayjs(e.etkinlikParcaBaslangic).isBefore(
-          dayjs(parca.etkinlikParcaBitis),
-          "day"
-        ) &&
-          dayjs(e.etkinlikParcaBitis).isAfter(
+  const indeksliEtkinlikler = useMemo(() => {
+    return ayinEtkinlikleri.reduce((acc, parca) => {
+      const cakisanParcalar = acc.filter(
+        (e) =>
+          dayjs(e.etkinlikParcaBaslangic).isSame(
             dayjs(parca.etkinlikParcaBaslangic),
             "day"
-          )) ||
-        dayjs(e.etkinlikParcaBitis).isSame(
-          dayjs(parca.etkinlikParcaBaslangic),
-          "day"
-        ) ||
-        dayjs(e.etkinlikParcaBaslangic).isSame(
-          dayjs(parca.etkinlikParcaBitis),
-          "day"
-        )
-    );
-
-    const kullanilmisIndeksler = new Set(cakisanParcalar.map((p) => p.index));
-    let index = 0;
-    while (kullanilmisIndeksler.has(index)) {
-      index++;
-    }
-
-    acc.push({ ...parca, index });
-    return acc;
-  }, [] as ((typeof etkinlikParcalari)[0] & { index: number })[]);
+          ) ||
+          dayjs(e.etkinlikParcaBitis).isSame(
+            dayjs(parca.etkinlikParcaBitis),
+            "day"
+          ) ||
+          (dayjs(e.etkinlikParcaBaslangic).isBefore(
+            dayjs(parca.etkinlikParcaBitis),
+            "day"
+          ) &&
+            dayjs(e.etkinlikParcaBitis).isAfter(
+              dayjs(parca.etkinlikParcaBaslangic),
+              "day"
+            )) ||
+          dayjs(e.etkinlikParcaBitis).isSame(
+            dayjs(parca.etkinlikParcaBaslangic),
+            "day"
+          ) ||
+          dayjs(e.etkinlikParcaBaslangic).isSame(
+            dayjs(parca.etkinlikParcaBitis),
+            "day"
+          )
+      );
+  
+      const kullanilmisIndeksler = new Set(cakisanParcalar.map((p) => p.index));
+      let index = 0;
+      while (kullanilmisIndeksler.has(index)) {
+        index++;
+      }
+  
+      acc.push({ ...parca, index });
+      return acc;
+    }, [] as ((typeof etkinlikParcalari)[0] & { index: number })[]);
+  }, [ayinEtkinlikleri, etkinlikParcalari]);
+  
 
   const DahaFazlaEtkinlikPenceresi = () => {
     if (!seciliGun) return null;

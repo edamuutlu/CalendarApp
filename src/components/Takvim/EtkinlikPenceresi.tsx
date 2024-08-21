@@ -345,6 +345,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
         >
           <Input placeholder="Etkinlik Başlığı" />
         </Form.Item>
+        
         <Form.Item
           name="aciklama"
           label={
@@ -355,6 +356,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
         >
           <Input.TextArea placeholder="Etkinlik Açıklaması" />
         </Form.Item>
+        
         <Form.Item
           name="tarihAraligi"
           label={
@@ -373,6 +375,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
             }
           />
         </Form.Item>
+
         <Form.Item label="Katılımcılar">
           <Select
             mode="multiple"
@@ -382,6 +385,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
             value={secilenKullaniciIsimleri}
           />
         </Form.Item>
+
         <Form.Item
           shouldUpdate={(prevValues, currentValues) =>
             prevValues.tekrarSayisi !== currentValues.tekrarSayisi

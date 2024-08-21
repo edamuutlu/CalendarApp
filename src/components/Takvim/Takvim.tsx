@@ -58,6 +58,7 @@ const Takvim: React.FC = () => {
     kullanicilariCek();
     etkinlikleriAl();
   }, []);
+  
   const tumEtkinlikler = [...etkinlikData, ...eklendigimEtkinlikler];
 
   const etkinlikTekrarKontrolu = (etkinlik: Etkinlik, date: Dayjs) => {
@@ -82,7 +83,8 @@ const Takvim: React.FC = () => {
           date.isSameOrAfter(startDate, "day") &&
           date.date() >= startDate.date() &&
           date.date() <= endDate.date() &&
-          date.diff(startDate, "month") >= 0
+          date.year() >= startDate.year() &&
+          date.month() >= startDate.month()
         );
       case TekrarEnum.herYil:
         return (
@@ -127,8 +129,8 @@ const Takvim: React.FC = () => {
 
   const etkinligiSeciliYap = (event: Etkinlik) => {
     setseciliEtkinlik(event);
-    setBilgiPenceresiGorunurluk(false); 
-    setEtkinlikPenceresiniGoster(true); 
+    setBilgiPenceresiGorunurluk(false);
+    setEtkinlikPenceresiniGoster(true);
   };
 
   return (

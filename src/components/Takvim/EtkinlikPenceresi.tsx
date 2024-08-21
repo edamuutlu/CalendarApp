@@ -135,7 +135,6 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
       form.setFieldsValue({
         tekrarSayisi: keyAsNumber as TekrarEnum,
       });
-      message.info(`Selected: ${selectedItem.label}`);
     }
   };
 

@@ -1,12 +1,11 @@
-/* CreateEventButton.css */
 .create-event-button {
     border: 1px solid #ccc; /* Kenarlık rengi ve kalınlığı */
     padding: 0.5rem; /* 2 birim padding */
     width: 75%;
-    border-radius: 10px; /* Tam yuvarlak köşe */
-    display: flex; /* Flexbox düzeni */
+    border-radius: 10px; 
+    display: flex; 
     justify-content: center;
-    align-items: center; /* Dikeyde ortalama */
+    align-items: center; 
     transition: all 0.3s ease; /* Hover durumunda yumuşak geçiş */
     background-color: #ffffff;
     cursor: pointer;

@@ -1,7 +1,6 @@
 import { Card, Form, Input, Button, message } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import "../../assets/css/KayitOl.css";
 import { kayitOl } from "../../yonetimler/KimlikYonetimi";
 
 const Kayit = () => {
@@ -30,14 +29,11 @@ const Kayit = () => {
       await kayitOl(newUserData);
       message.success("Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.");
   
-      // Redirect to login page
       navigate("/");
     } catch (error: any) {
       if (error.response && error.response.data && error.response.data.message) {
-        // Server provided a detailed error message
         message.error(`Hata: ${error.response.data.message}`);
       } else {
-        // Generic error message
         message.error("Kayıt sırasında bir hata oluştu. Lütfen daha sonra tekrar deneyin.");
       }
     }

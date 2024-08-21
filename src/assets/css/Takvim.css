@@ -25,7 +25,6 @@ body, html{
   cursor: pointer;
 }
 
-/* styles.css */
 .event-item {
   position: absolute;
   background-color: #cce7ff;
@@ -67,19 +66,6 @@ body, html{
   color: #303030;
   background-color: #9c9c9c5e;
 }
-/* .event-item.start {
-  border-left: 1px solid #91d5ff;
-  border-radius: 4px 0 0 4px;
-}
-
-.event-item.end {
-  border-right: 1px solid #91d5ff;
-  border-radius: 0 4px 4px 0;
-}
-
-.event-item.start-end {
-  border-radius: 0px;
-} */
 
 .event-item.guest {
   background-color: #a692ff;
@@ -88,21 +74,6 @@ body, html{
 .event-item.active {
   background-color: #91d5ff !important;
   color: #303030 !important;
-}
-
-/* :where(
-    .css-dev-only-do-not-override-p8b6i
-  ).ant-picker-calendar.ant-picker-calendar-full
-  .ant-picker-calendar-date {
-  padding: 0 !important;
-  margin: 0 !important;
-}
-
-:where(
-    .css-dev-only-do-not-override-p8b6i
-  ).ant-picker-calendar.ant-picker-calendar-full
-  .ant-picker-calendar-date-content {
-  overflow: auto;
 }
 
 /* Kaydırma çubuğunu özelleştir */

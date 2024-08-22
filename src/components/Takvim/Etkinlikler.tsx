@@ -1,9 +1,8 @@
-import React, { Dispatch, SetStateAction, useMemo, useRef, useState } from "react";
+import React, { Dispatch, SetStateAction, useMemo, useState } from "react";
 import Etkinlik from "../../tipler/Etkinlik";
 import dayjs, { Dayjs } from "dayjs";
 import { Modal } from "antd";
 import { TekrarEnum } from "../../yonetimler/EtkinlikYonetimi";
-import { useOgeGenislik } from "../../assets/setHeightOrWeight";
 
 interface EtkinliklerProps {
   seciliGun: dayjs.Dayjs;
@@ -28,14 +27,14 @@ const DAY_OFFSET = {
 };
 
 const Etkinlikler = (props: EtkinliklerProps) => {
-  const{
-  seciliGun,
-  setSeciliGun,
-  tumEtkinlikler,
-  onEventClick,
-  etkinlikTekrarKontrolu,
-  kalanGenislik
-} = props;
+  const {
+    seciliGun,
+    setSeciliGun,
+    tumEtkinlikler,
+    onEventClick,
+    etkinlikTekrarKontrolu,
+    kalanGenislik
+  } = props;
   // Hover edilen etkinliğin ID'sini tutan state
   const [hoveredEtkinlikId, setHoveredEtkinlikId] = useState<string | null>(null);
 
@@ -221,18 +220,18 @@ const Etkinlikler = (props: EtkinliklerProps) => {
             "day"
           )
       );
-  
+
       const kullanilmisIndeksler = new Set(cakisanParcalar.map((p) => p.index));
       let index = 0;
       while (kullanilmisIndeksler.has(index)) {
         index++;
       }
-  
+
       acc.push({ ...parca, index });
       return acc;
     }, [] as ((typeof etkinlikParcalari)[0] & { index: number })[]);
   }, [ayinEtkinlikleri, etkinlikParcalari]);
-  
+
 
   const DahaFazlaEtkinlikPenceresi = () => {
     if (!seciliGun) return null;
@@ -296,7 +295,6 @@ const Etkinlikler = (props: EtkinliklerProps) => {
         const end = parca.etkinlikParcaBitis;
         const gunFarki = parseInt(end.format("D")) - parseInt(start.format("D")) + 1;
 
-
         let classes = "event-item";
         if (parca.ekleyenKullaniciAdi) classes += " guest";
 
@@ -304,16 +302,13 @@ const Etkinlikler = (props: EtkinliklerProps) => {
           <React.Fragment key={`${parca.id}-${index}`}>
             {parca.index < 2 && (
               <div
-                className={`${classes} ${
-                  hoveredEtkinlikId === String(parca.id) ? "active" : ""
-                }`}
+                className={`${classes} ${hoveredEtkinlikId === String(parca.id) ? "active" : ""
+                  }`}
                 style={{
-                  width: `${(gunFarki * (kalanGenislik/7)) + (gunFarki - 1) - 32}px`, /* buton genişliği için */
-                  /* left: `calc(${(1630 / 7) * solUzunluk(start) + 15}px)`, */
+                  width: `${(gunFarki * (kalanGenislik / 7)) - 40}px`, /* buton genişliği için */
                   left: `calc(${(kalanGenislik / 7) * solUzunluk(start) + 5}px)`,
-                  top: `${
-                    ustUzunluk(start) * 118 + (parca.index as number) * 25
-                  }px`,
+                  top: `${ustUzunluk(start) * 118 + (parca.index as number) * 25
+                    }px`,
                   height: "auto",
                 }}
                 onMouseEnter={() => setHoveredEtkinlikId(String(parca.id))}
@@ -344,10 +339,9 @@ const Etkinlikler = (props: EtkinliklerProps) => {
                     className="daha-fazla-goster"
                     style={{
                       position: "absolute",
-                      width: `${(kalanGenislik/7) - 32}px`,
-                      left: `calc(${
-                        (kalanGenislik / 7) * solUzunluk(currentDate) + 5
-                      }px)`,
+                      width: `${(kalanGenislik / 7) - 40}px`,
+                      left: `calc(${(kalanGenislik / 7) * solUzunluk(currentDate) + 5
+                        }px)`,
                       top: `${ustUzunluk(currentDate) * 118 + 50}px`,
                       zIndex: 50,
                     }}

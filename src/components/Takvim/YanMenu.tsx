@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu, MenuProps } from "antd";
 import "../../assets/css/YanMenu.css";
 import { AppstoreAddOutlined } from "@ant-design/icons";
@@ -81,7 +81,7 @@ const YanMenu = (props: YanMenuProps) => {
   };
 
   return (
-    <aside className="sidebar" > {/* ref={yanMenuRef} */}
+    <aside className="sidebar">
       <EtkinlikOlusturButonu
         setEtkinlikPenceresiniGoster={setEtkinlikPenceresiniGoster}
         setseciliEtkinlik={setseciliEtkinlik}

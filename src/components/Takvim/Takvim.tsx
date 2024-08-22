@@ -19,7 +19,7 @@ import { TekrarEnum } from "../../yonetimler/EtkinlikYonetimi";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import BilgiPenceresi from "./BilgiPenceresi";
 import Etkinlikler from "./Etkinlikler";
-import { useOgeGenislik } from "../../assets/setHeightOrWeight";
+import { useOgeGenislik } from "../../assets/GenislikHesapla";
 
 dayjs.extend(isBetween);
 dayjs.extend(isSameOrAfter);
@@ -35,7 +35,7 @@ const Takvim: React.FC = () => {
   const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] = useState<Dayjs>(dayjs());
   const [tumKullanicilar, setTumKullanicilar] = useState<Kullanici[]>([]);
   const [bilgiPenceresiGorunurluk, setBilgiPenceresiGorunurluk] = useState(false);
-  
+
   const etkinlikleriAl = async (): Promise<Etkinlik[]> => {
     try {
       const kayitliEtkinlikler: Etkinlik[] = await tumEtkinlikleriGetir();
@@ -61,10 +61,7 @@ const Takvim: React.FC = () => {
 
     kullanicilariCek();
     etkinlikleriAl();
-
-    const toplamGenislik = window.innerWidth;
-    console.log('toplamGenislik :>> ', toplamGenislik);
-  }, [window]);
+  }, []);
   
   const tumEtkinlikler = [...etkinlikData, ...eklendigimEtkinlikler];
 
@@ -142,9 +139,8 @@ const Takvim: React.FC = () => {
   
   const mainRef = useRef(null);
   const mainGenislik = useOgeGenislik(mainRef);
-  console.log('mainGenislik :>> ', mainGenislik);
   const yanMenuGenislik = 256;
-  const kalanGenislik1 = mainGenislik - yanMenuGenislik;
+  const kalanGenislik = mainGenislik - yanMenuGenislik;
 
   return (
     <div ref={mainRef}>
@@ -206,7 +202,7 @@ const Takvim: React.FC = () => {
               tarihSec(dayjs(etkinlik.baslangicTarihi), true);
             }}
             etkinlikTekrarKontrolu={etkinlikTekrarKontrolu}
-            kalanGenislik={kalanGenislik1}
+            kalanGenislik={kalanGenislik}
           />
           <Calendar
             onSelect={(date) => tarihSec(date, false)} // isEventClick parametresini false olarak gönder

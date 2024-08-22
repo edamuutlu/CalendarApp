@@ -56,10 +56,9 @@ body, html{
 }
 .daha-fazla-goster {
   font-size: 13px;
-  padding: 2px 15px;
+  padding: 2px 8px;
   color: #303030;
   border-radius: 4px;
-  width: 200px;
   cursor: pointer;
 }
 .daha-fazla-goster:hover {

@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Menu, MenuProps } from "antd";
 import "../../assets/css/YanMenu.css";
 import { AppstoreAddOutlined } from "@ant-design/icons";
 import Etkinlik from "../../tipler/Etkinlik";
 import EtkinlikOlusturButonu from "./EtkinlikOlusturButonu";
 import dayjs from "dayjs";
+import { aylikEtkinlikleriGetir } from "../../yonetimler/TakvimYonetimi";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -24,17 +25,27 @@ interface YanMenuProps {
   setEtkinlikPenceresiniGoster: React.Dispatch<React.SetStateAction<boolean>>;
   setBilgiPenceresiGorunurluk: (visible: boolean) => void;
   setseciliEtkinlik: React.Dispatch<React.SetStateAction<Etkinlik | null>>;
-  etkinlikData: Etkinlik[];
+  seciliGun: dayjs.Dayjs;
 }
 
 const YanMenu = (props: YanMenuProps) => {
-  const { setEtkinlikPenceresiniGoster, setseciliEtkinlik, etkinlikData, setBilgiPenceresiGorunurluk } = props;
+  const { setEtkinlikPenceresiniGoster, setseciliEtkinlik, setBilgiPenceresiGorunurluk, seciliGun } = props;
 
   const [items, setItems] = useState<MenuItem[]>(initialItems);
 
   useEffect(() => {
-    setMyEventsMenuItems(etkinlikData);
-  }, [etkinlikData]);
+    const fetchEvents = async () => {
+      try {
+        const aylikEtkinlikler = await aylikEtkinlikleriGetir(seciliGun);
+        setMyEventsMenuItems(aylikEtkinlikler);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+        setMyEventsMenuItems([]); 
+      }
+    };
+
+    fetchEvents();
+  }, [seciliGun]); 
 
   const setMyEventsMenuItems = (events: Etkinlik[]) => {
     setItems((prevItems) => {
@@ -70,7 +81,7 @@ const YanMenu = (props: YanMenuProps) => {
   };
 
   return (
-    <aside className="sidebar">
+    <aside className="sidebar" > {/* ref={yanMenuRef} */}
       <EtkinlikOlusturButonu
         setEtkinlikPenceresiniGoster={setEtkinlikPenceresiniGoster}
         setseciliEtkinlik={setseciliEtkinlik}

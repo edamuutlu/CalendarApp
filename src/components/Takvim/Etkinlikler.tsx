@@ -1,8 +1,9 @@
-import React, { Dispatch, SetStateAction, useMemo, useState } from "react";
+import React, { Dispatch, SetStateAction, useMemo, useRef, useState } from "react";
 import Etkinlik from "../../tipler/Etkinlik";
 import dayjs, { Dayjs } from "dayjs";
 import { Modal } from "antd";
 import { TekrarEnum } from "../../yonetimler/EtkinlikYonetimi";
+import { useOgeGenislik } from "../../assets/setHeightOrWeight";
 
 interface EtkinliklerProps {
   seciliGun: dayjs.Dayjs;
@@ -10,6 +11,7 @@ interface EtkinliklerProps {
   tumEtkinlikler: Etkinlik[];
   onEventClick: (event: Etkinlik) => void;
   etkinlikTekrarKontrolu: (etkinlik: Etkinlik, date: Dayjs) => boolean;
+  kalanGenislik: number;
 }
 
 type DayName = "Pts" | "Sal" | "Çar" | "Per" | "Cum" | "Cts" | "Paz";
@@ -32,6 +34,7 @@ const Etkinlikler = (props: EtkinliklerProps) => {
   tumEtkinlikler,
   onEventClick,
   etkinlikTekrarKontrolu,
+  kalanGenislik
 } = props;
   // Hover edilen etkinliğin ID'sini tutan state
   const [hoveredEtkinlikId, setHoveredEtkinlikId] = useState<string | null>(null);
@@ -291,8 +294,8 @@ const Etkinlikler = (props: EtkinliklerProps) => {
 
         const start = parca.etkinlikParcaBaslangic;
         const end = parca.etkinlikParcaBitis;
-        const gunFarki =
-          parseInt(end.format("D")) - parseInt(start.format("D")) + 1;
+        const gunFarki = parseInt(end.format("D")) - parseInt(start.format("D")) + 1;
+
 
         let classes = "event-item";
         if (parca.ekleyenKullaniciAdi) classes += " guest";
@@ -305,8 +308,9 @@ const Etkinlikler = (props: EtkinliklerProps) => {
                   hoveredEtkinlikId === String(parca.id) ? "active" : ""
                 }`}
                 style={{
-                  width: `${gunFarki * 200 + (gunFarki - 1) * 32}px`,
-                  left: `calc(${(1630 / 7) * solUzunluk(start) + 15}px)`,
+                  width: `${(gunFarki * (kalanGenislik/7)) + (gunFarki - 1) - 32}px`, /* buton genişliği için */
+                  /* left: `calc(${(1630 / 7) * solUzunluk(start) + 15}px)`, */
+                  left: `calc(${(kalanGenislik / 7) * solUzunluk(start) + 5}px)`,
                   top: `${
                     ustUzunluk(start) * 118 + (parca.index as number) * 25
                   }px`,
@@ -340,8 +344,9 @@ const Etkinlikler = (props: EtkinliklerProps) => {
                     className="daha-fazla-goster"
                     style={{
                       position: "absolute",
+                      width: `${(kalanGenislik/7) - 32}px`,
                       left: `calc(${
-                        (1630 / 7) * solUzunluk(currentDate) + 5
+                        (kalanGenislik / 7) * solUzunluk(currentDate) + 5
                       }px)`,
                       top: `${ustUzunluk(currentDate) * 118 + 50}px`,
                       zIndex: 50,

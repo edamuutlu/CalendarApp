@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button, Calendar } from "antd";
 import "../../assets/css/Takvim.css";
 import dayjs, { Dayjs } from "dayjs";
@@ -10,7 +10,7 @@ import UstMenu from "../UstMenu/UstMenu";
 import YanMenu from "./YanMenu";
 import Etkinlik from "../../tipler/Etkinlik";
 import Kullanici from "../../tipler/Kullanici";
-import { tumEtkinlikleriGetir } from "../../yonetimler/TakvimYonetimi";
+import { aylikEtkinlikleriGetir, tumEtkinlikleriGetir } from "../../yonetimler/TakvimYonetimi";
 import EtkinlikPenceresi from "./EtkinlikPenceresi";
 import isBetween from "dayjs/plugin/isBetween";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
@@ -19,6 +19,7 @@ import { TekrarEnum } from "../../yonetimler/EtkinlikYonetimi";
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import BilgiPenceresi from "./BilgiPenceresi";
 import Etkinlikler from "./Etkinlikler";
+import { useOgeGenislik } from "../../assets/setHeightOrWeight";
 
 dayjs.extend(isBetween);
 dayjs.extend(isSameOrAfter);
@@ -28,18 +29,21 @@ const Takvim: React.FC = () => {
   const [seciliGun, setSeciliGun] = useState(dayjs());
   const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] = useState(false);
   const [etkinlikData, setEtkinlikData] = useState<Etkinlik[]>([]);
+  const [aylikEtkinlikler, setAylikEtkinlikler] = useState<Etkinlik[]>([]);
   const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<Etkinlik[]>([]);
   const [seciliEtkinlik, setseciliEtkinlik] = useState<Etkinlik | null>(null);
   const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] = useState<Dayjs>(dayjs());
   const [tumKullanicilar, setTumKullanicilar] = useState<Kullanici[]>([]);
   const [bilgiPenceresiGorunurluk, setBilgiPenceresiGorunurluk] = useState(false);
-
+  
   const etkinlikleriAl = async (): Promise<Etkinlik[]> => {
     try {
       const kayitliEtkinlikler: Etkinlik[] = await tumEtkinlikleriGetir();
+      const aylikEtkinlikler: Etkinlik[] = await aylikEtkinlikleriGetir(seciliGun);
       const eklendigimEtkinlikler: Etkinlik[] =
         await eklendigimEtkinlikleriGetir();
       setEklendigimEtkinlikler(eklendigimEtkinlikler);
+      setAylikEtkinlikler(aylikEtkinlikler);
       setEtkinlikData(kayitliEtkinlikler);
       return kayitliEtkinlikler;
     } catch (error) {
@@ -57,7 +61,10 @@ const Takvim: React.FC = () => {
 
     kullanicilariCek();
     etkinlikleriAl();
-  }, []);
+
+    const toplamGenislik = window.innerWidth;
+    console.log('toplamGenislik :>> ', toplamGenislik);
+  }, [window]);
   
   const tumEtkinlikler = [...etkinlikData, ...eklendigimEtkinlikler];
 
@@ -102,7 +109,7 @@ const Takvim: React.FC = () => {
   };
 
   const tarihSec = (date: Dayjs, isEventClick: boolean = false) => {
-    const gununEtkinlikleri = etkinlikData.filter((etkinlik) =>
+    const gununEtkinlikleri = aylikEtkinlikler.filter((etkinlik) =>
       etkinlikTekrarKontrolu(etkinlik, date)
     );
     const eklenenEtkinlikler = eklendigimEtkinlikler.filter((etkinlik) =>
@@ -132,16 +139,22 @@ const Takvim: React.FC = () => {
     setBilgiPenceresiGorunurluk(false);
     setEtkinlikPenceresiniGoster(true);
   };
+  
+  const mainRef = useRef(null);
+  const mainGenislik = useOgeGenislik(mainRef);
+  console.log('mainGenislik :>> ', mainGenislik);
+  const yanMenuGenislik = 256;
+  const kalanGenislik1 = mainGenislik - yanMenuGenislik;
 
   return (
-    <div>
+    <div ref={mainRef}>
       <UstMenu />
       <div className="hero">
         <YanMenu
           setEtkinlikPenceresiniGoster={setEtkinlikPenceresiniGoster}
           setBilgiPenceresiGorunurluk={setBilgiPenceresiGorunurluk}
           setseciliEtkinlik={setseciliEtkinlik}
-          etkinlikData={etkinlikData}
+          seciliGun={seciliGun}
         />
         <div className="main">
           <div className="takvim-baslik-container">
@@ -193,6 +206,7 @@ const Takvim: React.FC = () => {
               tarihSec(dayjs(etkinlik.baslangicTarihi), true);
             }}
             etkinlikTekrarKontrolu={etkinlikTekrarKontrolu}
+            kalanGenislik={kalanGenislik1}
           />
           <Calendar
             onSelect={(date) => tarihSec(date, false)} // isEventClick parametresini false olarak gönder

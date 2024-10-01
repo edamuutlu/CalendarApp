@@ -70,7 +70,7 @@ export const etkinliktenKullaniciSil = async (
       throw new Error("Token bulunamadı. Lütfen tekrar giriş yapın.");
     }
 
-    await axios.delete(apiUrlEtkinligeDavetliKullanicilariGuncelle, {
+    await axios.delete(apiUrletkinliktenKullaniciSil, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",

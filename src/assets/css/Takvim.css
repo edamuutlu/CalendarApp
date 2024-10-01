@@ -149,6 +149,14 @@ body, html{
   width: 100%;
 }
 
+@media screen and (max-width: 848px) {
+  .takvim-baslik-container {
+    position: relative;
+    width: 100%;
+    display: none;
+  }
+}
+
 .takvim-baslik {
   position: absolute;
   display: flex;

@@ -10,7 +10,10 @@ import UstMenu from "../UstMenu/UstMenu";
 import YanMenu from "./YanMenu";
 import Etkinlik from "../../tipler/Etkinlik";
 import Kullanici from "../../tipler/Kullanici";
-import { aylikEtkinlikleriGetir, tumEtkinlikleriGetir } from "../../yonetimler/TakvimYonetimi";
+import {
+  aylikEtkinlikleriGetir,
+  tumEtkinlikleriGetir,
+} from "../../yonetimler/TakvimYonetimi";
 import EtkinlikPenceresi from "./EtkinlikPenceresi";
 import isBetween from "dayjs/plugin/isBetween";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
@@ -20,6 +23,7 @@ import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import BilgiPenceresi from "./BilgiPenceresi";
 import Etkinlikler from "./Etkinlikler";
 import { useOgeGenislik } from "../../assets/GenislikHesapla";
+import YillikEtkinlikler from "./YillikEtkinlikler";
 
 dayjs.extend(isBetween);
 dayjs.extend(isSameOrAfter);
@@ -27,19 +31,26 @@ dayjs.extend(isSameOrBefore);
 
 const Takvim: React.FC = () => {
   const [seciliGun, setSeciliGun] = useState(dayjs());
-  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] = useState(false);
+  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] =
+    useState(false);
   const [etkinlikData, setEtkinlikData] = useState<Etkinlik[]>([]);
   const [aylikEtkinlikler, setAylikEtkinlikler] = useState<Etkinlik[]>([]);
-  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<Etkinlik[]>([]);
+  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<
+    Etkinlik[]
+  >([]);
   const [seciliEtkinlik, setseciliEtkinlik] = useState<Etkinlik | null>(null);
-  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] = useState<Dayjs>(dayjs());
+  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] =
+    useState<Dayjs>(dayjs());
   const [tumKullanicilar, setTumKullanicilar] = useState<Kullanici[]>([]);
-  const [bilgiPenceresiGorunurluk, setBilgiPenceresiGorunurluk] = useState(false);
+  const [bilgiPenceresiGorunurluk, setBilgiPenceresiGorunurluk] =
+    useState(false);
 
   const etkinlikleriAl = async (): Promise<Etkinlik[]> => {
     try {
       const kayitliEtkinlikler: Etkinlik[] = await tumEtkinlikleriGetir();
-      const aylikEtkinlikler: Etkinlik[] = await aylikEtkinlikleriGetir(seciliGun);
+      const aylikEtkinlikler: Etkinlik[] = await aylikEtkinlikleriGetir(
+        seciliGun
+      );
       const eklendigimEtkinlikler: Etkinlik[] =
         await eklendigimEtkinlikleriGetir();
       setEklendigimEtkinlikler(eklendigimEtkinlikler);
@@ -62,7 +73,7 @@ const Takvim: React.FC = () => {
     kullanicilariCek();
     etkinlikleriAl();
   }, []);
-  
+
   const tumEtkinlikler = [...etkinlikData, ...eklendigimEtkinlikler];
 
   const etkinlikTekrarKontrolu = (etkinlik: Etkinlik, date: Dayjs) => {
@@ -136,7 +147,17 @@ const Takvim: React.FC = () => {
     setBilgiPenceresiGorunurluk(false);
     setEtkinlikPenceresiniGoster(true);
   };
-  
+
+  const [calendarMode, setCalendarMode] = useState<"month" | "year">("month");
+
+  const handlePanelChange = (date: Dayjs, mode: "month" | "year") => {
+    if (mode === "year") {
+      setCalendarMode("year");
+    } else if (mode === "month") {
+      setCalendarMode("month");
+    }
+  };
+
   const mainRef = useRef(null);
   const mainGenislik = useOgeGenislik(mainRef);
   const yanMenuGenislik = 256;
@@ -147,6 +168,7 @@ const Takvim: React.FC = () => {
       <UstMenu />
       <div className="hero">
         <YanMenu
+          etkinlikPenceresiniGoster={etkinlikPenceresiniGoster}
           setEtkinlikPenceresiniGoster={setEtkinlikPenceresiniGoster}
           setBilgiPenceresiGorunurluk={setBilgiPenceresiGorunurluk}
           setseciliEtkinlik={setseciliEtkinlik}
@@ -193,20 +215,36 @@ const Takvim: React.FC = () => {
               <h2 className="calendar-month">{seciliGun.format("MMM YYYY")}</h2>
             </div>
           </div>
-          <Etkinlikler
-            seciliGun={seciliGun}
-            setSeciliGun={setSeciliGun}
-            tumEtkinlikler={tumEtkinlikler}
-            onEventClick={(etkinlik) => {
-              setseciliEtkinlik(etkinlik);
-              tarihSec(dayjs(etkinlik.baslangicTarihi), true);
-            }}
-            etkinlikTekrarKontrolu={etkinlikTekrarKontrolu}
-            kalanGenislik={kalanGenislik}
-          />
+          {calendarMode === "month" ? (
+            <Etkinlikler
+              seciliGun={seciliGun}
+              setSeciliGun={setSeciliGun}
+              tumEtkinlikler={tumEtkinlikler}
+              onEventClick={(etkinlik) => {
+                setseciliEtkinlik(etkinlik);
+                tarihSec(dayjs(etkinlik.baslangicTarihi), true);
+              }}
+              etkinlikTekrarKontrolu={etkinlikTekrarKontrolu}
+              kalanGenislik={kalanGenislik}
+            />
+          ) : (
+            <YillikEtkinlikler
+              seciliYil={seciliGun}
+              setSeciliGun={setSeciliGun}
+              tumEtkinlikler={tumEtkinlikler}
+              onEventClick={(etkinlik) => {
+                setseciliEtkinlik(etkinlik);
+                tarihSec(dayjs(etkinlik.baslangicTarihi), true);
+              }}
+              kalanGenislik={kalanGenislik}
+            />
+          )}
+
           <Calendar
             onSelect={(date) => tarihSec(date, false)} // isEventClick parametresini false olarak gönder
             value={seciliGun}
+            mode={calendarMode}
+            onPanelChange={handlePanelChange}
           />
         </div>
         <EtkinlikPenceresi

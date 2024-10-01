@@ -73,9 +73,31 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
 
   const [form] = Form.useForm();
   const [ilkAcilisMi, setIlkAcilisMi] = useState(false);
-  const [kullanicilar, setKullanicilar] = useState<Kullanici[]>([]);
   const [secilenKullanicilar, setSecilenKullanicilar] = useState<Kullanici[]>([]);
   const [secilenKullaniciIsimleri, setSecilenKullaniciIsimleri] = useState<string[]>([]);
+  const [davetliKullanicilar, setDavetliKullanicilar] = useState<Kullanici[]>([]);
+
+  useEffect(() => {
+    if (seciliEtkinlikForm) {
+      getDavetliKullanicilar(Number(seciliEtkinlikForm.id));
+    } else {
+      setSecilenKullaniciIsimleri([]);
+      setSecilenKullanicilar([]);
+    }
+  }, [seciliEtkinlikForm]);
+
+  const getDavetliKullanicilar = async (etkinlikId: number) => {
+    try {
+      const davetliler: Kullanici[] = await etkinligeDavetliKullanicilariGetir(etkinlikId);
+      setDavetliKullanicilar(davetliler);
+      const davetliIsimleri = davetliler.map(kullanici => kullanici.isim);
+      setSecilenKullaniciIsimleri(davetliIsimleri);
+      setSecilenKullanicilar(davetliler);
+      form.setFieldsValue({ secilenKullaniciIsimleri: davetliIsimleri });
+    } catch (error) {
+      console.error("Davetli kullanıcılar getirilirken hata oluştu:", error);
+    }
+  };
 
   useEffect(() => {
     if (seciliEtkinlikForm) {
@@ -91,6 +113,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
           dayjs(seciliEtkinlikForm.bitisTarihi),
         ],
         tekrarSayisi: seciliEtkinlikForm.tekrarDurumu,
+        secilenKullaniciIsimleri: secilenKullaniciIsimleri,
       });
     } else {
       form.resetFields();
@@ -101,6 +124,8 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
         ],
         tekrarSayisi: TekrarEnum.hic,
       });
+      setSecilenKullaniciIsimleri([]);
+      setSecilenKullanicilar([]);
     }
   }, [seciliEtkinlikForm, form, etkinlikPenceresiniGoster]);
 
@@ -153,12 +178,9 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
   });
 
   const katilimciEkle = (value: string[]) => {
-    const selectedUsers = value
-      .map((user) => kullanicilar.find((item) => item.isim === user))
-      .filter((user): user is Kullanici => user !== undefined);
+    const selectedUsers = tumKullanicilar.filter(kullanici => value.includes(kullanici.isim));
     setSecilenKullanicilar(selectedUsers);
-    const secilenKullaniciIsimleri = selectedUsers.map((user) => user.isim);
-    setSecilenKullaniciIsimleri(secilenKullaniciIsimleri);
+    setSecilenKullaniciIsimleri(value);
   };
 
   const gununEtkinlikleri = async (): Promise<Etkinlik[]> => {
@@ -206,7 +228,6 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
   };
 
   useEffect(() => {
-    setKullanicilar(tumKullanicilar);
     if (acilanEtkinlikPencereTarihi && ilkAcilisMi && etkinlikPenceresiniAc) {
       etkinlikPenceresiniAc();
     }
@@ -229,46 +250,58 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
     try {
       if (seciliEtkinlikForm) {
         /* Etkinlik Güncelleme */
-        const etkinlikler: Etkinlik[] = await gununEtkinlikleri();
-        console.log("etkinlikler :>> ", etkinlikler);
         etkinlik = { ...etkinlik, id: seciliEtkinlikForm.id };
-
         const etkinlikId = Number(seciliEtkinlikForm.id);
-        if (secilenKullanicilar) {
-          const selectedUserIds = secilenKullanicilar.map((user) => user.id);
-          const request: EtkinliktenDavetliKullanicilariSilRequest = {
-            /*const request: EtkinligeDavetliKullanicilariGuncelleRequest = { */
+
+        // Mevcut davetlileri ve yeni seçilenleri karşılaştır
+        const mevcutDavetliIds = davetliKullanicilar.map(k => k.id);
+        const yeniSecilenIds = secilenKullanicilar.map(k => k.id);
+
+        // Silinecek kullanıcıları bul
+        const silinecekIds = mevcutDavetliIds.filter(id => !yeniSecilenIds.includes(id));
+        console.log(silinecekIds)
+        
+        // Eklenecek kullanıcıları bul
+        const eklenecekIds = yeniSecilenIds.filter(id => !mevcutDavetliIds.includes(id));
+
+        // Kullanıcıları sil
+        if (silinecekIds.length > 0) {
+          const silRequest: EtkinliktenDavetliKullanicilariSilRequest = {
             etkinlikId: etkinlikId,
-            kullaniciIds: selectedUserIds, // `davetliKullanici`'yı `string` olarak belirtme
+            kullaniciIds: silinecekIds,
           };
-          await etkinliktenKullaniciSil(request);
-          await etkinlikGuncelle(etkinlik);
-          await etkinligeKullaniciEkle(request);
-          /* await etkinligeDavetliKullanicilariGuncelle(request); */
-          await etkinlikleriAl();
-        } else {
-          console.error("Davetli kullanıcı null veya undefined.");
+          await etkinliktenKullaniciSil(silRequest);
+        }
+
+        // Etkinliği güncelle
+        await etkinlikGuncelle(etkinlik);
+
+        // Yeni kullanıcıları ekle
+        if (eklenecekIds.length > 0) {
+          const ekleRequest: EtkinligeKullaniciEkleRequest = {
+            etkinlikId: etkinlikId,
+            kullaniciIds: eklenecekIds,
+          };
+          await etkinligeKullaniciEkle(ekleRequest);
         }
       } else {
         /* Etkinlik Ekleme */
-        await etkinlikEkle(etkinlik);
-        const etkinlikler: Etkinlik[] = await gununEtkinlikleri();
-        const etkinlikId = Number(etkinlikler[0].id);
+        const yeniEtkinlik = await etkinlikEkle(etkinlik);
+        const etkinlikId = Number(yeniEtkinlik.id);
 
-        if (secilenKullanicilar) {
+        if (secilenKullanicilar.length > 0) {
           const selectedUserIds = secilenKullanicilar.map((user) => user.id);
           const request: EtkinligeKullaniciEkleRequest = {
             etkinlikId: etkinlikId,
             kullaniciIds: selectedUserIds,
           };
           await etkinligeKullaniciEkle(request);
-        } else {
-          console.error("Davetli kullanıcı null veya undefined.");
         }
       }
 
       const etkinlikler = await etkinlikleriAl();
       console.log("Events:", etkinlikler);
+      message.success("Etkinlik başarıyla kaydedildi.");
     } catch (error) {
       console.error("Error adding/updating event:", error);
       message.error("Etkinlik eklenirken/güncellenirken hata oluştu.");
@@ -376,13 +409,12 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
           />
         </Form.Item>
 
-        <Form.Item label="Katılımcılar">
+        <Form.Item label="Katılımcılar" name="secilenKullaniciIsimleri">
           <Select
             mode="multiple"
             placeholder="Katılımcı seçiniz"
             options={options}
             onChange={katilimciEkle}
-            value={secilenKullaniciIsimleri}
           />
         </Form.Item>
 

@@ -6,6 +6,7 @@ import Etkinlik from "../../tipler/Etkinlik";
 import EtkinlikOlusturButonu from "./EtkinlikOlusturButonu";
 import dayjs from "dayjs";
 import { aylikEtkinlikleriGetir } from "../../yonetimler/TakvimYonetimi";
+import { eklendigimEtkinlikleriGetir } from "../../yonetimler/KullaniciYonetimi"; 
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -22,6 +23,7 @@ const initialItems: MenuItem[] = [
 ];
 
 interface YanMenuProps {
+  etkinlikPenceresiniGoster: boolean;
   setEtkinlikPenceresiniGoster: React.Dispatch<React.SetStateAction<boolean>>;
   setBilgiPenceresiGorunurluk: (visible: boolean) => void;
   setseciliEtkinlik: React.Dispatch<React.SetStateAction<Etkinlik | null>>;
@@ -29,7 +31,7 @@ interface YanMenuProps {
 }
 
 const YanMenu = (props: YanMenuProps) => {
-  const { setEtkinlikPenceresiniGoster, setseciliEtkinlik, setBilgiPenceresiGorunurluk, seciliGun } = props;
+  const { etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster, setseciliEtkinlik, setBilgiPenceresiGorunurluk, seciliGun } = props;
 
   const [items, setItems] = useState<MenuItem[]>(initialItems);
 
@@ -37,7 +39,23 @@ const YanMenu = (props: YanMenuProps) => {
     const fetchEvents = async () => {
       try {
         const aylikEtkinlikler = await aylikEtkinlikleriGetir(seciliGun);
-        setMyEventsMenuItems(aylikEtkinlikler);
+        let eklenilenEtkinlikler = await eklendigimEtkinlikleriGetir();
+        eklenilenEtkinlikler = eklenilenEtkinlikler.filter((etk: any) => {
+          const secilenAy = seciliGun.month(); 
+          const secilenYil = seciliGun.year(); 
+        
+          const etkinliginAyi = dayjs(etk.baslangicTarihi).month();
+          const etkinliginYili = dayjs(etk.baslangicTarihi).year();
+        
+          return etkinliginAyi === secilenAy && etkinliginYili === secilenYil;
+        });
+        const etkinliklerim = [...aylikEtkinlikler, ...eklenilenEtkinlikler].sort((a, b) => {
+          const dateA = dayjs(a.baslangicTarihi); 
+          const dateB = dayjs(b.baslangicTarihi); 
+          return dateA.isBefore(dateB) ? -1 : dateA.isAfter(dateB) ? 1 : 0;
+        });
+        
+        setMyEventsMenuItems(etkinliklerim);
       } catch (error) {
         console.error("Error fetching events:", error);
         setMyEventsMenuItems([]); 
@@ -45,7 +63,7 @@ const YanMenu = (props: YanMenuProps) => {
     };
 
     fetchEvents();
-  }, [seciliGun]); 
+  }, [seciliGun, etkinlikPenceresiniGoster]); 
 
   const setMyEventsMenuItems = (events: Etkinlik[]) => {
     setItems((prevItems) => {

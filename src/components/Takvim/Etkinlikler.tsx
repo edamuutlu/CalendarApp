@@ -40,9 +40,6 @@ const Etkinlikler = (props: EtkinliklerProps) => {
 
   const [dahaFazlaPenceresiniAc, setDahaFazlaPenceresiniAc] = useState(false);
 
-  // Seçili günün hangi ayda olduğunu bulan değişken
-  const seciliGunAy = seciliGun.format("MMM");
-
   const oncekiAySonGun = useMemo(
     () =>
       dayjs(seciliGun)
@@ -160,34 +157,33 @@ const Etkinlikler = (props: EtkinliklerProps) => {
   );
 
   // Etkinlikleri belirli bir aya göre filtreleyip, tarih sırasına göre sıralar
-  const ayinEtkinlikleri = useMemo(
-    () =>
-      etkinlikParcalari
-        .filter((etkinlik) => {
-          const etkinlikBaslangic = dayjs(etkinlik.etkinlikParcaBaslangic);
-          const etkinlikBitis = dayjs(etkinlik.etkinlikParcaBitis);
-          const seciliGunIlkGunu = dayjs(seciliGun).startOf("month");
-          const seciliGunSonGunu = dayjs(seciliGun).endOf("month");
-
-          // Eğer etkinlikParcaBaslangic seciliGun Ayı ile aynı değilse, ilk gününü atayın
-          if (!etkinlikBaslangic.isSame(seciliGun, "month")) {
-            etkinlik.etkinlikParcaBaslangic = seciliGunIlkGunu;
-          }
-
-          // Eğer etkinlikParcaBitis seciliGun Ayı ile aynı değilse, son gününü atayın
-          if (!etkinlikBitis.isSame(seciliGun, "month")) {
-            etkinlik.etkinlikParcaBitis = seciliGunSonGunu;
-          }
-
-          return (
-            etkinlikBaslangic.isBefore(seciliGunSonGunu, "day") &&
-            etkinlikBitis.isAfter(seciliGunIlkGunu, "day")
-          );
-        })
-        .sort((a, b) =>
-          dayjs(a.baslangicTarihi).diff(dayjs(b.baslangicTarihi))
-        ),
-    [etkinlikParcalari, seciliGunAy]
+  const ayinEtkinlikleri = useMemo(() => 
+    etkinlikParcalari
+      .filter((etkinlik) => {
+        const etkinlikBaslangic = dayjs(etkinlik.etkinlikParcaBaslangic);
+        const etkinlikBitis = dayjs(etkinlik.etkinlikParcaBitis);
+        const seciliGunIlkGunu = dayjs(seciliGun).startOf("month");
+        const seciliGunSonGunu = dayjs(seciliGun).endOf("month");
+  
+        // Eğer etkinlikParcaBaslangic seciliGun Ayı ile aynı değilse, ilk gününü atayın
+        if (!etkinlikBaslangic.isSame(seciliGun, "month")) {
+          etkinlik.etkinlikParcaBaslangic = seciliGunIlkGunu;
+        }
+  
+        // Eğer etkinlikParcaBitis seciliGun Ayı ile aynı değilse, son gününü atayın
+        if (!etkinlikBitis.isSame(seciliGun, "month")) {
+          etkinlik.etkinlikParcaBitis = seciliGunSonGunu;
+        }
+  
+        return (
+          etkinlikBaslangic.isBefore(seciliGunSonGunu.add(1, 'day'), "day") && // Son günü dahil etmek için 1 gün ekledik
+          etkinlikBaslangic.isSameOrBefore(seciliGunSonGunu, "day") &&
+          etkinlikBitis.isAfter(seciliGunIlkGunu.subtract(1, 'day'), "day") && // İlk günü dahil etmek için 1 gün çıkardık
+          etkinlikBitis.isSameOrAfter(seciliGunIlkGunu, "day")
+        );
+      })
+      .sort((a, b) => dayjs(a.baslangicTarihi).diff(dayjs(b.baslangicTarihi))),
+    [etkinlikParcalari, seciliGun]
   );
 
   // Şimdi, etkinlik parçalarının index değerlerini güncelleyelim
@@ -275,7 +271,6 @@ const Etkinlikler = (props: EtkinliklerProps) => {
 
   // Create a Set to track which days have already displayed "Daha fazla göster"
   const renderedDays = new Set<string>();
-
   return (
     <div style={{ position: "relative", width: "100%", zIndex: 10 }}>
       {indeksliEtkinlikler.map((parca, index) => {
@@ -306,7 +301,7 @@ const Etkinlikler = (props: EtkinliklerProps) => {
                   }`}
                 style={{
                   width: `${(gunFarki * (kalanGenislik / 7)) - 40}px`, /* buton genişliği için */
-                  left: `calc(${(kalanGenislik / 7) * solUzunluk(start) + 5}px)`,
+                  left: `${Math.floor(kalanGenislik / 7.1) * solUzunluk(start) + 12}px`,
                   top: `${ustUzunluk(start) * 118 + (parca.index as number) * 25
                     }px`,
                   height: "auto",

@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Modal, Descriptions, Button } from "antd";
 import Etkinlik from "../../tipler/Etkinlik";
 import dayjs from "dayjs";
-import { eklendigimEtkinlikleriGetir } from "../../yonetimler/KullaniciYonetimi"; 
+import { eklendigimEtkinlikleriGetir } from "../../yonetimler/KullaniciYonetimi";
+import "../../assets/css/Takvim.css";
+import { ConfigProvider } from "antd/lib";
 
 interface BilgiPenceresiProps {
   bilgiPenceresiGorunurluk: boolean;
@@ -21,7 +23,9 @@ const BilgiPenceresi = (props: BilgiPenceresiProps) => {
     etkinligiSeciliYap,
   } = props;
 
-  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<Etkinlik[]>([]);
+  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<
+    Etkinlik[]
+  >([]);
 
   useEffect(() => {
     const fetchEklendigimEtkinlikler = async () => {
@@ -34,7 +38,8 @@ const BilgiPenceresi = (props: BilgiPenceresiProps) => {
 
   if (!seciliEtkinlikForm) return null;
 
-  const { baslik, aciklama, baslangicTarihi, bitisTarihi, tekrarDurumu, id } = seciliEtkinlikForm;
+  const { baslik, aciklama, baslangicTarihi, bitisTarihi, tekrarDurumu, id } =
+    seciliEtkinlikForm;
 
   const handleOk = () => {
     setBilgiPenceresiGorunurluk(false);
@@ -45,7 +50,9 @@ const BilgiPenceresi = (props: BilgiPenceresiProps) => {
     setseciliEtkinlik(null);
   };
 
-  const etkinlikEklendi = eklendigimEtkinlikler.some(etkinlik => etkinlik.id === id);
+  const etkinlikEklendi = eklendigimEtkinlikler.some(
+    (etkinlik) => etkinlik.id === id
+  );
 
   return (
     <Modal
@@ -68,13 +75,22 @@ const BilgiPenceresi = (props: BilgiPenceresiProps) => {
           {tekrarDurumu || "Tekrar Yok"}
         </Descriptions.Item>
       </Descriptions>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "16px" }}>
-       { !etkinlikEklendi && (<Button
-          type="primary"
-          onClick={() => etkinligiSeciliYap(seciliEtkinlikForm)}
-        >
-          Etkinliği Düzenle
-        </Button>)}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginTop: "16px",
+        }}
+      >
+        {!etkinlikEklendi && (
+          <Button
+            type="primary"
+            className="duzenle-buton"
+            onClick={() => etkinligiSeciliYap(seciliEtkinlikForm)}
+          >
+            Etkinliği Düzenle
+          </Button>        
+        )}
       </div>
     </Modal>
   );

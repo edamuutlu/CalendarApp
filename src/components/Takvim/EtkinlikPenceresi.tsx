@@ -330,10 +330,10 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
         <Button
           key="save"
           type="primary"
+          className="kaydetButonu"
           onClick={() => {
             form.submit();
           }}
-          style={{ backgroundColor: "green", borderColor: "green" }}
         >
           Kaydet
         </Button>,
@@ -354,7 +354,7 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
           >
             <Button
               type="primary"
-              style={{ backgroundColor: "red", borderColor: "red" }}
+              className="silButonu"
             >
               Sil
             </Button>

@@ -1,4 +1,5 @@
-body, html{
+body,
+html {
   overflow: hidden;
 }
 
@@ -27,7 +28,7 @@ body, html{
 
 .event-item {
   position: absolute;
-  background-color: #cce7ff;
+  background-color: #b5dafa;
   height: 20px;
   overflow: hidden;
   white-space: nowrap;
@@ -37,6 +38,11 @@ body, html{
   line-height: 18px;
   cursor: pointer;
   border-radius: 6px;
+}
+
+.event-item.active {
+  background-color: #cce7ff !important;
+  color: #303030 !important;
 }
 
 .daha-fazla-etkinlik {
@@ -71,10 +77,11 @@ body, html{
 
 .event-item.guest {
   background-color: #a692ff;
+  color: #000000;
 }
 
-.event-item.active {
-  background-color: #91d5ff !important;
+.event-item.guest.active {
+  background-color: #bbacfd !important;
   color: #303030 !important;
 }
 
@@ -84,15 +91,6 @@ body, html{
   ).ant-picker-calendar.ant-picker-calendar-full
   .ant-picker-calendar-date-content::-webkit-scrollbar {
   width: 0px; /* İnce kaydırma çubuğu */
-}
-*/ .guest-cell-style {
-  list-style: none;
-  padding: 3px 10px;
-  font-weight: 500;
-  background: #a692ff;
-  border-radius: 16px;
-  margin-bottom: 2px;
-  cursor: pointer;
 }
 
 .modal {
@@ -165,3 +163,36 @@ body, html{
   top: 10px;
   left: 10px;
 }
+
+/* Bilgi Penceresi Başlangıç */
+.duzenle-buton {
+  background-color: #07b1bd;
+  color: white;
+  transition: background-color 0.3s;
+}
+
+.duzenle-buton:hover {
+  background-color: #54cdd6 !important;
+}
+/* Bilgi Penceresi Bitiş */
+
+/* Etkinlik Penceresi Başlangıç */
+.kaydetButonu {
+  background-color: #559e6d;
+  color: white;
+  transition: background-color 0.3s;
+}
+
+.kaydetButonu:hover {
+  background-color: #379e59c7 !important;
+}
+
+.silButonu {
+  background-color: #e73535;
+  color: white;
+  transition: background-color 0.3s;
+}
+.silButonu:hover {
+  background-color: #e93b3bc7 !important;
+}
+/* Etkinlik Penceresi Bitiş */

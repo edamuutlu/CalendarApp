@@ -11,7 +11,6 @@ export enum TekrarEnum {
 }
 
 export const etkinlikEkle = async (event: Etkinlik): Promise<Etkinlik> => {
-  console.log("event", event);
   try {
     const response = await axios.post(
       "http://localhost:5011/api/Etkinlik/EtkinlikOlustur",
@@ -24,6 +23,7 @@ export const etkinlikEkle = async (event: Etkinlik): Promise<Etkinlik> => {
       }
     );
     message.success("Etkinlik başarıyla eklendi.");
+    console.log('response.data :>> ', response.data);
     return response.data;
   } catch (error) {
     message.error("Aynı tarih ve saat aralığında etkinlik eklenemez.");

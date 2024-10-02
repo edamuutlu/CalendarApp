@@ -4,7 +4,7 @@ import Etkinlik from "../../tipler/Etkinlik";
 import dayjs from "dayjs";
 import { eklendigimEtkinlikleriGetir } from "../../yonetimler/KullaniciYonetimi";
 import "../../assets/css/Takvim.css";
-import { ConfigProvider } from "antd/lib";
+import { TekrarEnum } from "../../yonetimler/EtkinlikYonetimi";
 
 interface BilgiPenceresiProps {
   bilgiPenceresiGorunurluk: boolean;
@@ -23,9 +23,7 @@ const BilgiPenceresi = (props: BilgiPenceresiProps) => {
     etkinligiSeciliYap,
   } = props;
 
-  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<
-    Etkinlik[]
-  >([]);
+  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<Etkinlik[]>([]);
 
   useEffect(() => {
     const fetchEklendigimEtkinlikler = async () => {
@@ -38,17 +36,30 @@ const BilgiPenceresi = (props: BilgiPenceresiProps) => {
 
   if (!seciliEtkinlikForm) return null;
 
-  const { baslik, aciklama, baslangicTarihi, bitisTarihi, tekrarDurumu, id } =
-    seciliEtkinlikForm;
+  const { baslik, aciklama, baslangicTarihi, bitisTarihi, tekrarDurumu, id } = seciliEtkinlikForm;
 
-  const handleOk = () => {
-    setBilgiPenceresiGorunurluk(false);
-  };
-
-  const handleCancel = () => {
-    setBilgiPenceresiGorunurluk(false);
-    setseciliEtkinlik(null);
-  };
+  const items = [
+    {
+      label: "Tekrar Yok",
+      key: 0,
+    },
+    {
+      label: "Her Gün",
+      key: 1,
+    },
+    {
+      label: `Her Hafta`,
+      key: 2,
+    },
+    {
+      label: `Her Ay`,
+      key: 3,
+    },
+    {
+      label: `Her Yıl`,
+      key: 4,
+    },
+  ];
 
   const etkinlikEklendi = eklendigimEtkinlikler.some(
     (etkinlik) => etkinlik.id === id
@@ -58,8 +69,11 @@ const BilgiPenceresi = (props: BilgiPenceresiProps) => {
     <Modal
       title="Etkinlik Bilgileri"
       visible={bilgiPenceresiGorunurluk}
-      onOk={handleOk}
-      onCancel={handleCancel}
+      onOk={() => setBilgiPenceresiGorunurluk(false)}
+      onCancel={() => {
+        setBilgiPenceresiGorunurluk(false);
+        setseciliEtkinlik(null);
+      }}
       footer={null}
     >
       <Descriptions column={1}>
@@ -72,7 +86,7 @@ const BilgiPenceresi = (props: BilgiPenceresiProps) => {
           {dayjs(bitisTarihi).format("YYYY-MM-DD HH:mm")}
         </Descriptions.Item>
         <Descriptions.Item label="Tekrar Durumu">
-          {tekrarDurumu || "Tekrar Yok"}
+          {items[tekrarDurumu as TekrarEnum]?.label || "Tekrar Yok"}
         </Descriptions.Item>
       </Descriptions>
       <div
@@ -89,7 +103,7 @@ const BilgiPenceresi = (props: BilgiPenceresiProps) => {
             onClick={() => etkinligiSeciliYap(seciliEtkinlikForm)}
           >
             Etkinliği Düzenle
-          </Button>        
+          </Button>
         )}
       </div>
     </Modal>

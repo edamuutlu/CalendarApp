@@ -13,6 +13,5 @@ interface Etkinlik {
 
   ekleyenKullaniciId?: string;
   ekleyenKullaniciAdi?: string;
-  isRecurring?: boolean;
 }
 export default Etkinlik;

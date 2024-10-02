@@ -34,6 +34,22 @@ const YillikEtkinlikler = (props: EtkinliklerProps) => {
     switch (tekrarDurumu) {
       case TekrarEnum.hic:
         return date.isBetween(startDate, endDate, "day", "[]");
+      case TekrarEnum.herGun:
+        return (
+          date.isSameOrAfter(startDate, "day") &&
+          date.date() >= startDate.date() &&
+          date.date() <= endDate.date() &&
+          date.year() >= startDate.year() &&
+          date.month() >= startDate.month()
+        );
+      case TekrarEnum.herHafta:
+        return (
+          date.isSameOrAfter(startDate, "day") &&
+          date.date() >= startDate.date() &&
+          date.date() <= endDate.date() &&
+          date.year() >= startDate.year() &&
+          date.month() >= startDate.month()
+        );
       case TekrarEnum.herAy:
         return (
           date.isSameOrAfter(startDate, "day") &&
@@ -157,47 +173,53 @@ const YillikEtkinlikler = (props: EtkinliklerProps) => {
     const sortedEvents = yilEtkinlikleri.sort((a, b) =>
       dayjs(a.etkinlikParcaBaslangic).diff(dayjs(b.etkinlikParcaBaslangic))
     );
-  
-    const result: (typeof sortedEvents[0] & { index: number })[] = [];
+
+    const result: ((typeof sortedEvents)[0] & { index: number })[] = [];
     const indexMap = new Map<string, number>();
-  
+
     sortedEvents.forEach((parca) => {
-        const cakisanParcalar = result.filter((e) => {
-          const sameMonthCondition =
-            dayjs(e.etkinlikParcaBaslangic).isSame(dayjs(parca.etkinlikParcaBaslangic), "month") ||
-            dayjs(e.etkinlikParcaBitis).isSame(dayjs(parca.etkinlikParcaBitis), "month") ||
-            (dayjs(e.etkinlikParcaBaslangic).isBefore(dayjs(parca.etkinlikParcaBitis), "month") &&
-              dayjs(e.etkinlikParcaBitis).isAfter(dayjs(parca.etkinlikParcaBaslangic), "month"));
-      
-          return (
-            sameMonthCondition && e.id !== parca.id 
-          );
-        });
-      
-        if (!parca.id) return; 
-      
-        const kullanilmisIndeksler = new Set(cakisanParcalar.map((p) => p.index));
-        
-        let index: number;
-        if (indexMap.has(parca.id)) {
-          index = indexMap.get(parca.id)!; 
-        } else {
-          index = 0;
-          while (kullanilmisIndeksler.has(index)) {
-            index++;
-          }
-          indexMap.set(parca.id, index);
-        }
-        
-        result.push({ ...parca, index });
+      const cakisanParcalar = result.filter((e) => {
+        const sameMonthCondition =
+          dayjs(e.etkinlikParcaBaslangic).isSame(
+            dayjs(parca.etkinlikParcaBaslangic),
+            "month"
+          ) ||
+          dayjs(e.etkinlikParcaBitis).isSame(
+            dayjs(parca.etkinlikParcaBitis),
+            "month"
+          ) ||
+          (dayjs(e.etkinlikParcaBaslangic).isBefore(
+            dayjs(parca.etkinlikParcaBitis),
+            "month"
+          ) &&
+            dayjs(e.etkinlikParcaBitis).isAfter(
+              dayjs(parca.etkinlikParcaBaslangic),
+              "month"
+            ));
+
+        return sameMonthCondition && e.id !== parca.id;
       });
-      
-  
+
+      if (!parca.id) return;
+
+      const kullanilmisIndeksler = new Set(cakisanParcalar.map((p) => p.index));
+
+      let index: number;
+      if (indexMap.has(parca.id)) {
+        index = indexMap.get(parca.id)!;
+      } else {
+        index = 0;
+        while (kullanilmisIndeksler.has(index)) {
+          index++;
+        }
+        indexMap.set(parca.id, index);
+      }
+
+      result.push({ ...parca, index });
+    });
+
     return result;
   }, [yilEtkinlikleri]);
-  
-
-  console.log("indeksliEtkinlikler :>> ", indeksliEtkinlikler);
 
   const DahaFazlaEtkinlikPenceresi = () => {
     if (!seciliYil) return null;
@@ -259,9 +281,6 @@ const YillikEtkinlikler = (props: EtkinliklerProps) => {
         };
 
         const start = parca.etkinlikParcaBaslangic;
-        const end = parca.etkinlikParcaBitis;
-        const ayFarki = parseInt(end.format("M")) - parseInt(start.format("M")) + 1;
-        console.log('ayFarki :>> ', ayFarki);
 
         let classes = "event-item";
         if (parca.ekleyenKullaniciAdi) classes += " guest";
@@ -274,7 +293,7 @@ const YillikEtkinlikler = (props: EtkinliklerProps) => {
                   hoveredEtkinlikId === String(parca.id) ? "active" : ""
                 }`}
                 style={{
-                  width: `${(Math.floor(kalanGenislik) / 3) - 50}px`,
+                  width: `${Math.floor(kalanGenislik) / 3 - 50}px`,
                   left: `${
                     Math.floor(kalanGenislik / 3.1) * solUzunluk(start) + 15
                   }px`,
@@ -294,15 +313,15 @@ const YillikEtkinlikler = (props: EtkinliklerProps) => {
               </div>
             )}
 
-            {[...Array(ayFarki)].map((_, dayIndex) => {
+            {[...Array(1)].map((_, dayIndex) => {
               const currentDate = start.add(dayIndex, "day");
               const currentEtkinlikSayisi = etkinlikSayisi(currentDate);
 
               if (
                 currentEtkinlikSayisi > 0 &&
-                !renderedDays.has(currentDate.format("YYYY-MM-DD"))
+                !renderedDays.has(currentDate.format("YYYY-MM"))
               ) {
-                renderedDays.add(currentDate.format("YYYY-MM-DD"));
+                renderedDays.add(currentDate.format("YYYY-MM"));
 
                 return (
                   <div
@@ -310,7 +329,7 @@ const YillikEtkinlikler = (props: EtkinliklerProps) => {
                     className="daha-fazla-goster"
                     style={{
                       position: "absolute",
-                      width: `${(Math.floor(kalanGenislik) / 3) - 50}px`,
+                      width: `${Math.floor(kalanGenislik) / 3 - 50}px`,
                       left: `${
                         Math.floor(kalanGenislik / 3.1) * solUzunluk(start) + 15
                       }px`,

@@ -228,7 +228,6 @@ const Etkinlikler = (props: EtkinliklerProps) => {
     }, [] as ((typeof etkinlikParcalari)[0] & { index: number })[]);
   }, [ayinEtkinlikleri, etkinlikParcalari]);
 
-
   const DahaFazlaEtkinlikPenceresi = () => {
     if (!seciliGun) return null;
 

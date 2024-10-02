@@ -31,34 +31,29 @@ dayjs.extend(isSameOrBefore);
 
 const Takvim: React.FC = () => {
   const [seciliGun, setSeciliGun] = useState(dayjs());
-  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] =
-    useState(false);
-  const [etkinlikData, setEtkinlikData] = useState<Etkinlik[]>([]);
+  const [etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster] = useState(false);
+  const [kayitliEtkinlikler, setKayitliEtkinlikler] = useState<Etkinlik[]>([]);
   const [aylikEtkinlikler, setAylikEtkinlikler] = useState<Etkinlik[]>([]);
-  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<
-    Etkinlik[]
-  >([]);
+  const [eklendigimEtkinlikler, setEklendigimEtkinlikler] = useState<Etkinlik[]>([]);
   const [seciliEtkinlik, setseciliEtkinlik] = useState<Etkinlik | null>(null);
-  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] =
-    useState<Dayjs>(dayjs());
+  const [acilanEtkinlikPencereTarihi, setAcilanEtkinlikPencereTarihi] = useState<Dayjs>(dayjs());
   const [tumKullanicilar, setTumKullanicilar] = useState<Kullanici[]>([]);
-  const [bilgiPenceresiGorunurluk, setBilgiPenceresiGorunurluk] =
-    useState(false);
+  const [bilgiPenceresiGorunurluk, setBilgiPenceresiGorunurluk] = useState(false);
+  const [takvimModu, setTakvimModu] = useState<"month" | "year">("month");
+
+  const tumEtkinlikler = [...kayitliEtkinlikler, ...eklendigimEtkinlikler];
 
   const etkinlikleriAl = async (): Promise<Etkinlik[]> => {
     try {
       const kayitliEtkinlikler: Etkinlik[] = await tumEtkinlikleriGetir();
-      const aylikEtkinlikler: Etkinlik[] = await aylikEtkinlikleriGetir(
-        seciliGun
-      );
-      const eklendigimEtkinlikler: Etkinlik[] =
-        await eklendigimEtkinlikleriGetir();
+      const aylikEtkinlikler: Etkinlik[] = await aylikEtkinlikleriGetir(seciliGun);
+      const eklendigimEtkinlikler: Etkinlik[] = await eklendigimEtkinlikleriGetir();
       setEklendigimEtkinlikler(eklendigimEtkinlikler);
       setAylikEtkinlikler(aylikEtkinlikler);
-      setEtkinlikData(kayitliEtkinlikler);
+      setKayitliEtkinlikler(kayitliEtkinlikler);
       return kayitliEtkinlikler;
     } catch (error) {
-      setEtkinlikData([]);
+      setKayitliEtkinlikler([]);
       console.error("Etkinlikler getirilirken hata oluştu:", error);
       return [];
     }
@@ -74,8 +69,6 @@ const Takvim: React.FC = () => {
     etkinlikleriAl();
   }, []);
 
-  const tumEtkinlikler = [...etkinlikData, ...eklendigimEtkinlikler];
-
   const etkinlikTekrarKontrolu = (etkinlik: Etkinlik, date: Dayjs) => {
     const { baslangicTarihi, bitisTarihi, tekrarDurumu } = etkinlik;
     const startDate = dayjs(baslangicTarihi);
@@ -90,7 +83,7 @@ const Takvim: React.FC = () => {
         return (
           date.isSameOrAfter(startDate, "day") &&
           date.day() >= startDate.day() &&
-          date.day() <= endDate.day() &&
+          date.day() <= endDate.day() &&                                                                                                                                                                                                   
           date.diff(startDate, "week") >= 0
         );
       case TekrarEnum.herAy:
@@ -139,22 +132,6 @@ const Takvim: React.FC = () => {
       setAcilanEtkinlikPencereTarihi(date);
       setEtkinlikPenceresiniGoster(true);
       setBilgiPenceresiGorunurluk(false);
-    }
-  };
-
-  const etkinligiSeciliYap = (event: Etkinlik) => {
-    setseciliEtkinlik(event);
-    setBilgiPenceresiGorunurluk(false);
-    setEtkinlikPenceresiniGoster(true);
-  };
-
-  const [calendarMode, setCalendarMode] = useState<"month" | "year">("month");
-
-  const handlePanelChange = (date: Dayjs, mode: "month" | "year") => {
-    if (mode === "year") {
-      setCalendarMode("year");
-    } else if (mode === "month") {
-      setCalendarMode("month");
     }
   };
 
@@ -215,7 +192,7 @@ const Takvim: React.FC = () => {
               <h2 className="calendar-month">{seciliGun.format("MMM YYYY")}</h2>
             </div>
           </div>
-          {calendarMode === "month" ? (
+          {takvimModu === "month" ? (
             <Etkinlikler
               seciliGun={seciliGun}
               setSeciliGun={setSeciliGun}
@@ -241,10 +218,10 @@ const Takvim: React.FC = () => {
           )}
 
           <Calendar
-            onSelect={(date) => tarihSec(date, false)} // isEventClick parametresini false olarak gönder
+            onSelect={(date) => tarihSec(date, false)}
             value={seciliGun}
-            mode={calendarMode}
-            onPanelChange={handlePanelChange}
+            mode={takvimModu}
+            onPanelChange={(_, mode) => setTakvimModu(mode)}
           />
         </div>
         <EtkinlikPenceresi
@@ -262,7 +239,11 @@ const Takvim: React.FC = () => {
           setBilgiPenceresiGorunurluk={setBilgiPenceresiGorunurluk}
           seciliEtkinlikForm={seciliEtkinlik}
           setseciliEtkinlik={setseciliEtkinlik}
-          etkinligiSeciliYap={etkinligiSeciliYap}
+          etkinligiSeciliYap={(event: Etkinlik) => {
+            setseciliEtkinlik(event);
+            setBilgiPenceresiGorunurluk(false);
+            setEtkinlikPenceresiniGoster(true);
+          }}
         />
       </div>
     </div>

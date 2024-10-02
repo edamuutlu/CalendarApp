@@ -76,8 +76,8 @@ const YillikEtkinlikler = (props: EtkinliklerProps) => {
   // Bir tarihin hangi aya denk geldiğini hesaplar (0-11 arası)
   const solUzunluk = useMemo(
     () => (date: dayjs.Dayjs) => {
-      const etkinlikBaslangicGunSayisi = date.month() % 3;
-      return etkinlikBaslangicGunSayisi;
+      const etkinlikSutunSayısı = date.month() % 3;
+      return etkinlikSutunSayısı;
     },
     []
   );
@@ -293,9 +293,9 @@ const YillikEtkinlikler = (props: EtkinliklerProps) => {
                   hoveredEtkinlikId === String(parca.id) ? "active" : ""
                 }`}
                 style={{
-                  width: `${Math.floor(kalanGenislik) / 3 - 50}px`,
+                  width: `${Math.floor(kalanGenislik / 3) - 55}px`,
                   left: `${
-                    Math.floor(kalanGenislik / 3.1) * solUzunluk(start) + 15
+                    Math.floor(kalanGenislik / 3) * solUzunluk(start) + 10 
                   }px`,
                   top: `${
                     ustUzunluk(start) * 112 + (parca.index as number) * 25
@@ -329,9 +329,9 @@ const YillikEtkinlikler = (props: EtkinliklerProps) => {
                     className="daha-fazla-goster"
                     style={{
                       position: "absolute",
-                      width: `${Math.floor(kalanGenislik) / 3 - 50}px`,
+                      width: `${Math.floor(kalanGenislik) / 3 - 55}px`,
                       left: `${
-                        Math.floor(kalanGenislik / 3.1) * solUzunluk(start) + 15
+                        Math.floor(kalanGenislik / 3) * solUzunluk(start) + 10 
                       }px`,
                       top: `${ustUzunluk(currentDate) * 112 + 50}px`,
                       zIndex: 50,

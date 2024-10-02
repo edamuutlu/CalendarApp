@@ -317,15 +317,15 @@ const Etkinlikler = (props: EtkinliklerProps) => {
             )}
 
             {[...Array(gunFarki)].map((_, dayIndex) => {
-              const currentDate = start.add(dayIndex, "day");
-              const currentEtkinlikSayisi = etkinlikSayisi(currentDate);
+              const guncelTarih = start.add(dayIndex, "day");
+              const guncelEtkinlikSayisi = etkinlikSayisi(guncelTarih);
 
               // Check if "Daha fazla göster" has already been rendered for this date
               if (
-                currentEtkinlikSayisi > 0 &&
-                !renderedDays.has(currentDate.format("YYYY-MM-DD"))
+                guncelEtkinlikSayisi > 0 &&
+                !renderedDays.has(guncelTarih.format("YYYY-MM-DD"))
               ) {
-                renderedDays.add(currentDate.format("YYYY-MM-DD")); // Mark the day as rendered
+                renderedDays.add(guncelTarih.format("YYYY-MM-DD")); // Mark the day as rendered
 
                 return (
                   <div
@@ -334,17 +334,17 @@ const Etkinlikler = (props: EtkinliklerProps) => {
                     style={{
                       position: "absolute",
                       width: `${(kalanGenislik / 7) - 40}px`,
-                      left: `calc(${(kalanGenislik / 7) * solUzunluk(currentDate) + 5
+                      left: `calc(${(kalanGenislik / 7) * solUzunluk(guncelTarih) + 5
                         }px)`,
-                      top: `${ustUzunluk(currentDate) * 118 + 50}px`,
+                      top: `${ustUzunluk(guncelTarih) * 118 + 50}px`,
                       zIndex: 50,
                     }}
                     onClick={() => {
-                      setSeciliGun(currentDate);
+                      setSeciliGun(guncelTarih);
                       setDahaFazlaPenceresiniAc(true);
                     }}
                   >
-                    Daha fazla göster ({currentEtkinlikSayisi})
+                    Daha fazla göster ({guncelEtkinlikSayisi})
                   </div>
                 );
               }

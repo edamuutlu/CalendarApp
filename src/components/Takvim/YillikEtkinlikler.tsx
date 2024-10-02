@@ -21,9 +21,7 @@ const YillikEtkinlikler = (props: EtkinliklerProps) => {
     kalanGenislik,
   } = props;
 
-  const [hoveredEtkinlikId, setHoveredEtkinlikId] = useState<string | null>(
-    null
-  );
+  const [hoveredEtkinlikId, setHoveredEtkinlikId] = useState<string | null>(null);
   const [dahaFazlaPenceresiniAc, setDahaFazlaPenceresiniAc] = useState(false);
 
   const etkinlikTekrarKontrolu = (etkinlik: Etkinlik, date: Dayjs) => {
@@ -99,7 +97,6 @@ const YillikEtkinlikler = (props: EtkinliklerProps) => {
     return date1.isBefore(date2) ? date1 : date2;
   };
 
-  // Etkinlik parçalarını oluştur
   const etkinlikParcalari = useMemo(
     () =>
       tumEtkinlikler.flatMap((etkinlik) => {

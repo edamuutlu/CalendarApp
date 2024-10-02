@@ -23,7 +23,6 @@ export const etkinlikEkle = async (event: Etkinlik): Promise<Etkinlik> => {
       }
     );
     message.success("Etkinlik başarıyla eklendi.");
-    console.log('response.data :>> ', response.data);
     return response.data;
   } catch (error) {
     message.error("Aynı tarih ve saat aralığında etkinlik eklenemez.");

@@ -33,11 +33,10 @@ const Etkinlikler = (props: EtkinliklerProps) => {
     tumEtkinlikler,
     onEventClick,
     etkinlikTekrarKontrolu,
-    kalanGenislik
+    kalanGenislik,
   } = props;
-  // Hover edilen etkinliğin ID'sini tutan state
-  const [hoveredEtkinlikId, setHoveredEtkinlikId] = useState<string | null>(null);
 
+  const [hoveredEtkinlikId, setHoveredEtkinlikId] = useState<string | null>(null);
   const [dahaFazlaPenceresiniAc, setDahaFazlaPenceresiniAc] = useState(false);
 
   const oncekiAySonGun = useMemo(
@@ -55,7 +54,7 @@ const Etkinlikler = (props: EtkinliklerProps) => {
     [oncekiAySonGun]
   );
 
-  // Bir tarihin hangi haftanın hangi gününe denk geldiğini hesaplar
+  // Bir tarihin, haftanın hangi gününe denk geldiğini hesaplar
   const solUzunluk = (date: dayjs.Dayjs) =>
     DAY_OFFSET[date.format("ddd") as DayName] || 0;
 
@@ -65,80 +64,57 @@ const Etkinlikler = (props: EtkinliklerProps) => {
       const ayinIlkHaftadakiGunSayisi = 7 - oncekiAydanGelenGunSayisi;
       const etkinlikBaslangicGunSayisi = date.date();
 
-      // Etkinliğin hangi hafta sırasına denk geldiğini belirler
       if (etkinlikBaslangicGunSayisi <= ayinIlkHaftadakiGunSayisi) return 1;
       if (etkinlikBaslangicGunSayisi <= ayinIlkHaftadakiGunSayisi + 7) return 2;
-      if (etkinlikBaslangicGunSayisi <= ayinIlkHaftadakiGunSayisi + 14) return 3;
-      if (etkinlikBaslangicGunSayisi <= ayinIlkHaftadakiGunSayisi + 21) return 4;
-      if (etkinlikBaslangicGunSayisi <= ayinIlkHaftadakiGunSayisi + 28) return 5;
+      if (etkinlikBaslangicGunSayisi <= ayinIlkHaftadakiGunSayisi + 14)
+        return 3;
+      if (etkinlikBaslangicGunSayisi <= ayinIlkHaftadakiGunSayisi + 21)
+        return 4;
+      if (etkinlikBaslangicGunSayisi <= ayinIlkHaftadakiGunSayisi + 28)
+        return 5;
       return 6;
     },
     [oncekiAydanGelenGunSayisi]
   );
 
-  // İki tarih arasından en küçük olanı döndürür
   const minDate = (date1: dayjs.Dayjs, date2: dayjs.Dayjs) => {
     return date1.isBefore(date2) ? date1 : date2;
   };
 
-  // İlk olarak, etkinlik parçalarını oluşturuyoruz
   const etkinlikParcalari = useMemo(
-    () =>
-      tumEtkinlikler.flatMap((etkinlik) => {
-        const ayinIlkGunu = seciliGun.startOf("year");
-        const ayinSonGunu = seciliGun.endOf("year");
-        const gunFarki = dayjs(etkinlik.bitisTarihi).diff(
-          dayjs(etkinlik.baslangicTarihi),
-          "day"
-        );
-        const parcalar = [];
+  () =>
+    tumEtkinlikler.flatMap((etkinlik) => {
+      const ayinIlkGunu = seciliGun.startOf("year");
+      const ayinSonGunu = seciliGun.endOf("year");
+      const gunFarki = dayjs(etkinlik.bitisTarihi).diff(
+        dayjs(etkinlik.baslangicTarihi),
+        "day"
+      );
+      const parcalar = [];
 
-        for (
-          let gun = ayinIlkGunu;
-          gun.isSameOrBefore(ayinSonGunu);
-          gun = gun.add(1, "day")
-        ) {
-          if (
-            etkinlikTekrarKontrolu(etkinlik, gun) &&
-            etkinlik.tekrarDurumu !== TekrarEnum.hic
-          ) {
-            // Etkinlik parçasının başlangıç ve bitiş tarihlerini saat ile birlikte ayarla
-            const etkinlikBaslangicSaatli = gun
-              .hour(dayjs(etkinlik.baslangicTarihi).hour())
-              .minute(dayjs(etkinlik.baslangicTarihi).minute());
-            const parcaBitis = etkinlikBaslangicSaatli
-              .add(gunFarki, "day")
-              .hour(dayjs(etkinlik.bitisTarihi).hour())
-              .minute(dayjs(etkinlik.bitisTarihi).minute());
+      for (
+        let gun = ayinIlkGunu;
+        gun.isSameOrBefore(ayinSonGunu);
+        gun = gun.add(1, "day")
+      ) {
+        if (etkinlikTekrarKontrolu(etkinlik, gun)) {
+          // Etkinlik parçasının başlangıç ve bitiş tarihlerini saat ile birlikte ayarla
+          const etkinlikBaslangicSaatli = gun
+            .hour(dayjs(etkinlik.baslangicTarihi).hour())
+            .minute(dayjs(etkinlik.baslangicTarihi).minute());
+          const parcaBitis = etkinlikBaslangicSaatli
+            .add(gunFarki, "day")
+            .hour(dayjs(etkinlik.bitisTarihi).hour())
+            .minute(dayjs(etkinlik.bitisTarihi).minute());
 
-            parcalar.push({
-              ...etkinlik,
-              etkinlikParcaBaslangic: etkinlikBaslangicSaatli,
-              etkinlikParcaBitis: parcaBitis,
-            });
-
-            // Bir sonraki güne geçiş yap
-            gun = gun.add(gunFarki, "day");
-          }
-        }
-
-        if (etkinlik.tekrarDurumu === TekrarEnum.hic) {
-          const baslangic = dayjs(etkinlik.baslangicTarihi);
-          const bitis = dayjs(etkinlik.bitisTarihi);
-
-          let guncelBaslangic = baslangic;
           // Etkinliği haftalara böler ve her parçayı listeye ekler
+          let guncelBaslangic = etkinlikBaslangicSaatli;
           while (
-            guncelBaslangic.isBefore(bitis) ||
-            guncelBaslangic.isSame(bitis, "day")
+            guncelBaslangic.isBefore(parcaBitis) ||
+            guncelBaslangic.isSame(parcaBitis, "day")
           ) {
-            guncelBaslangic
-              .hour(dayjs(etkinlik.baslangicTarihi).hour())
-              .minute(dayjs(etkinlik.baslangicTarihi).minute());
             const haftaninSonGunu = guncelBaslangic.endOf("week");
-            const etkinlikSonParca = minDate(haftaninSonGunu, bitis)
-              .hour(dayjs(etkinlik.bitisTarihi).hour())
-              .minute(dayjs(etkinlik.bitisTarihi).minute());
+            const etkinlikSonParca = minDate(haftaninSonGunu, parcaBitis);
 
             parcalar.push({
               ...etkinlik,
@@ -149,40 +125,51 @@ const Etkinlikler = (props: EtkinliklerProps) => {
             // Bir sonraki haftaya geçer
             guncelBaslangic = haftaninSonGunu.add(1, "day");
           }
-        }
 
-        return parcalar;
-      }),
-    [seciliGun, tumEtkinlikler]
-  );
+          // Bir sonraki tekrar gününe geçiş yap
+          if (etkinlik.tekrarDurumu !== TekrarEnum.hic) {
+            gun = gun.add(gunFarki, "day");
+          } else {
+            break;
+          }
+        }
+      }
+
+      return parcalar;
+    }),
+  [seciliGun, tumEtkinlikler]
+);
 
   // Etkinlikleri belirli bir aya göre filtreleyip, tarih sırasına göre sıralar
-  const ayinEtkinlikleri = useMemo(() => 
-    etkinlikParcalari
-      .filter((etkinlik) => {
-        const etkinlikBaslangic = dayjs(etkinlik.etkinlikParcaBaslangic);
-        const etkinlikBitis = dayjs(etkinlik.etkinlikParcaBitis);
-        const seciliGunIlkGunu = dayjs(seciliGun).startOf("month");
-        const seciliGunSonGunu = dayjs(seciliGun).endOf("month");
-  
-        // Eğer etkinlikParcaBaslangic seciliGun Ayı ile aynı değilse, ilk gününü atayın
-        if (!etkinlikBaslangic.isSame(seciliGun, "month")) {
-          etkinlik.etkinlikParcaBaslangic = seciliGunIlkGunu;
-        }
-  
-        // Eğer etkinlikParcaBitis seciliGun Ayı ile aynı değilse, son gününü atayın
-        if (!etkinlikBitis.isSame(seciliGun, "month")) {
-          etkinlik.etkinlikParcaBitis = seciliGunSonGunu;
-        }
-  
-        return (
-          etkinlikBaslangic.isBefore(seciliGunSonGunu.add(1, 'day'), "day") && // Son günü dahil etmek için 1 gün ekledik
-          etkinlikBaslangic.isSameOrBefore(seciliGunSonGunu, "day") &&
-          etkinlikBitis.isAfter(seciliGunIlkGunu.subtract(1, 'day'), "day") && // İlk günü dahil etmek için 1 gün çıkardık
-          etkinlikBitis.isSameOrAfter(seciliGunIlkGunu, "day")
-        );
-      })
-      .sort((a, b) => dayjs(a.baslangicTarihi).diff(dayjs(b.baslangicTarihi))),
+  const ayinEtkinlikleri = useMemo(
+    () =>
+      etkinlikParcalari
+        .filter((etkinlik) => {
+          const etkinlikBaslangic = dayjs(etkinlik.etkinlikParcaBaslangic);
+          const etkinlikBitis = dayjs(etkinlik.etkinlikParcaBitis);
+          const seciliGunIlkGunu = dayjs(seciliGun).startOf("month");
+          const seciliGunSonGunu = dayjs(seciliGun).endOf("month");
+
+          // Eğer etkinlikParcaBaslangic seciliGun Ayı ile aynı değilse, ilk gününü atayın
+          if (!etkinlikBaslangic.isSame(seciliGun, "month")) {
+            etkinlik.etkinlikParcaBaslangic = seciliGunIlkGunu;
+          }
+
+          // Eğer etkinlikParcaBitis seciliGun Ayı ile aynı değilse, son gününü atayın
+          if (!etkinlikBitis.isSame(seciliGun, "month")) {
+            etkinlik.etkinlikParcaBitis = seciliGunSonGunu;
+          }
+
+          return (
+            etkinlikBaslangic.isBefore(seciliGunSonGunu.add(1, "day"), "day") && // Son günü dahil etmek için 1 gün ekledik
+            etkinlikBaslangic.isSameOrBefore(seciliGunSonGunu, "day") &&
+            etkinlikBitis.isAfter(seciliGunIlkGunu.subtract(1, "day"), "day") && // İlk günü dahil etmek için 1 gün çıkardık
+            etkinlikBitis.isSameOrAfter(seciliGunIlkGunu, "day")
+          );
+        })
+        .sort((a, b) =>
+          dayjs(a.baslangicTarihi).diff(dayjs(b.baslangicTarihi))
+        ),
     [etkinlikParcalari, seciliGun]
   );
 
@@ -284,10 +271,11 @@ const Etkinlikler = (props: EtkinliklerProps) => {
               etk.index >= 2
           ).length;
         };
-
+        const baslangicSaati = dayjs(parca.baslangicTarihi);
         const start = parca.etkinlikParcaBaslangic;
         const end = parca.etkinlikParcaBitis;
-        const gunFarki = parseInt(end.format("D")) - parseInt(start.format("D")) + 1;
+        const gunFarki =
+          parseInt(end.format("D")) - parseInt(start.format("D")) + 1;
 
         let classes = "event-item";
         if (parca.ekleyenKullaniciAdi) classes += " guest";
@@ -296,13 +284,19 @@ const Etkinlikler = (props: EtkinliklerProps) => {
           <React.Fragment key={`${parca.id}-${index}`}>
             {parca.index < 2 && (
               <div
-                className={`${classes} ${hoveredEtkinlikId === String(parca.id) ? "active" : ""
-                  }`}
+                className={`${classes} ${
+                  hoveredEtkinlikId === String(parca.id) ? "active" : ""
+                }`}
                 style={{
-                  width: `${(gunFarki * (kalanGenislik / 7)) - 40}px`, /* buton genişliği için */
-                  left: `${Math.floor(kalanGenislik / 7.1) * solUzunluk(start) + 12}px`,
-                  top: `${ustUzunluk(start) * 118 + (parca.index as number) * 25
-                    }px`,
+                  width: `${
+                    gunFarki * (kalanGenislik / 7) - 40
+                  }px`,
+                  left: `${
+                    Math.floor(kalanGenislik / 7.1) * solUzunluk(start) + 12
+                  }px`,
+                  top: `${
+                    ustUzunluk(start) * 118 + (parca.index as number) * 25
+                  }px`,
                   height: "auto",
                 }}
                 onMouseEnter={() => setHoveredEtkinlikId(String(parca.id))}
@@ -312,7 +306,7 @@ const Etkinlikler = (props: EtkinliklerProps) => {
                   onEventClick(parca);
                 }}
               >
-                {start.format("HH:mm")} - {parca.baslik}
+                {baslangicSaati.format("HH:mm")} - {parca.baslik}
               </div>
             )}
 
@@ -333,9 +327,10 @@ const Etkinlikler = (props: EtkinliklerProps) => {
                     className="daha-fazla-goster"
                     style={{
                       position: "absolute",
-                      width: `${(kalanGenislik / 7) - 40}px`,
-                      left: `calc(${(kalanGenislik / 7) * solUzunluk(guncelTarih) + 5
-                        }px)`,
+                      width: `${kalanGenislik / 7 - 40}px`,
+                      left: `calc(${
+                        (kalanGenislik / 7) * solUzunluk(guncelTarih) + 5
+                      }px)`,
                       top: `${ustUzunluk(guncelTarih) * 118 + 50}px`,
                       zIndex: 50,
                     }}

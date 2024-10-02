@@ -2,10 +2,10 @@ import React from "react";
 import logo from "../../assets/images/logo.jpg";
 import "../../assets/css/UstMenu.css";
 import { Button } from "antd";
-import "dayjs/locale/tr"; // Import the Turkish locale
+import "dayjs/locale/tr";
 import dayjs from "dayjs";
 
-dayjs.locale("tr"); // Set the global locale to Turkish
+dayjs.locale("tr");
 
 const UstMenu: React.FC = () => {
 

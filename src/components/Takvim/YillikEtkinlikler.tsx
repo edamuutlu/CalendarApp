@@ -102,12 +102,9 @@ const YillikEtkinlikler = (props: EtkinliklerProps) => {
       tumEtkinlikler.flatMap((etkinlik) => {
         const yilBaslangic = seciliYil.startOf("year");
         const yilBitis = seciliYil.endOf("year");
-        const gunFarki = dayjs(etkinlik.bitisTarihi).diff(
-          dayjs(etkinlik.baslangicTarihi),
-          "day"
-        );
         const parcalar = [];
-
+        let sonEklenenAy = null;
+  
         for (
           let gun = yilBaslangic;
           gun.isSameOrBefore(yilBitis);
@@ -118,28 +115,33 @@ const YillikEtkinlikler = (props: EtkinliklerProps) => {
             (dayjs(etkinlik.baslangicTarihi).isSameOrBefore(gun) &&
               dayjs(etkinlik.bitisTarihi).isSameOrAfter(gun))
           ) {
-            const etkinlikBaslangicSaatli = gun
-              .hour(dayjs(etkinlik.baslangicTarihi).hour())
-              .minute(dayjs(etkinlik.baslangicTarihi).minute());
-            const parcaBitis = minDate(
-              etkinlikBaslangicSaatli.add(gunFarki, "day"),
-              yilBitis
-            )
-              .hour(dayjs(etkinlik.bitisTarihi).hour())
-              .minute(dayjs(etkinlik.bitisTarihi).minute());
-
-            parcalar.push({
-              ...etkinlik,
-              etkinlikParcaBaslangic: etkinlikBaslangicSaatli,
-              etkinlikParcaBitis: parcaBitis,
-            });
-
+            const gunAy = gun.format("YYYY-MM");
+            if (gunAy !== sonEklenenAy) {
+              const etkinlikBaslangicSaatli = gun
+                .hour(dayjs(etkinlik.baslangicTarihi).hour())
+                .minute(dayjs(etkinlik.baslangicTarihi).minute());
+              const parcaBitis = minDate(
+                dayjs(etkinlik.bitisTarihi),
+                gun.endOf("month")
+              )
+                .hour(dayjs(etkinlik.bitisTarihi).hour())
+                .minute(dayjs(etkinlik.bitisTarihi).minute());
+  
+              parcalar.push({
+                ...etkinlik,
+                etkinlikParcaBaslangic: etkinlikBaslangicSaatli,
+                etkinlikParcaBitis: parcaBitis,
+              });
+  
+              sonEklenenAy = gunAy;
+            }
+  
             if (etkinlik.tekrarDurumu === TekrarEnum.hic) {
-              gun = gun.add(gunFarki, "day");
+              gun = gun.endOf("month");
             }
           }
         }
-
+  
         return parcalar;
       }),
     [seciliYil, tumEtkinlikler, etkinlikTekrarKontrolu]
@@ -164,6 +166,9 @@ const YillikEtkinlikler = (props: EtkinliklerProps) => {
         ),
     [etkinlikParcalari, seciliYil]
   );
+
+
+  console.log('etkinlikParcalari :>> ', yilEtkinlikleri);
 
   // Etkinlik parçalarının index değerlerini güncelle
   const indeksliEtkinlikler = useMemo(() => {
@@ -217,6 +222,8 @@ const YillikEtkinlikler = (props: EtkinliklerProps) => {
 
     return result;
   }, [yilEtkinlikleri]);
+
+  console.log('indeksliEtkinlikler :>> ', indeksliEtkinlikler);
 
   const DahaFazlaEtkinlikPenceresi = () => {
     if (!seciliYil) return null;

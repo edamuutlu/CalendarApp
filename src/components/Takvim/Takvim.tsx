@@ -150,6 +150,7 @@ const Takvim: React.FC = () => {
           setBilgiPenceresiGorunurluk={setBilgiPenceresiGorunurluk}
           setseciliEtkinlik={setseciliEtkinlik}
           seciliGun={seciliGun}
+          takvimModu={takvimModu}
         />
         <div className="main">
           <div className="takvim-baslik-container">

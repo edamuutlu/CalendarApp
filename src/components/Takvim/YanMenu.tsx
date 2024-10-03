@@ -5,7 +5,7 @@ import { AppstoreAddOutlined } from "@ant-design/icons";
 import Etkinlik from "../../tipler/Etkinlik";
 import EtkinlikOlusturButonu from "./EtkinlikOlusturButonu";
 import dayjs from "dayjs";
-import { aylikEtkinlikleriGetir } from "../../yonetimler/TakvimYonetimi";
+import { aylikEtkinlikleriGetir, tumEtkinlikleriGetir } from "../../yonetimler/TakvimYonetimi";
 import { eklendigimEtkinlikleriGetir } from "../../yonetimler/KullaniciYonetimi"; 
 
 type MenuItem = Required<MenuProps>["items"][number];
@@ -28,28 +28,45 @@ interface YanMenuProps {
   setBilgiPenceresiGorunurluk: (visible: boolean) => void;
   setseciliEtkinlik: React.Dispatch<React.SetStateAction<Etkinlik | null>>;
   seciliGun: dayjs.Dayjs;
+  takvimModu: string;
 }
 
 const YanMenu = (props: YanMenuProps) => {
-  const { etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster, setseciliEtkinlik, setBilgiPenceresiGorunurluk, seciliGun } = props;
+  const { etkinlikPenceresiniGoster, setEtkinlikPenceresiniGoster, setseciliEtkinlik, setBilgiPenceresiGorunurluk, seciliGun, takvimModu } = props;
 
   const [items, setItems] = useState<MenuItem[]>(initialItems);
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const aylikEtkinlikler = await aylikEtkinlikleriGetir(seciliGun);
-        let eklenilenEtkinlikler = await eklendigimEtkinlikleriGetir();
-        eklenilenEtkinlikler = eklenilenEtkinlikler.filter((etk: any) => {
-          const secilenAy = seciliGun.month(); 
-          const secilenYil = seciliGun.year(); 
-        
-          const etkinliginAyi = dayjs(etk.baslangicTarihi).month();
-          const etkinliginYili = dayjs(etk.baslangicTarihi).year();
-        
-          return etkinliginAyi === secilenAy && etkinliginYili === secilenYil;
-        });
-        const etkinliklerim = [...aylikEtkinlikler, ...eklenilenEtkinlikler].sort((a, b) => {
+        let etkinliklerim: Etkinlik[] = [];
+
+        if (takvimModu === "month") {
+          const aylikEtkinlikler = await aylikEtkinlikleriGetir(seciliGun);
+          let eklenilenEtkinlikler = await eklendigimEtkinlikleriGetir();
+          eklenilenEtkinlikler = eklenilenEtkinlikler.filter((etk: any) => {
+            const secilenAy = seciliGun.month(); 
+            const secilenYil = seciliGun.year(); 
+          
+            const etkinliginAyi = dayjs(etk.baslangicTarihi).month();
+            const etkinliginYili = dayjs(etk.baslangicTarihi).year();
+          
+            return etkinliginAyi === secilenAy && etkinliginYili === secilenYil;
+          });
+          etkinliklerim = [...aylikEtkinlikler, ...eklenilenEtkinlikler];
+        } else if (takvimModu === "year") {
+          const tumEtkinlikler = await tumEtkinlikleriGetir();
+          const eklenilenEtkinlikler = await eklendigimEtkinlikleriGetir();
+          
+          const secilenYil = seciliGun.year();
+          
+          etkinliklerim = [...tumEtkinlikler, ...eklenilenEtkinlikler].filter((etk) => {
+            const etkinlikYili = dayjs(etk.baslangicTarihi).year();
+            return etkinlikYili === secilenYil;
+          });
+        }
+
+        etkinliklerim.sort((a, b) => {
           const dateA = dayjs(a.baslangicTarihi); 
           const dateB = dayjs(b.baslangicTarihi); 
           return dateA.isBefore(dateB) ? -1 : dateA.isAfter(dateB) ? 1 : 0;
@@ -63,7 +80,7 @@ const YanMenu = (props: YanMenuProps) => {
     };
 
     fetchEvents();
-  }, [seciliGun, etkinlikPenceresiniGoster]); 
+  }, [seciliGun, etkinlikPenceresiniGoster, takvimModu]); 
 
   const setMyEventsMenuItems = (events: Etkinlik[]) => {
     setItems((prevItems) => {

@@ -66,12 +66,9 @@ const Etkinlikler = (props: EtkinliklerProps) => {
 
       if (etkinlikBaslangicGunSayisi <= ayinIlkHaftadakiGunSayisi) return 1;
       if (etkinlikBaslangicGunSayisi <= ayinIlkHaftadakiGunSayisi + 7) return 2;
-      if (etkinlikBaslangicGunSayisi <= ayinIlkHaftadakiGunSayisi + 14)
-        return 3;
-      if (etkinlikBaslangicGunSayisi <= ayinIlkHaftadakiGunSayisi + 21)
-        return 4;
-      if (etkinlikBaslangicGunSayisi <= ayinIlkHaftadakiGunSayisi + 28)
-        return 5;
+      if (etkinlikBaslangicGunSayisi <= ayinIlkHaftadakiGunSayisi + 14) return 3;
+      if (etkinlikBaslangicGunSayisi <= ayinIlkHaftadakiGunSayisi + 21) return 4;
+      if (etkinlikBaslangicGunSayisi <= ayinIlkHaftadakiGunSayisi + 28) return 5;
       return 6;
     },
     [oncekiAydanGelenGunSayisi]

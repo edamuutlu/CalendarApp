@@ -74,15 +74,9 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
 
   const [form] = Form.useForm();
   const [ilkAcilisMi, setIlkAcilisMi] = useState(false);
-  const [secilenKullanicilar, setSecilenKullanicilar] = useState<Kullanici[]>(
-    []
-  );
-  const [secilenKullaniciIsimleri, setSecilenKullaniciIsimleri] = useState<
-    string[]
-  >([]);
-  const [davetliKullanicilar, setDavetliKullanicilar] = useState<Kullanici[]>(
-    []
-  );
+  const [secilenKullanicilar, setSecilenKullanicilar] = useState<Kullanici[]>([]);
+  const [secilenKullaniciIsimleri, setSecilenKullaniciIsimleri] = useState<string[]>([]);
+  const [davetliKullanicilar, setDavetliKullanicilar] = useState<Kullanici[]>([]);
 
   useEffect(() => {
     if (seciliEtkinlikForm) {
@@ -287,7 +281,6 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
           await etkinliktenKullaniciSil(silRequest);
         }
 
-        // Etkinliği güncelle
         await etkinlikGuncelle(etkinlik);
 
         // Yeni kullanıcıları ekle
@@ -316,7 +309,6 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
       }
 
       await etkinlikleriAl();
-      message.success("Etkinlik başarıyla kaydedildi.");
     } catch (error) {
       console.error("Error adding/updating event:", error);
       message.error("Etkinlik eklenirken/güncellenirken hata oluştu.");
@@ -359,7 +351,6 @@ const EtkinlikPenceresi = (props: EtkinlikPenceresiProps) => {
             onConfirm={async () => {
               if (seciliEtkinlikForm) {
                 await etkinlikSil(Number(seciliEtkinlikForm.id));
-                message.success("Etkinlik silindi.");
                 etkinlikPencereKapat();
                 await etkinlikleriAl();
               }
